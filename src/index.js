@@ -1,32 +1,24 @@
-const http = require('http');
-const express = require('express');
-const fs = require('fs');
-const socketio = require('socket.io');
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
-const app = express();
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/index-room.html');
+});
 
-app.all('/', (req, res, next) => {
-  fs.readFile('chatLog.html', (err, result) => {
-    res.writeHead(200, {'Content-Type' : 'text/html'});
-    res.end(result);
+// namespace /chat에 접속한다.
+const chat = io.of('/chat').on('connection', function(socket) {
+  socket.on('chat message', function(data){
+    console.log('message from client: ', data);
+
+    const name = socket.name = data.name;
+    const room = socket.room = data.room;
+
+    socket.join(room);
+    chat.to(room).emit('chat message', data.msg);
   });
 });
 
-const server = http.createServer(app).listen(10009, () => {
-  console.log('Server Started now..');
-});
-
-const io = socketio.listen(server);
-io.sockets.on('connection', socket => {
-  socket.on('join', result => {
-    socket.leave(socket.room);
-    socket.join(result);
-    socket.room = result;
-  });
-
-  socket.on('message', (result) => {
-    io.sockets.in(socket.room).emit('message', result);
-  });
-
-  socket.on('disconnect', () => {});
+server.listen(3000, function() {
+  console.log('Socket IO server listening on port 3000');
 });
