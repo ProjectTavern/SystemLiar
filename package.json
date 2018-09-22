@@ -1,7 +1,7 @@
 {
   "name": "systemliar",
   "version": "1.0.0",
-  "description": "Server for Liargame in Playstore",
+  "description": "Server for Liargame",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,6 +24,8 @@
   "homepage": "https://github.com/qoov/SystemLiar#readme",
   "devDependencies": {
     "express": "^4.16.3",
+    "redis": "^2.8.0",
+    "redis-clustr": "^1.6.0",
     "socket.io": "^2.1.1"
   }
 }
