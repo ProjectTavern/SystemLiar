@@ -19,6 +19,6 @@ const chat = io.of('/chat').on('connection', function(socket) {
   });
 });
 
-server.listen(3000, function() {
-  console.log('Socket IO server listening on port 3000');
+server.listen(30500, function() {
+  console.log('Socket IO server listening on port 30500');
 });
