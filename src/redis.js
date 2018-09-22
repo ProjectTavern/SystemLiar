@@ -1,7 +1,7 @@
 /**
  * 설정 정보 불러오기
  * */
-const CONFIG = require("./config");
+const CONFIG = require("../config");
 const SYSTEMMESSAGE = CONFIG.SYSTEMMESSAGE;
 /**
  * 레디스 기본 설정 및 세팅
