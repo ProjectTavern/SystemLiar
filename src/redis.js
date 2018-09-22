@@ -10,8 +10,6 @@ const Redis = require('ioredis');
 const JSON = require('JSON');
 client = new Redis(CONFIG.SERVER);
 
-
-
 /**
  * 테스트용 코드 작성
  * */
@@ -52,3 +50,12 @@ client.zrevrange(CONFIG["RANKINGBOARD"], 0, 2, (err, obj) => {
   const rankingData = obj.map(elem => JSON.parse(elem).nickname);
   console.log(rankingData);
 });
+
+/**
+ * TODO:
+ * 승패 점수 관리
+ * 1승
+ * 1패
+ * 결과에 대해 점수 처리해서 점수 저장
+ * 아이디 / 승 / 패 / 점수
+ * */
