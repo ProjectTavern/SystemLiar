@@ -24,6 +24,7 @@
   "homepage": "https://github.com/qoov/SystemLiar#readme",
   "devDependencies": {
     "JSON": "^1.0.0",
+    "body-parser": "^1.18.3",
     "crossdomain": "0.0.1",
     "express": "^4.16.3",
     "ioredis": "^4.0.0",

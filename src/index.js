@@ -4,7 +4,10 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
 const redis = require('./redis');
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
 app.use((request, response, next) => {
   request.redis = redis;
   next();
@@ -31,26 +34,28 @@ app.get('/chat', function(request, response) {
 
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
-  console.log(request.body);
+  request.on('data', function (data) {
+    console.log(data);
+  });
+
   const key = request.body.name;
   const value = JSON.stringify(request.body);
-  console.log(request.redis);
-  request.redis.set( key, value, (error, data) => {
+  console.log("key: ", key);
+  console.log("value: ", value);
+  request.redis.set(key, value, (error, data) => {
     if (error) {
       console.log(error);
       response.send("REDIS ERROR: " + error);
       return;
     }
-    request.redis.expire(key,10);
+    /* 성공 후처리 */
+    // request.redis.expire(key,10);
     response.json(value);
-    console.log(value);
   });
-
 });
 
 app.get('/user/status/:name', (request, response ,next) => {
   const key = request.params.name;
-  console.log(request.redis);
   request.redis.get(key, (error, data) => {
     if (error) {
       console.log(error);
