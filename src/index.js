@@ -6,8 +6,11 @@ const crossdomain = require('crossdomain');
 const redis = require('./redis');
 const bodyParser = require('body-parser');
 
+/* 바디 파서 등록 */
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+
+/* 응답객체에 레디스 등록 */
 app.use((request, response, next) => {
   request.redis = redis;
   next();
@@ -24,24 +27,24 @@ app.get('/', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/index.html'));
 });
 
+/* 레디스 테스트 페이지 */
 app.get('/redis', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/sample_redis.html'));
 });
 
+/* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
+/* 유저 상태 등록 */
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
-  request.on('data', function (data) {
-    console.log(data);
-  });
+  request.on('data', (data) => console.log(data));
 
   const key = request.body.name;
   const value = JSON.stringify(request.body);
-  console.log("key: ", key);
-  console.log("value: ", value);
+
   request.redis.set(key, value, (error, data) => {
     if (error) {
       console.log(error);
@@ -54,6 +57,7 @@ app.post('/user/status', (request, response, next) => {
   });
 });
 
+/* 유저 상태 불러오기 */
 app.get('/user/status/:name', (request, response ,next) => {
   const key = request.params.name;
   request.redis.get(key, (error, data) => {
@@ -67,6 +71,7 @@ app.get('/user/status/:name', (request, response ,next) => {
   });
 });
 
+/* 에러 핸들러 */
 app.use(function(request, response, next) {
   const error = new Error('Data Not Found Exception');
   error.status = 404;
@@ -75,7 +80,7 @@ app.use(function(request, response, next) {
 
 /* namespace /chat에 접속한다. */
 const chat = io.of('/chat').on('connection', function(socket) {
-  socket.on('chat message', function(data){
+  socket.on('chat message', (data) => {
     console.log('message from client: ', data);
 
     const name = socket.name = data.name;
