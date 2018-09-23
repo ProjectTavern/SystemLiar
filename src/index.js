@@ -1,6 +1,12 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const crossdomain = require('crossdomain');
+
+app.all('/crossdomain.xml', function (req, res, next) {
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.send(crossdomain({ domain: '*' }), 200);
+});
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index-room.html');
