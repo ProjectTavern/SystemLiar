@@ -3,5 +3,4 @@ const CONFIG = require("./config");
 
 /* 레디스 기본 설정 및 세팅 */
 const Redis = require('ioredis');
-const JSON = require('JSON');
 module.exports = new Redis(CONFIG.SERVER);
