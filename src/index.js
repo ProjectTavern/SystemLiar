@@ -22,7 +22,7 @@ app.get('/', function(request, response) {
 });
 
 
-app.post('/profile', (request, response, next) => {
+app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
   const key = request.body.name;
   const value = JSON.stringify(request.body);
@@ -40,7 +40,7 @@ app.post('/profile', (request, response, next) => {
 
 });
 
-app.get('/profile/:name', (request, response ,next) => {
+app.get('/user/status/:name', (request, response ,next) => {
   const key = request.params.name;
   console.log(request.redis);
   request.redis.get(key, (error, data) => {
@@ -55,7 +55,7 @@ app.get('/profile/:name', (request, response ,next) => {
 });
 
 app.use(function(request, response, next) {
-  const error = new Error('HTTP Not Found Exception');
+  const error = new Error('Data Not Found Exception');
   error.status = 404;
   next(error);
 });
