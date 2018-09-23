@@ -1,6 +1,7 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+
 const crossdomain = require('crossdomain');
 
 app.all('/crossdomain.xml', function (req, res, next) {

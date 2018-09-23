@@ -27,6 +27,7 @@
     "crossdomain": "0.0.1",
     "express": "^4.16.3",
     "ioredis": "^4.0.0",
+    "leaderboard": "0.0.9",
     "socket.io": "^2.1.1"
   }
 }
