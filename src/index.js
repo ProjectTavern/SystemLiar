@@ -16,14 +16,22 @@ app.all('/crossdomain.xml', function (request, response, next) {
   response.send(crossdomain({ domain: '*' }), 200);
 });
 
-/* 테스트를 위한 샘플 채팅 */
+/* 테스트를 위한 샘플 페이지 */
 app.get('/', function(request, response) {
+  response.sendFile(path.join(__dirname, '/templates/index.html'));
+});
+
+app.get('/redis', function(request, response) {
+  response.sendFile(path.join(__dirname, '/templates/sample_redis.html'));
+});
+
+app.get('/chat', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
-
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
+  console.log(request.body);
   const key = request.body.name;
   const value = JSON.stringify(request.body);
   console.log(request.redis);
