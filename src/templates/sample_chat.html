@@ -2,50 +2,159 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Chat Test</title>
-  <script
-    src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-    crossorigin="anonymous"></script>
+  <title>Chat Room Test</title>
+  <style>
+    fieldset {
+      width: 50%;
+      min-width: 360px;
+    }
+    .panel_chat {
+      height: 360px;
+      overflow: hidden;
+      overflow-y: scroll;
+    }
+    .wrap_message {
+      width: 50%;
+      min-width: 360px;
+      border: 1px solid #e7e7e7;
+      margin-inline-start: 2px;
+      margin-inline-end: 2px;
+      padding-block-start: 0.35em;
+      padding-inline-start: 0.75em;
+      padding-inline-end: 0.75em;
+      padding-block-end: 0.625em;
+      border-width: 2px;
+      border-style: groove;
+      border-color: threedface;
+      border-image: initial;
+    }
+    .input_message {
+      overflow: hidden;
+    }
+    .input_message label {
+      float: left;
+    }
+    #userMessage {
+      float: right;
+      overflow: hidden;
+      width: 80%;
+    }
+    #btnSend {
+      float: right;
+    }
+    li {
+      list-style-type: none;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
   <script>
-    $(document).ready(() => {
-      const socket = io.connect();
+    (function() {
+      $(document).ready(($) => {
+        /* **공통 변수 정의** */
+        /* 소켓 설정 */
+        const socket = io('/roomspace');
+        /* 기본 데이터 자료 수집 */
+        const $roomName = $('#RoomName');
+        const $panelChat = $('#chatContent');
+        const $userName = $('#userName');
+        const $userMessage = $('#userMessage');
 
-      socket.emit('join', 'Lobby');
-      const $roomName = $('#RoomName');
-      $roomName.val('Lobby');
-      $('btnEnter').click(() => {
-        $roomName.val() === '' && $roomName.val('Lobby');
-        socket.emit('join', $roomName.val());
-      });
-
-      socket.on('message', result => {
-        const output = '<p>' + '[' + result.date + ']<strong>' + result.userName + '</strong>: ' + result.userMessage + '</p>';
-        $(output).appendTo('#chatContent');
-      });
-
-      $('#btnSend').on('click', () => {
-        const $userMessage = $('#UserMessage');
-        if ($userMessage.val() !== '') {
-          socket.emit('message', {
-            userName : $('#userName').val(),
-            userMessage: $('#userMessage').val(),
-            date : new Date().toUTCString()
-          })
+        function checkValidation(data) {
+          if (data.name.trim()) {
+            return true;
+          } else {
+            window.alert('대화에 사용하실 이름이 필요합니다.');
+          }
         }
-        $userMessage.val('');
+
+        /* 버튼 이벤트 설치 */
+        function bindBtnEvent() {
+          /* 버튼 정보 수집 */
+          const $btnRoomEnter = $('#btnEnter');
+          const $btnRoomQuit = $('#btnQuit');
+          const $btnSendMessage = $('#btnSend');
+          /* 방 입장 */
+          $btnRoomEnter.on('click', () => {
+            const data = {
+              type: 'joinRoom',
+              room: $roomName.val(),
+              name: $userName.val()
+            };
+            checkValidation(data) && $roomName.val() !== '' && socket.emit('joinRoom', data);
+          });
+
+          /* 메시지 전송 */
+          $btnSendMessage.on('click', () => {
+            const data = {
+              type: 'message',
+              room: $roomName.val(),
+              name: $userName.val(),
+              message : $userMessage.val(),
+            };
+            checkValidation(data) && socket.emit('sendToMessage', data);
+          });
+
+          /* 방 탈출 */
+          $btnRoomQuit.on('click', () => {
+            const data = {
+             type: 'disconnect',
+             room: $roomName.val(),
+             name: $userName.val()
+            };
+            $btnRoomQuit.emit('disconnect', data);
+          });
+
+        }
+
+        /* 소켓 이벤트 설치 */
+        function bindSocketEvent() {
+          const $panelChatBackground = $panelChat.closest('.panel_chat');
+          socket.on('systemMessage', (data) => {
+            $panelChat.append(`<li>${data.message}</li>`);
+            $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
+          });
+
+          socket.on('getUserMessage', (data) => {
+            console.log("getUserMessage", data);
+            $panelChat.append(`<li>${data.name}: ${data.message}</li>`);
+            $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
+          });
+        }
+
+        /* 문서 준비되었을 때 실행 */
+        function documentOnReady() {
+          bindBtnEvent();
+          bindSocketEvent();
+        }
+
+        documentOnReady();
       });
-    });
+    })();
   </script>
 </head>
-  <h1>Socket Chat Test Page</h1>
-  <input id="RoomName"/>
-  <ul id="chatContent"></ul>
-  <button id="btnEnter">입장</button>
-  <button id="btnQuit">나가기</button>
-  <hr>
-  닉네임: <input id="userName"/>
-  메시지: <input id="userMessage"/>
-  <button id="btnSend">Send</button>
+<body>
+  <h1>Socket Chat Room Test Page</h1>
+  <fieldset>
+    <div class="room">
+      <label for="RoomName">입장중인 방</label>
+      <input id="RoomName"/>
+      <button id="btnEnter">입장</button>
+      <button id="btnQuit">나가기</button>
+    </div>
+    <label for="userName">대화명:</label>
+    <input id="userName"/>
+  </fieldset>
+  <div class="wrap_message">
+    <button id="btnSend">Send</button>
+    <div class="input_message">
+      <label for="userMessage">메시지: </label>
+      <input id="userMessage"/>
+    </div>
+  </div>
+  <fieldset class="panel_chat">
+    <legend>채팅 내용</legend>
+    <ul id="chatContent"></ul>
+  </fieldset>
+</body>
 </html>

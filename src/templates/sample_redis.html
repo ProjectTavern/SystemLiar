@@ -3,18 +3,24 @@
 <head>
   <meta charset="utf-8">
   <title>Chat Test</title>
-  <script src="//code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
-  <script>
-    $(document).ready(() => {
-
-    });
-  </script>
 </head>
 <h1>Redis [POST / GET] TEST PAGE</h1>
 <form action="/user/status" name="body" method="post">
-  <label for="name">사용자 정보 입력</label>
-  <input id="name" name="name" type="text"/>
-  <button type="submit">입력</button>
+  <fieldset>
+    <legend>데이터 입력 필드</legend>
+    <div class="input_panel">
+      <label for="name">아이디 입력</label>
+      <input id="name" name="name" type="text"/>
+    </div>
+    <div class="input_panel">
+      <label for="win">승리 횟수</label>
+      <input id="win" name="win" value="5">
+    </div>
+    <div class="input_panel">
+      <label for="lose">패배 횟수</label>
+      <input id="lose" name="lose" value="12">
+    </div>
+    <button type="submit">입력</button>
+  </fieldset>
 </form>
 </html>

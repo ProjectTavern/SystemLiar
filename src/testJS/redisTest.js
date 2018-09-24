@@ -1,9 +1,9 @@
 /**
  * 테스트용 코드 작성
  * */
-const client = require('./redis');
+const client = require('../redis');
 
-const CONFIG = require("./config");
+const CONFIG = require("../config");
 const SYSTEMMESSAGE = CONFIG.SYSTEMMESSAGE;
 
 
