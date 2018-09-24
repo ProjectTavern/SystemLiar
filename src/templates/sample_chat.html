@@ -10,6 +10,8 @@
     }
     .panel_chat {
       height: 360px;
+      overflow: hidden;
+      overflow-y: scroll;
     }
     .wrap_message {
       width: 50%;
@@ -58,6 +60,14 @@
         const $userName = $('#userName');
         const $userMessage = $('#userMessage');
 
+        function checkValidation(data) {
+          if (data.name.trim()) {
+            return true;
+          } else {
+            window.alert('대화에 사용하실 이름이 필요합니다.');
+          }
+        }
+
         /* 버튼 이벤트 설치 */
         function bindBtnEvent() {
           /* 버튼 정보 수집 */
@@ -71,7 +81,7 @@
               room: $roomName.val(),
               name: $userName.val()
             };
-            $roomName.val() !== '' && socket.emit('joinRoom', data);
+            checkValidation(data) && $roomName.val() !== '' && socket.emit('joinRoom', data);
           });
 
           /* 메시지 전송 */
@@ -82,7 +92,7 @@
               name: $userName.val(),
               message : $userMessage.val(),
             };
-            socket.emit('sendToMessage', data);
+            checkValidation(data) && socket.emit('sendToMessage', data);
           });
 
           /* 방 탈출 */
@@ -99,13 +109,16 @@
 
         /* 소켓 이벤트 설치 */
         function bindSocketEvent() {
+          const $panelChatBackground = $panelChat.closest('.panel_chat');
           socket.on('systemMessage', (data) => {
             $panelChat.append(`<li>${data.message}</li>`);
+            $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
           });
 
           socket.on('getUserMessage', (data) => {
             console.log("getUserMessage", data);
             $panelChat.append(`<li>${data.name}: ${data.message}</li>`);
+            $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
           });
         }
 

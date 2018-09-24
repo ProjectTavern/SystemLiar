@@ -6,6 +6,18 @@ const crossdomain = require('crossdomain');
 const redis = require('./redis');
 const bodyParser = require('body-parser');
 
+/* 임시 해쉬코드 작성 */
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash;
+};
+
 /* 바디 파서 등록 */
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
@@ -88,7 +100,8 @@ roomspace.on('connection', (socket) => {
     if(data.type === 'joinRoom') {
       socket.join(data.room);
       socket.emit('systemMessage', { message: '채팅방에 오신 것을 환영합니다.' });
-      socket.broadcast.to(data.room).emit('systemMessage', { message: data.name + '님이 접속하셨습니다.' });
+      setNameTag(socket, data.name);
+      socket.broadcast.to(data.room).emit('systemMessage', { message: socket.username + '님이 접속하셨습니다.' });
     }
   });
 
@@ -97,9 +110,23 @@ roomspace.on('connection', (socket) => {
     roomspace.to(data.room).emit('getUserMessage', data);
   });
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on('leftRoom', (data) => {
+    if (data.name) {
+      console.log(`${data.name} is left this room.`);
+    }
+    roomspace.to(data.room).emit('systemMessage', { message: data.name + '님이 방에서 나가셨습니다.' });
+
   });
+
+  function setNameTag(socket, name) {
+    if (name) {
+      socket.username = name;
+    } else {
+      const someones = ["A","B","C","D","E","F"]
+      const random = Math.floor(Math.random() * 6);
+      socket.username = someones[random];
+    }
+  }
 });
 
 /* 서버 기동 포트: 30500 */
