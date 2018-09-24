@@ -85,7 +85,7 @@ app.get('/user/status/:name', (request, response ,next) => {
 
 /* 에러 핸들러 */
 app.use(function(request, response, next) {
-  const error = new Error('Data Not Found Exception');
+  const error = new Error('Not Found Exception');
   error.status = 404;
   next(error);
 });
@@ -97,26 +97,38 @@ roomspace.on('connection', (socket) => {
   socket.userRooms = [];
 
   socket.on('join:room', (data) => {
-    console.log("join:room: ", data);
-    initRoom(socket);
-    if(data.type === 'joinRoom') {
-      socket.join(data.room);
-      socket.userRooms.push(data.room);
-      socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
-      setNameTag(socket, data.name);
-      socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+    try {
+      console.log("join:room: ", data);
+      initRoom(socket);
+      if(data.type === 'joinRoom') {
+        socket.join(data.room);
+        socket.userRooms.push(data.room);
+        socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
+        setNameTag(socket, data.name);
+        socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+      }
+    } catch (e) {
+
     }
   });
 
   socket.on('send:message', (data) => {
-    console.log("send:message: ",data);
-    roomspace.to(data.room).emit('user:message', data);
+    try {
+      console.log("send:message: ",data);
+      roomspace.to(data.room).emit('user:message', data);
+    } catch (e) {
+
+    }
   });
 
   socket.on('leave:room', (data) => {
-    if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
-    socket.leave(data.room);
-    roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
+    try {
+      if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
+      socket.leave(data.room);
+      roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
+    } catch (e) {
+
+    }
   });
 
   function setNameTag(socket, name) {
