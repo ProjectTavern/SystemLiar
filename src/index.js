@@ -78,15 +78,24 @@ app.use(function(request, response, next) {
   next(error);
 });
 
+/* socketio 채팅 */
 const roomspace = io.of('/roomspace');
-/* socketio 채팅 로직 */
 roomspace.on('connection', (socket) => {
   console.log('A user connected.');
 
-  socket.on('')
+  socket.on('joinRoom', (data) => {
+    console.log(data);
+    if(data.type === 'joinRoom') {
+      socket.join(data.room);
+      socket.emit('systemMessage', { message: '채팅방에 오신 것을 환영합니다.' });
+      socket.broadcast.to(data.room).emit('systemMessage', { message: data.name + '님이 접속하셨습니다.' });
+    }
+  });
 
-  const roomId = 'testRoomId';
-  socket.join(roomId);
+  socket.on('sendToMessage', (data) => {
+    console.log(data);
+    roomspace.to(data.room).emit('getUserMessage', data);
+  });
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
