@@ -78,16 +78,18 @@ app.use(function(request, response, next) {
   next(error);
 });
 
-/* namespace /chat에 접속한다. */
-const chat = io.of('/chat').on('connection', function(socket) {
-  socket.on('chat message', (data) => {
-    console.log('message from client: ', data);
+const roomspace = io.of('/roomspace');
+/* socketio 채팅 로직 */
+roomspace.on('connection', (socket) => {
+  console.log('A user connected.');
 
-    const name = socket.name = data.name;
-    const room = socket.room = data.room;
+  socket.on('')
 
-    socket.join(room);
-    chat.to(room).emit('chat message', data.msg);
+  const roomId = 'testRoomId';
+  socket.join(roomId);
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
   });
 });
 
