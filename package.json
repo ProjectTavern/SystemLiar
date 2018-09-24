@@ -23,13 +23,10 @@
   },
   "homepage": "https://github.com/qoov/SystemLiar#readme",
   "devDependencies": {
-    "JSON": "^1.0.0",
     "body-parser": "^1.18.3",
     "crossdomain": "0.0.1",
     "express": "^4.16.3",
-    "ioredis": "^4.0.0",
-    "leaderboard": "0.0.9",
     "path": "^0.12.7",
-    "socket.io": "^2.1.1"
+    "socket.io": "^1.7.4"
   }
 }
