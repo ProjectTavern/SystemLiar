@@ -26,6 +26,7 @@
     "body-parser": "^1.18.3",
     "crossdomain": "0.0.1",
     "express": "^4.16.3",
+    "ioredis": "^4.0.0",
     "path": "^0.12.7",
     "socket.io": "^1.7.4"
   }
