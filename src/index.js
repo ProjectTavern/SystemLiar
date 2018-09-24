@@ -94,42 +94,50 @@ app.use(function(request, response, next) {
 const roomspace = io.of('/roomspace');
 roomspace.on('connection', (socket) => {
   console.log('A user connected.');
+  socket.userRooms = [];
 
-  socket.on('joinRoom', (data) => {
-    console.log(data);
+  socket.on('join:room', (data) => {
+    console.log("join:room: ", data);
+    initRoom(socket);
     if(data.type === 'joinRoom') {
       socket.join(data.room);
-      socket.emit('systemMessage', { message: '채팅방에 오신 것을 환영합니다.' });
+      socket.userRooms.push(data.room);
+      socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
       setNameTag(socket, data.name);
-      socket.broadcast.to(data.room).emit('systemMessage', { message: socket.username + '님이 접속하셨습니다.' });
+      socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
     }
   });
 
-  socket.on('sendToMessage', (data) => {
-    console.log(data);
-    roomspace.to(data.room).emit('getUserMessage', data);
+  socket.on('send:message', (data) => {
+    console.log("send:message: ",data);
+    roomspace.to(data.room).emit('user:message', data);
   });
 
-  socket.on('leftRoom', (data) => {
-    if (data.name) {
-      console.log(`${data.name} is left this room.`);
-    }
-    roomspace.to(data.room).emit('systemMessage', { message: data.name + '님이 방에서 나가셨습니다.' });
-
+  socket.on('leave:room', (data) => {
+    if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
+    socket.leave(data.room);
+    roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
   });
 
   function setNameTag(socket, name) {
     if (name) {
       socket.username = name;
     } else {
-      const someones = ["A","B","C","D","E","F"]
+      const someones = ["A", "B", "C", "D", "E", "F"];
       const random = Math.floor(Math.random() * 6);
       socket.username = someones[random];
     }
   }
+
+  function initRoom(socket) {
+    const currentRooms = socket.userRooms;
+    currentRooms.forEach((elem) => {
+      socket.leave(elem);
+    });
+  }
 });
 
 /* 서버 기동 포트: 30500 */
-server.listen(30500, function() {
+server.listen(30500, () => {
   console.log('Socket IO server listening on port 30500');
 });
