@@ -60,7 +60,7 @@ app.post('/user/status', (request, response, next) => {
   request.redis.set(key, value, (error, data) => {
     if (error) {
       console.log(error);
-      response.send("REDIS ERROR: " + error);
+      response.send("[ERROR] REDIS ERROR: " + error);
       return;
     }
     /* 성공 후처리 */
@@ -75,7 +75,7 @@ app.get('/user/status/:name', (request, response ,next) => {
   request.redis.get(key, (error, data) => {
     if (error) {
       console.log(error);
-      response.send("REDIS ERROR: " + error);
+      response.send("[ERROR] REDIS ERROR: " + error);
       return;
     }
     const value = JSON.parse(data);
@@ -85,7 +85,7 @@ app.get('/user/status/:name', (request, response ,next) => {
 
 /* 에러 핸들러 */
 app.use(function(request, response, next) {
-  const error = new Error('Not Found Exception');
+  const error = new Error('[ERROR] Not Found Exception');
   error.status = 404;
   next(error);
 });
@@ -93,65 +93,57 @@ app.use(function(request, response, next) {
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
 roomspace.on('connection', (socket) => {
-  console.log('A user connected.');
+  console.log('[LOG] An user connected.', socket);
+  /**
+   * 나중에 init함수로 유저에 대한 데이터를 정리하는 함수로 만들 것
+   * 현재는 유저 방에 대한 정보만을 초기화 시키고 있음.
+   * (연결이 유실되었다가 다시 들어오면 방이 초기화될 수 있는 문제가 있을 수도 있음)
+   * */
   socket.userRooms = [];
 
   socket.on('join:room', (data) => {
-
-    console.log("join:room: ", data);
-
+    console.log("[LOG] join:room: ", data);
     try {
-
       initRoom(socket);
-
       if(data.type === 'joinRoom') {
-        console.log("data.type: joinRoom => valid entered.", data.type);
+        console.log("[LOG] data.type: joinRoom => valid entered.", data.type);
         socket.join(data.room);
         socket.userRooms.push(data.room);
         socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
         setNameTag(socket, data.name);
         socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
       }
-
-    } catch (e) {
-
-      console.log("Error: join:room.");
-
+    } catch (error) {
+      console.log("[ERROR] join:room.", error);
     }
   });
 
   socket.on('send:message', (data) => {
-
-    data = parseData(data);
-    console.log("send:message: ",data);
-
+    console.log("[LOG] send:message: ",data);
     try {
-
       roomspace.to(data.room).emit('user:message', data);
-
-    } catch (e) {
-
-      console.log("Error: send:message.");
-
+    } catch (error) {
+      console.log("[ERROR] send:message.", error);
     }
   });
 
   socket.on('leave:room', (data) => {
-
-    data = parseData(data);
-
+    console.log('[LOG] leave:room: ', data);
     try {
-
       if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
       socket.leave(data.room);
       roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
-
-    } catch (e) {
-
-      console.log("Error: leave:room");
-
+    } catch (error) {
+      console.log("[ERROR] leave:room.", error);
     }
   });
+
+  function initRoom(socket) {
+    const currentRooms = socket.userRooms;
+    currentRooms.forEach((elem) => {
+      socket.leave(elem);
+    });
+  }
 
   function setNameTag(socket, name) {
     if (name) {
@@ -163,18 +155,15 @@ roomspace.on('connection', (socket) => {
     }
   }
 
-  function initRoom(socket) {
-    const currentRooms = socket.userRooms;
-    currentRooms.forEach((elem) => {
-      socket.leave(elem);
-    });
-  }
-
+  /**
+   * EmitJson의 사용으로 불필요해짐
+   * 유니티 모듈 변경이 필요해진 경우 다시 사용할 수도 있음
+   * */
   function parseData(data) {
     try {
       data = typeof data === "string" ? JSON.parse(data) : data;
     } catch(e) {
-      console.log("Can not parse to JSON from string object.");
+      console.log("[ERROR] Can not parse to JSON from string object.");
     }
     return data;
   }
@@ -182,5 +171,5 @@ roomspace.on('connection', (socket) => {
 
 /* 서버 기동 포트: 30500 */
 server.listen(30500, () => {
-  console.log('Socket IO server listening on port 30500');
+  console.log('[LOG] Socket IO server listening on port 30500');
 });
