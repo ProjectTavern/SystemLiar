@@ -3,7 +3,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
-const redis = require('./redis');
+const redis = require('./routes/database/redis');
 const bodyParser = require('body-parser');
 
 /* 임시 해쉬코드 작성 */

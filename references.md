@@ -1,3 +1,4 @@
 - [Node-Redis 사용하기](https://askofcloud.wordpress.com/2016/04/05/node-%EC%97%90%EC%84%9C-redis-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/)  
 - [Node-WebSocket 서버 구축하기](https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61)  
 - [Unity Socket.io Client by NHNent](https://github.com/nhnent/socket.io-client-unity3d)  
+- [Router 모듈 분리하기](https://jiwondh.github.io/2017/01/17/routes-seperate/)  
