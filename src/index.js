@@ -98,7 +98,6 @@ roomspace.on('connection', (socket) => {
 
   socket.on('join:room', (data) => {
 
-    data = parseData(data);
     console.log("join:room: ", data);
 
     try {
@@ -106,6 +105,7 @@ roomspace.on('connection', (socket) => {
       initRoom(socket);
 
       if(data.type === 'joinRoom') {
+        console.log("data.type: joinRoom => valid entered.", data.type);
         socket.join(data.room);
         socket.userRooms.push(data.room);
         socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
