@@ -83,13 +83,6 @@ app.get('/user/status/:name', (request, response ,next) => {
   });
 });
 
-/* 에러 핸들러 */
-app.use(function(request, response, next) {
-  const error = new Error('[ERROR] Not Found Exception');
-  error.status = 404;
-  next(error);
-});
-
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
 roomspace.on('connection', (socket) => {
