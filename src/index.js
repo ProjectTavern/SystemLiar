@@ -97,9 +97,14 @@ roomspace.on('connection', (socket) => {
   socket.userRooms = [];
 
   socket.on('join:room', (data) => {
+
+    data = parseData(data);
+    console.log("join:room: ", data);
+
     try {
-      console.log("join:room: ", data);
+
       initRoom(socket);
+
       if(data.type === 'joinRoom') {
         socket.join(data.room);
         socket.userRooms.push(data.room);
@@ -107,26 +112,43 @@ roomspace.on('connection', (socket) => {
         setNameTag(socket, data.name);
         socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
       }
+
     } catch (e) {
+
+      console.log("Error: join:room.");
 
     }
   });
 
   socket.on('send:message', (data) => {
+
+    data = parseData(data);
+    console.log("send:message: ",data);
+
     try {
-      console.log("send:message: ",data);
+
       roomspace.to(data.room).emit('user:message', data);
+
     } catch (e) {
+
+      console.log("Error: send:message.");
 
     }
   });
 
   socket.on('leave:room', (data) => {
+
+    data = parseData(data);
+
     try {
+
       if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
       socket.leave(data.room);
       roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
+
     } catch (e) {
+
+      console.log("Error: leave:room");
 
     }
   });
@@ -146,6 +168,15 @@ roomspace.on('connection', (socket) => {
     currentRooms.forEach((elem) => {
       socket.leave(elem);
     });
+  }
+
+  function parseData(data) {
+    try {
+      data = typeof data === "string" ? JSON.parse(data) : data;
+    } catch(e) {
+      console.log("Can not parse to JSON from string object.");
+    }
+    return data;
   }
 });
 
