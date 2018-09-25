@@ -86,7 +86,7 @@ app.get('/user/status/:name', (request, response ,next) => {
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
 roomspace.on('connection', (socket) => {
-  console.log('[LOG] An user connected.', socket);
+  console.log('[LOG] An user connected.', socket.id);
   /**
    * 나중에 init함수로 유저에 대한 데이터를 정리하는 함수로 만들 것
    * 현재는 유저 방에 대한 정보만을 초기화 시키고 있음.
