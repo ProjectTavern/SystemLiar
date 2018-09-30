@@ -64,17 +64,31 @@ app.post('/user/status', (request, response, next) => {
   const value = JSON.stringify(request.body);
 
   /**
-   * 구글 아이디를 저장하는 로직
+   * 구글 아이디를 저장하는 로직 + 닉네임이 있는지 체크
+   *
+   * 구글 아이디가 존재하고, 닉네임이 존재할 경우 =>
+   * 닉네임 생성화면을 보여줄 필요가 없을 때 : true 값 반환
+   *
+   * 구글 아이디가 존재하지 않거나, 닉네임이 존재하지 않는 경우 =>
+   * 닉네임 생성화면을 보여줄 필요가 있을 때 : false 값 반환
+   *
    * */
   request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
     console.log(userGhashes);
     if (userGhashes.includes(userGhash)) {
-      console.log("유저 정보가 데이터셋에 존재하여 이대로 진행합니다.");
+      console.log("유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.");
+      request.redis.hget(userGhash, "nickname", (error, value) => {
+        console.log(value);
+      })
     } else {
       console.log("유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.");
       request.redis.sadd(configDataset.user.ghashes, userGhash);
     }
   });
+
+});
+
+app.get('/user/valid/nickname/:nickname', (request, response, next) => {
 
 });
 
