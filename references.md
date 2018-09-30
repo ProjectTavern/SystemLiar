@@ -4,3 +4,5 @@
 - [Router 모듈 분리하기](https://jiwondh.github.io/2017/01/17/routes-seperate/)  
 - [ChatLog](http://wi-fi.tistory.com/entry/%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B1%84%ED%8C%85%EB%B0%A9-%EB%A7%8C%EB%93%A4%EA%B8%B0-NodeJS-Express-Redis-Socketio-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0)
 - [Chat => Node + socketio](https://github.com/teragoon/node-socketio-test)
+- [Express-Session](https://velopert.com/406)
+- [Socket.io](https://www.zerocho.com/category/NodeJS/post/57edfcf481d46f0015d3f0cd)
