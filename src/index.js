@@ -57,7 +57,7 @@ app.get('/chat', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
-/* 유저 상태 등록 */
+/* 유저 상태 확인 */
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
   request.on('data', (data) => console.log("[LOG] DATA: ", data));
@@ -95,6 +95,7 @@ app.post('/user/create/nickname/', (request, response, next) => {
 
   const userData = request.body;
 
+  /* 유저 정보 배열로 전환 */
   let userInform = [];
   for ( let userInformKey in userData) {
     if (userData.hasOwnProperty(userInformKey)) {
@@ -103,41 +104,33 @@ app.post('/user/create/nickname/', (request, response, next) => {
     }
   }
 
-  let storedNicknameSuccess = false;
-  let storedUserInformSuccess = false;
+  /* 유저 정보 */
   const userNickname = userData.nickname;
   const userGhashId = userData.id;
 
   request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
     if(userNicknameLists.includes(userNickname)) {
       console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
-      const result = storedNicknameSuccess && storedUserInformSuccess;
-      response.send(result);
+      response.send(false);
     } else {
       console.log("[LOG] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
-      storedNicknameSuccess = true;
-      request.redis.sadd(configDataset.user.nicknames, userNickname, (error, count) => {
-        if (error) {
-          console.log("[LOG] 유저의 닉네임을 저장하려 했으나 실패했습니다.", error);
-        }
-        console.log("[LOG] 유저의 닉네임을 저장했습니다.", count);
-        storedNicknameSuccess = true;
-        request.redis.hset(userGhashId, userInform, (error, count) => {
+      request.redis
+        .multi()
+        .sadd(configDataset.user.nicknames, userNickname)
+        .hset(userGhashId, userInform)
+        .exec((error, result) => {
           if (error) {
             console.log("[LOG] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+            response.send(false);
+          } else {
+            console.log("[LOG] 유저의 정보를 저장했습니다.", result);
+            response.send(true);
+            /* 저장되었는지 확인 용도로 임시 체크 중 : 나중에 삭제 */
+            request.redis.hgetall(userGhashId, (error, data) => {
+              console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
+            });
           }
-          console.log("[LOG] 유저의 정보를 저장했습니다.", count);
-          storedUserInformSuccess = true;
-          /* 나중에 트랜잭션 형태로 변경할 것 */
-          const result = storedNicknameSuccess && storedUserInformSuccess;
-          response.send(result);
-
-          /* 저장되었는지 확인 용도로 체크 */
-          request.redis.hgetall(userGhashId, (error, data) => {
-            console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
-          });
         });
-      });
     }
   });
 });
