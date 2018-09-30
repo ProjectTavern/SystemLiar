@@ -130,6 +130,8 @@ app.post('/user/create/nickname/', (request, response, next) => {
   request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
     if(userNicknameLists.includes(userNickname)) {
       console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
+      const result = storedNicknameSuccess && storedUserInformSuccess;
+      response.send(result);
     } else {
       console.log("[LOG] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
       storedNicknameSuccess = true;
