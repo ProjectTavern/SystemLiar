@@ -20,7 +20,9 @@ String.prototype.hashCode = function() {
 
 const configDataset = {
   user : {
-    ghashes : "user:ghash"
+    ghashes : "user:ghash",
+    nicknames : "user:nickname",
+    status: "user:status"
   }
 };
 
@@ -73,11 +75,11 @@ app.post('/user/status', (request, response, next) => {
    * 닉네임 생성화면을 보여줄 필요가 있을 때 : false 값 반환
    *
    * */
-  request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
-    console.log(userGhashes);
+  request.redis.smembers(configDataset.user.ghashes, (error, userGhashLists) => {
+    console.log(userGhashLists);
     let createNicknameResult = false;
 
-    if (userGhashes.includes(userGhash)) {
+    if (userGhashLists.includes(userGhash)) {
       console.log("[LOG] 유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.", userGhash);
       /**
        * nickname 값이 유저 정보에 있는 확인
@@ -101,8 +103,61 @@ app.post('/user/status', (request, response, next) => {
 
 });
 
-app.get('/user/valid/nickname/:nickname', (request, response, next) => {
+/**
+ * 닉네임 생성 시도
+ * 닉네임이 사용되고 있는 것인지 체크 후에 사용 가능하면 바로 저장
+ *
+ * 사용가능하여 저장된 경우에는 true
+ * 사용하고 있는 닉네임이 있는 경우에는 false
+ * */
+app.post('/user/create/nickname/', (request, response, next) => {
 
+  request.accepts('application/json');
+  request.on('data', (data) => console.log(data));
+  const userData = request.body;
+
+  let userInform = [];
+  for ( let userInformKey in userData) {
+    if (userData.hasOwnProperty(userInformKey)) {
+      userInform.push(userInformKey);
+      userInform.push(userData[userInformKey]);
+    }
+  }
+  let storedNicknameSuccess = false;
+  let storedUserInformSuccess = false;
+  const userNickname = userData.nickname;
+  const userGhashId = userData.id;
+  request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
+    if(userNicknameLists.includes(userNickname)) {
+      console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
+      const result = storedNicknameSuccess && storedUserInformSuccess;
+      response.send(result);
+    } else {
+      console.log("[LOG] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
+      storedNicknameSuccess = true;
+      request.redis.sadd(configDataset.user.nicknames, userNickname, (error, count) => {
+        if (error) {
+          console.log("[LOG] 유저의 닉네임을 저장하려 했으나 실패했습니다.", error);
+        }
+        console.log("[LOG] 유저의 닉네임을 저장했습니다.", count);
+        storedNicknameSuccess = true;
+        request.redis.hset(userGhashId, userInform, (error, count) => {
+          if (error) {
+            console.log("[LOG] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+          }
+          console.log("[LOG] 유저의 정보를 저장했습니다.", count);
+          storedUserInformSuccess = true;
+
+          /* 나중에 트랜잭션 형태로 변경할 것 */
+          const result = storedNicknameSuccess && storedUserInformSuccess;
+          response.send(result);
+          request.redis.hgetall(userGhashId, (error, data) => {
+            console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
+          });
+        });
+      });
+    }
+  });
 });
 
 /* 유저 상태 불러오기 */
@@ -117,6 +172,17 @@ app.get('/user/status/:id', (request, response ,next) => {
     const value = JSON.parse(data);
     response.json(value);
   });
+});
+
+/**
+ * 데이터 리셋 버튼! 주의!
+ * */
+app.post('/database/all/reset', (request, response, next) => {
+  request.redis.flushall()
+    .then(value => {
+      console.log(value);
+      response.send(true);
+    });
 });
 
 /* socketio 채팅 */
