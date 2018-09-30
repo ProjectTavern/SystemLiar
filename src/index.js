@@ -89,7 +89,6 @@ app.post('/user/status', (request, response, next) => {
  * 사용하고 있는 닉네임이 있는 경우에는 false
  * */
 app.post('/user/create/nickname/', (request, response, next) => {
-
   request.accepts('application/json');
   request.on('data', (data) => console.log("[LOG] DATA: ", data));
 
@@ -122,14 +121,9 @@ app.post('/user/create/nickname/', (request, response, next) => {
           if (error) {
             console.log("[LOG] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
             response.send(false);
-          } else {
-            console.log("[LOG] 유저의 정보를 저장했습니다.", result);
-            response.send(true);
-            /* 저장되었는지 확인 용도로 임시 체크 중 : 나중에 삭제 */
-            request.redis.hgetall(userGhashId, (error, data) => {
-              console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
-            });
           }
+          console.log("[LOG] 유저의 정보를 저장했습니다.", result);
+          response.send(true);
         });
     }
   });
