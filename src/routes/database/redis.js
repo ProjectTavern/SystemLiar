@@ -1,5 +1,5 @@
 /* 설정 정보 불러오기 */
-const CONFIG = require("./config");
+const CONFIG = require("../../config");
 
 /* 레디스 기본 설정 및 세팅 */
 const Redis = require('ioredis');

@@ -3,7 +3,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
-const redis = require('./redis');
+const redis = require('./routes/database/redis');
 const bodyParser = require('body-parser');
 
 /* 임시 해쉬코드 작성 */
@@ -56,6 +56,11 @@ app.post('/user/status', (request, response, next) => {
 
   const key = request.body.name;
   const value = JSON.stringify(request.body);
+
+  request.redis.sadd('animals',"cat","dog","cat");
+  request.redis.smembers('animals', (error, set) => {
+    console.log(set);
+  });
 
   request.redis.set(key, value, (error, data) => {
     if (error) {
