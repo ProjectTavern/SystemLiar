@@ -114,21 +114,46 @@ app.post('/user/create/nickname/', (request, response, next) => {
 
   request.accepts('application/json');
   request.on('data', (data) => console.log(data));
+  const userData = request.body;
 
-  const userNickname = request.body.nickname;
-  const userInform = JSON.stringify(request.body);
-  console.log(request.body);
-  console.log(userInform);
-
-
+  let userInform = [];
+  for ( let userInformKey in userData) {
+    if (userData.hasOwnProperty(userInformKey)) {
+      userInform.push(userInformKey);
+      userInform.push(userData[userInformKey]);
+    }
+  }
   let storedNicknameSuccess = false;
-
+  let storedUserInformSuccess = false;
+  const userNickname = userData.nickname;
+  const userGhashId = userData.id;
   request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
     if(userNicknameLists.includes(userNickname)) {
-
+      console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
     } else {
+      console.log("[LOG] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
       storedNicknameSuccess = true;
-      request.redis.sadd(configDataset.user.nicknames, userNickname);
+      request.redis.sadd(configDataset.user.nicknames, userNickname, (error, count) => {
+        if (error) {
+          console.log("[LOG] 유저의 닉네임을 저장하려 했으나 실패했습니다.", error);
+        }
+        console.log("[LOG] 유저의 닉네임을 저장했습니다.", count);
+        storedNicknameSuccess = true;
+        request.redis.hset(userGhashId, userInform, (error, count) => {
+          if (error) {
+            console.log("[LOG] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+          }
+          console.log("[LOG] 유저의 정보를 저장했습니다.", count);
+          storedUserInformSuccess = true;
+
+          /* 나중에 트랜잭션 형태로 변경할 것 */
+          const result = storedNicknameSuccess && storedUserInformSuccess;
+          response.send(result);
+          request.redis.hgetall(userGhashId, (error, data) => {
+            console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
+          });
+        });
+      });
     }
   });
 });
@@ -151,21 +176,11 @@ app.get('/user/status/:id', (request, response ,next) => {
  * 데이터 리셋 버튼! 주의!
  * */
 app.post('/database/all/delete', (request, response, next) => {
-  const stream = request.redis.scanStream({
-    match: 'sample_pattern:*'
-  });
-  stream.on('data', function (keys) {
-    if (keys.length) {
-      const pipeline = request.redis.pipeline();
-      keys.forEach(function (key) {
-        pipeline.del(key);
-      });
-      pipeline.exec();
-    }
-  });
-  stream.on('end', function () {
-    console.log('[WARN] Remove all data is completed.');
-  });
+  request.redis.flushall()
+    .then(value => {
+      console.log(value);
+      response.send(true);
+    });
 });
 
 /* socketio 채팅 */

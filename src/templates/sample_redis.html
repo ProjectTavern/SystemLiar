@@ -5,22 +5,25 @@
   <title>Chat Test</title>
 </head>
 <h1>Redis [POST / GET] TEST PAGE</h1>
-<form action="/user/status" name="body" method="post">
+<form action="/user/create/nickname/" name="body" method="post">
   <fieldset>
     <legend>데이터 입력 필드</legend>
     <div class="input_panel">
-      <label for="name">아이디 입력</label>
-      <input id="name" name="name" type="text"/>
+      <label for="id">아이디 입력</label>
+      <input id="id" name="id" type="text" value="GH0010"/>
     </div>
     <div class="input_panel">
-      <label for="win">승리 횟수</label>
-      <input id="win" name="win" value="5">
-    </div>
-    <div class="input_panel">
-      <label for="lose">패배 횟수</label>
-      <input id="lose" name="lose" value="12">
+      <label for="nickname">Nickname</label>
+      <input id="nickname" name="nickname" value="targetZero">
     </div>
     <button type="submit">입력</button>
+  </fieldset>
+</form>
+
+<form action="/database/all/delete" name="body" method="post">
+  <fieldset>
+    <legend>데이터 리셋 테스트</legend>
+    <button type="submit">모두 삭제</button>
   </fieldset>
 </form>
 </html>
