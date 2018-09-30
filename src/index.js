@@ -20,7 +20,9 @@ String.prototype.hashCode = function() {
 
 const configDataset = {
   user : {
-    ghashes : "user:ghash"
+    ghashes : "user:ghash",
+    nicknames : "user:nickname",
+    status: "user:status"
   }
 };
 
@@ -73,11 +75,11 @@ app.post('/user/status', (request, response, next) => {
    * 닉네임 생성화면을 보여줄 필요가 있을 때 : false 값 반환
    *
    * */
-  request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
-    console.log(userGhashes);
+  request.redis.smembers(configDataset.user.ghashes, (error, userGhashLists) => {
+    console.log(userGhashLists);
     let createNicknameResult = false;
 
-    if (userGhashes.includes(userGhash)) {
+    if (userGhashLists.includes(userGhash)) {
       console.log("[LOG] 유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.", userGhash);
       /**
        * nickname 값이 유저 정보에 있는 확인
@@ -101,8 +103,34 @@ app.post('/user/status', (request, response, next) => {
 
 });
 
-app.get('/user/valid/nickname/:nickname', (request, response, next) => {
+/**
+ * 닉네임 생성 시도
+ * 닉네임이 사용되고 있는 것인지 체크 후에 사용 가능하면 바로 저장
+ *
+ * 사용가능하여 저장된 경우에는 true
+ * 사용하고 있는 닉네임이 있는 경우에는 false
+ * */
+app.post('/user/create/nickname/', (request, response, next) => {
 
+  request.accepts('application/json');
+  request.on('data', (data) => console.log(data));
+
+  const userNickname = request.body.nickname;
+  const userInform = JSON.stringify(request.body);
+  console.log(request.body);
+  console.log(userInform);
+
+
+  let storedNicknameSuccess = false;
+
+  request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
+    if(userNicknameLists.includes(userNickname)) {
+
+    } else {
+      storedNicknameSuccess = true;
+      request.redis.sadd(configDataset.user.nicknames, userNickname);
+    }
+  });
 });
 
 /* 유저 상태 불러오기 */
@@ -116,6 +144,27 @@ app.get('/user/status/:id', (request, response ,next) => {
     }
     const value = JSON.parse(data);
     response.json(value);
+  });
+});
+
+/**
+ * 데이터 리셋 버튼! 주의!
+ * */
+app.post('/database/all/delete', (request, response, next) => {
+  const stream = request.redis.scanStream({
+    match: 'sample_pattern:*'
+  });
+  stream.on('data', function (keys) {
+    if (keys.length) {
+      const pipeline = request.redis.pipeline();
+      keys.forEach(function (key) {
+        pipeline.del(key);
+      });
+      pipeline.exec();
+    }
+  });
+  stream.on('end', function () {
+    console.log('[WARN] Remove all data is completed.');
   });
 });
 
