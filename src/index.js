@@ -60,60 +60,29 @@ app.get('/chat', function(request, response) {
 /* 유저 상태 등록 */
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
-  request.on('data', (data) => console.log(data));
+  request.on('data', (data) => console.log("[LOG] DATA: ", data));
 
   const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
   /**
-   * 구글 아이디를 저장하는 로직 + 닉네임이 있는지 체크
-   *
-   * 구글 아이디가 존재하고, 닉네임이 존재할 경우 =>
-   * 닉네임 생성화면을 보여줄 필요가 없을 때 : true 값 반환
-   *
-   * 구글 아이디가 존재하지 않거나, 닉네임이 존재하지 않는 경우 =>
-   * 닉네임 생성화면을 보여줄 필요가 있을 때 : false 값 반환
-   *
+   * 구글 아이디를 저장하는 로직
+   * 구글 아이디가 있는 경우 닉네임(string)을 바로 전송
+   * 구글 아이디가 없는 경우 false 값을 전송
    * */
-  request.redis.smembers(configDataset.user.ghashes, (error, userGhashLists) => {
-    console.log(userGhashLists);
-    let createNicknameResult = false;
-
-    if (userGhashLists.includes(userGhash)) {
-      console.log("[LOG] 유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.", userGhash);
-      /**
-       * nickname 값이 유저 정보에 있는 확인
-       * 최초에는 데이터 값이 null로 반환됨
-       * */
-      request.redis.hget(userGhash, "nickname", (error, value) => {
-        console.log("[LOG] 유저 정보에 대해 닉네임이 존재하는지 체크합니다.", value);
-        if (value) {
-          createNicknameResult = true;
-        }
-        response.send(createNicknameResult);
-      });
-
+  request.redis.hget(userGhash, "nickname", (error, value) => {
+    if (value) {
+      console.log("[LOG] 유저 정보가 기존 데이터셋에 존재합니다.", value);
+      response.send(value);
     } else {
-      console.log("[LOG] 유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.", userGhash);
-      /* 유저 정보 ghash 테이블에 저장 */
-      request.redis.sadd(configDataset.user.ghashes, userGhash, (error, value) => {
-        if (error) {
-          console.log("[LOG] 유저 정보를 데이터셋에 저장하는데에 실패했습니다.");
-        } else {
-          createNicknameResult = true;
-        }
-        console.log("[LOG] 유저의 정보를 저장했습니다.", value);
-        response.send(createNicknameResult);
-      });
+      console.log("[LOG] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
+      response.send(false);
     }
-
-
   });
-
 });
 
 /**
- * 닉네임 생성 시도
+ * 구글 아이디 + 닉네임 저장
  * 닉네임이 사용되고 있는 것인지 체크 후에 사용 가능하면 바로 저장
  *
  * 사용가능하여 저장된 경우에는 true
@@ -122,7 +91,8 @@ app.post('/user/status', (request, response, next) => {
 app.post('/user/create/nickname/', (request, response, next) => {
 
   request.accepts('application/json');
-  request.on('data', (data) => console.log(data));
+  request.on('data', (data) => console.log("[LOG] DATA: ", data));
+
   const userData = request.body;
 
   let userInform = [];
@@ -132,10 +102,12 @@ app.post('/user/create/nickname/', (request, response, next) => {
       userInform.push(userData[userInformKey]);
     }
   }
+
   let storedNicknameSuccess = false;
   let storedUserInformSuccess = false;
   const userNickname = userData.nickname;
   const userGhashId = userData.id;
+
   request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
     if(userNicknameLists.includes(userNickname)) {
       console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
@@ -156,10 +128,11 @@ app.post('/user/create/nickname/', (request, response, next) => {
           }
           console.log("[LOG] 유저의 정보를 저장했습니다.", count);
           storedUserInformSuccess = true;
-
           /* 나중에 트랜잭션 형태로 변경할 것 */
           const result = storedNicknameSuccess && storedUserInformSuccess;
           response.send(result);
+
+          /* 저장되었는지 확인 용도로 체크 */
           request.redis.hgetall(userGhashId, (error, data) => {
             console.log("[LOG] 저장된 유저의 정보를 가져오는데 성공했습니다.", data);
           });
