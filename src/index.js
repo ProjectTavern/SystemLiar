@@ -18,6 +18,12 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
+const configDataset = {
+  user : {
+    ghashes : "user:ghash"
+  }
+};
+
 /* 바디 파서 등록 */
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
@@ -54,29 +60,27 @@ app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
   request.on('data', (data) => console.log(data));
 
-  const key = request.body.name;
+  const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
-  request.redis.sadd('animals',"cat","dog","cat");
-  request.redis.smembers('animals', (error, set) => {
-    console.log(set);
+  /**
+   * 구글 아이디를 저장하는 로직
+   * */
+  request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
+    console.log(userGhashes);
+    if (userGhashes.includes(userGhash)) {
+      console.log("유저 정보가 데이터셋에 존재하여 이대로 진행합니다.");
+    } else {
+      console.log("유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.");
+      request.redis.sadd(configDataset.user.ghashes, userGhash);
+    }
   });
 
-  request.redis.set(key, value, (error, data) => {
-    if (error) {
-      console.log(error);
-      response.send("[ERROR] REDIS ERROR: " + error);
-      return;
-    }
-    /* 성공 후처리 */
-    // request.redis.expire(key,10);
-    response.json(value);
-  });
 });
 
 /* 유저 상태 불러오기 */
-app.get('/user/status/:name', (request, response ,next) => {
-  const key = request.params.name;
+app.get('/user/status/:id', (request, response ,next) => {
+  const key = request.params.id;
   request.redis.get(key, (error, data) => {
     if (error) {
       console.log(error);
