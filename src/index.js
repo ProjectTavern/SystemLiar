@@ -90,15 +90,24 @@ app.post('/user/status', (request, response, next) => {
         if (value) {
           createNicknameResult = true;
         }
+        response.send(createNicknameResult);
       });
 
     } else {
       console.log("[LOG] 유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.", userGhash);
       /* 유저 정보 ghash 테이블에 저장 */
-      request.redis.sadd(configDataset.user.ghashes, userGhash);
+      request.redis.sadd(configDataset.user.ghashes, userGhash, (error, value) => {
+        if (error) {
+          console.log("[LOG] 유저 정보를 데이터셋에 저장하는데에 실패했습니다.");
+        } else {
+          createNicknameResult = true;
+        }
+        console.log("[LOG] 유저의 정보를 저장했습니다.", value);
+        response.send(createNicknameResult);
+      });
     }
 
-    response.send(createNicknameResult);
+
   });
 
 });
