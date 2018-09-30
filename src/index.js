@@ -75,7 +75,7 @@ app.post('/user/status', (request, response, next) => {
    * */
   request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
     console.log(userGhashes);
-    let createNicknameResult = true;
+    let createNicknameResult = false;
 
     if (userGhashes.includes(userGhash)) {
       console.log("[LOG] 유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.", userGhash);
@@ -85,8 +85,8 @@ app.post('/user/status', (request, response, next) => {
        * */
       request.redis.hget(userGhash, "nickname", (error, value) => {
         console.log("[LOG] 유저 정보에 대해 닉네임이 존재하는지 체크합니다.", value);
-        if (!value) {
-          createNicknameResult = false;
+        if (value) {
+          createNicknameResult = true;
         }
       });
 
