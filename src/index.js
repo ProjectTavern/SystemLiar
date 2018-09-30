@@ -65,7 +65,7 @@ app.post('/user/status', (request, response, next) => {
   const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
-  console.log("[LOG] 받은 데이터", value);
+  console.log("[LOG] 유저 조회할 받은 데이터", value);
 
   /**
    * 구글 아이디를 저장하는 로직
@@ -104,7 +104,7 @@ app.post('/user/create/nickname/', (request, response, next) => {
       userInform.push(userData[userInformKey]);
     }
   }
-
+  console.log("[LOG] 저장할 받은 데이터: ", userData);
   /* 유저 정보 */
   const userNickname = userData.nickname;
   const userGhashId = userData.id;
