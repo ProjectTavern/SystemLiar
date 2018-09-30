@@ -175,7 +175,7 @@ app.get('/user/status/:id', (request, response ,next) => {
 /**
  * 데이터 리셋 버튼! 주의!
  * */
-app.post('/database/all/delete', (request, response, next) => {
+app.post('/database/all/reset', (request, response, next) => {
   request.redis.flushall()
     .then(value => {
       console.log(value);
