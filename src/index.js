@@ -65,6 +65,8 @@ app.post('/user/status', (request, response, next) => {
   const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
+  console.log("받은 데이터", value);
+
   /**
    * 구글 아이디를 저장하는 로직
    * 구글 아이디가 있는 경우 닉네임(string)을 바로 전송

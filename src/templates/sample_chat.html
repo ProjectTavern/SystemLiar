@@ -93,6 +93,12 @@
               message : $userMessage.val(),
             };
             checkValidation(data) && socket.emit('send:message', data);
+            $userMessage.val('');
+          });
+
+          $userMessage.on('keydown', event => {
+            console.log(event.key);
+            event.key === "Enter" && $btnSendMessage.trigger('click')
           });
 
           /* 방 탈출 */
