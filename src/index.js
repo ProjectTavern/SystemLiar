@@ -57,6 +57,11 @@ app.post('/user/status', (request, response, next) => {
   const key = request.body.name;
   const value = JSON.stringify(request.body);
 
+  request.redis.sadd('animals',"cat","dog","cat");
+  request.redis.smembers('animals', (error, set) => {
+    console.log(set);
+  });
+
   request.redis.set(key, value, (error, data) => {
     if (error) {
       console.log(error);
