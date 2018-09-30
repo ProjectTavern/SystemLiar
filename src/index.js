@@ -75,15 +75,28 @@ app.post('/user/status', (request, response, next) => {
    * */
   request.redis.smembers(configDataset.user.ghashes, (error, userGhashes) => {
     console.log(userGhashes);
+    let createNicknameResult = true;
+
     if (userGhashes.includes(userGhash)) {
-      console.log("유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.");
+      console.log("[LOG] 유저 정보가 데이터셋에 존재합니다. 닉네임이 존재하는지 체크하겠습니다.", userGhash);
+      /**
+       * nickname 값이 유저 정보에 있는 확인
+       * 최초에는 데이터 값이 null로 반환됨
+       * */
       request.redis.hget(userGhash, "nickname", (error, value) => {
-        console.log(value);
-      })
+        console.log("[LOG] 유저 정보에 대해 닉네임이 존재하는지 체크합니다.", value);
+        if (!value) {
+          createNicknameResult = false;
+        }
+      });
+
     } else {
-      console.log("유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.");
+      console.log("[LOG] 유저 정보가 데이터셋에 존재하지 않아 저장을 시작합니다.", userGhash);
+      /* 유저 정보 ghash 테이블에 저장 */
       request.redis.sadd(configDataset.user.ghashes, userGhash);
     }
+
+    response.send(createNicknameResult);
   });
 
 });
