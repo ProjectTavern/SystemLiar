@@ -179,6 +179,34 @@ app.post('/database/all/reset', (request, response, next) => {
 io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
 let rooms = [];
+const roomMock1 = {
+  number : 1,
+  name : "아무 일도 없었다.",
+  members : ["삼다수", "백두무궁", "한라삼천"],
+  limit : 7,
+  status : "wait",
+  ready: 0
+};
+const roomMock2 = {
+  number : 2,
+  name : "방 리스트 테스트",
+  members : ["카카로트", "베지터", "부르마"],
+  limit : 7,
+  status : "playing",
+  ready: 3
+};
+const roomMock3 = {
+  number : 3,
+  name : "종료된 방",
+  members : ["드레이크", "네로", "아르토리아", "에미야"],
+  limit : 7,
+  status : "end",
+  ready: 6
+};
+rooms.push(roomMock1);
+rooms.push(roomMock2);
+rooms.push(roomMock3);
+
 roomspace.on('connection', (socket) => {
   socket.userRooms = [];
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
@@ -186,10 +214,10 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("room:info", { name: "room:info", data: rooms });
+  socket.emit("room:info", rooms);
   /* 새로고침 누를 경우 방 정보를 재전송 */
   socket.on('room:refresh', data => {
-    socket.emit("room:info", { name: "room:info", data: rooms });
+    socket.emit("room:info", rooms);
   });
 
   /* 방에 만들 경우 & 참가할 경우 */
