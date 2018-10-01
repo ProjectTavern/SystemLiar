@@ -180,7 +180,7 @@ io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
 let rooms = {};
 const roomMock1 = {
-  number : 1,
+  id : 1,
   name : "아무 일도 없었다.",
   members : ["삼다수", "백두무궁", "한라삼천"],
   limit : 7,
@@ -188,7 +188,7 @@ const roomMock1 = {
   ready: 0
 };
 const roomMock2 = {
-  number : 2,
+  id : 2,
   name : "방 리스트 테스트",
   members : ["카카로트", "베지터", "부르마"],
   limit : 7,
@@ -196,7 +196,7 @@ const roomMock2 = {
   ready: 3
 };
 const roomMock3 = {
-  number : 3,
+  id : 3,
   name : "종료된 방",
   members : ["드레이크", "네로", "아르토리아", "에미야"],
   limit : 7,
@@ -228,18 +228,20 @@ roomspace.on('connection', (socket) => {
       initRoom(socket);
 
       console.log("[LOG] 방 데이터들을 확인합니다.");
-      if (rooms.hasOwnProperty(data.number)) {
+      console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession.id);
+      if (rooms.hasOwnProperty(data.id)) {
         /**
          * 방에 입장합니다.
          * */
-        rooms[data.number].members.push(usersession.id);
+        rooms[data.id].members.push(usersession.id);
       } else {
         /**
          * 방을 생성합니다.
          * 자세한 방에 대한 정보를 저장할 것
          * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
          * */
-        rooms[data.number] = { number : data.number, name : data.room, members : [usersession.id], limit : 7, status : "wait", ready: 0 };
+        const roomId = Date.now();
+        rooms[roomId] = { id : roomId, name : data.room, members : [usersession.id], limit : 7, status : "wait", ready: 0 };
       }
       socket.join(data.room);
       socket.userRooms.push(data.room);
