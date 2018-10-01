@@ -214,10 +214,10 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("room:info", rooms);
+  socket.emit("rooms:info", rooms);
   /* 새로고침 누를 경우 방 정보를 재전송 */
-  socket.on('room:refresh', data => {
-    socket.emit("room:info", rooms);
+  socket.on('rooms:refresh', data => {
+    socket.emit("rooms:info", rooms);
   });
 
   /* 방에 만들 경우 & 참가할 경우 */
