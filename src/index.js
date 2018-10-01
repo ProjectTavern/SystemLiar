@@ -178,7 +178,7 @@ app.post('/database/all/reset', (request, response, next) => {
 /* socketio 채팅 */
 io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
-let rooms = [];
+let rooms = {};
 const roomMock1 = {
   number : 1,
   name : "아무 일도 없었다.",
@@ -203,9 +203,9 @@ const roomMock3 = {
   status : "end",
   ready: 6
 };
-rooms.push(roomMock1);
-rooms.push(roomMock2);
-rooms.push(roomMock3);
+rooms[1] = roomMock1;
+rooms[2] = roomMock2;
+rooms[3] = roomMock3;
 
 roomspace.on('connection', (socket) => {
   socket.userRooms = [];
