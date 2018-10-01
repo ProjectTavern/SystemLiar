@@ -5,6 +5,8 @@ const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
 const redis = require('./routes/database/redis');
 const bodyParser = require('body-parser');
+const expsession = require('express-session');
+const socketsession = require('express-socket.io-session');
 
 /* 임시 해쉬코드 작성 */
 String.prototype.hashCode = function() {
@@ -35,6 +37,14 @@ app.use((request, response, next) => {
   request.redis = redis;
   next();
 });
+
+/* 세션 값 생성 */
+app.session = expsession({
+  secret: '&%^%SYSTEM%LIAR%^%&',
+  resave: false,
+  saveUninitialized: true
+});
+app.use(app.session);
 
 /* 크로스도메인 해제 : 나중에 서버 제대로 개설되면 제거 */
 app.all('/crossdomain.xml', function (request, response, next) {
@@ -75,6 +85,11 @@ app.post('/user/status', (request, response, next) => {
   request.redis.hget(userGhash, "nickname", (error, value) => {
     if (value) {
       console.log("[LOG] 유저 정보가 기존 데이터셋에 존재합니다.", value);
+      console.log("[LOG] 세션에 유저 정보를 저장합니다.");
+
+      /* 세션에 데이터 저장 */
+      const datas = { id: userGhash, nickname: value };
+      const session = setUserInfoToSession(request, datas);
       response.send(value);
     } else {
       console.log("[LOG] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
@@ -125,6 +140,10 @@ app.post('/user/create/nickname/', (request, response, next) => {
             response.send(false);
           }
           console.log("[LOG] 유저의 정보를 저장했습니다.", result);
+          /* 세션에 데이터 저장 */
+          const datas = { id: userGhashId, nickname: userNickname };
+          const session = setUserInfoToSession(request, datas);
+
           response.send(true);
         });
     }
@@ -157,33 +176,54 @@ app.post('/database/all/reset', (request, response, next) => {
 });
 
 /* socketio 채팅 */
+io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
+let rooms = [];
 roomspace.on('connection', (socket) => {
-  console.log('[LOG] An user connected.', socket.id);
-  /**
-   * 나중에 init함수로 유저에 대한 데이터를 정리하는 함수로 만들 것
-   * 현재는 유저 방에 대한 정보만을 초기화 시키고 있음.
-   * (연결이 유실되었다가 다시 들어오면 방이 초기화될 수 있는 문제가 있을 수도 있음)
-   * */
   socket.userRooms = [];
+  console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
+  const usersession = socket.handshake.session;
+  console.log('[LOG] An user connected.', socket.id);
 
-  socket.on('join:room', (data) => {
-    console.log("[LOG] join:room: ", data);
+  /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
+  socket.emit("room:info", { name: "room:info", data: rooms });
+  /* 새로고침 누를 경우 방 정보를 재전송 */
+  socket.on('room:refresh', data => {
+    socket.emit("room:info", { name: "room:info", data: rooms });
+  });
+
+  /* 방에 만들 경우 & 참가할 경우 */
+  socket.on('join:room', data => {
+    console.log("[LOG] join:room 요청을 전송받았습니다. ", data);
     try {
+      console.log("[LOG] 유저의 방 데이터를 초기화합니다.");
       initRoom(socket);
-      if(data.type === 'joinRoom') {
-        console.log("[LOG] data.type: joinRoom => valid entered.", data.type);
-        socket.join(data.room);
-        socket.userRooms.push(data.room);
-        socket.emit('system:message', { message: '채팅방에 오신 것을 환영합니다.' });
-        setNameTag(socket, data.name);
-        socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+
+      console.log("[LOG] 방 데이터들을 확인합니다.");
+      if (rooms.hasOwnProperty(data.number)) {
+        /**
+         * 방에 입장합니다.
+         * */
+        rooms[data.number].members.push(usersession.id);
+      } else {
+        /**
+         * 방을 생성합니다.
+         * 자세한 방에 대한 정보를 저장할 것
+         * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
+         * */
+        rooms[data.number] = { number : data.number, name : data.room, members : [usersession.id], limit : 7, status : "wait", ready: 0 };
       }
+      socket.join(data.room);
+      socket.userRooms.push(data.room);
+      socket.emit("system:message", { message: "게임에 입장하였습니다." });
+      setNameTag(socket, data.name);
+      socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
     } catch (error) {
       console.log("[ERROR] join:room.", error);
     }
   });
 
+  /* 대화 전송 */
   socket.on('send:message', (data) => {
     console.log("[LOG] send:message: ",data);
     try {
@@ -193,12 +233,18 @@ roomspace.on('connection', (socket) => {
     }
   });
 
+  /* 방을 떠납니다. */
   socket.on('leave:room', (data) => {
-    console.log('[LOG] leave:room: ', data);
+    console.log('[LOG] leave:room 요청을 전송받았습니다. ', data);
     try {
-      if (data.name) { console.log(`leave:room: ${data.name} is left this room.`); }
+      if (data.nickname) { console.log(`leave:room: ${data.nickname} is left this room.`); }
       socket.leave(data.room);
+      rooms[data.number].members.splice(rooms[data.number].members.indexOf(data.nickname), 1);
       roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
+      if (rooms[data.number].members.length === 0) {
+        console.log("[LOG] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
+        delete rooms[data.number];
+      }
     } catch (error) {
       console.log("[ERROR] leave:room.", error);
     }
@@ -239,3 +285,11 @@ roomspace.on('connection', (socket) => {
 server.listen(30500, () => {
   console.log('[LOG] Socket IO server listening on port 30500');
 });
+
+
+function setUserInfoToSession(request, datas) {
+  let session = request.session;
+  session.id = datas.id;
+  session.nickname = datas.nickname;
+  return session;
+}
