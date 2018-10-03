@@ -64,6 +64,8 @@ app.get('/redis', function(request, response) {
 
 /* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
+  const datas = { id: "tes", nickname: "nicks" };
+  const session = setUserInfoToSession(request, datas);
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
@@ -176,8 +178,8 @@ app.post('/database/all/reset', (request, response, next) => {
 });
 
 /* socketio 채팅 */
-io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
+roomspace.use(socketsession(app.session));
 let rooms = [];
 const roomMock1 = {
   id : 1,
