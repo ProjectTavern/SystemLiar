@@ -223,7 +223,7 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("rooms:info", roomMock1);
+  socket.emit("rooms:info", rooms);
   /* 새로고침 누를 경우 방 정보를 재전송 */
   socket.on('rooms:refresh', data => {
     socket.emit("rooms:info", rooms);
