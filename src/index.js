@@ -203,6 +203,14 @@ const roomMock3 = {
   status : "end",
   ready: 6
 };
+const roomMock4 = {
+  id : 0,
+  name : "시작하지 않은 방",
+  members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전"],
+  limit : 7,
+  status : "wait",
+  ready: 0
+};
 rooms[1] = roomMock1;
 rooms[2] = roomMock2;
 rooms[3] = roomMock3;
@@ -214,10 +222,10 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("rooms:info", rooms);
+  socket.emit("rooms:info", roomMock4);
   /* 새로고침 누를 경우 방 정보를 재전송 */
   socket.on('rooms:refresh', data => {
-    socket.emit("rooms:info", rooms);
+    socket.emit("rooms:info", roomMock4);
   });
 
   /* 방에 만들 경우 & 참가할 경우 */
