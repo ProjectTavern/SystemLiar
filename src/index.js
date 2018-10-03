@@ -221,7 +221,8 @@ roomspace.on('connection', (socket) => {
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
   const usersession = socket.handshake.session;
   console.log('[LOG] An user connected.', socket.id);
-  console.log(usersession);
+  console.log("usersession handshake", socket.handshake);
+  console.log("usersession", usersession);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
