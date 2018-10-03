@@ -178,7 +178,7 @@ app.post('/database/all/reset', (request, response, next) => {
 /* socketio 채팅 */
 io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
-let rooms = {};
+let rooms = [];
 const roomMock1 = {
   id : 1,
   name : "아무 일도 없었다.",
@@ -211,9 +211,10 @@ const roomMock4 = {
   status : "wait",
   ready: 0
 };
-rooms[1] = roomMock1;
-rooms[2] = roomMock2;
-rooms[3] = roomMock3;
+rooms.push(roomMock1);
+rooms.push(roomMock2);
+rooms.push(roomMock3);
+rooms.push(roomMock4);
 
 roomspace.on('connection', (socket) => {
   socket.userRooms = [];
@@ -222,10 +223,10 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("rooms:info", roomMock4);
+  socket.emit("rooms:info", rooms);
   /* 새로고침 누를 경우 방 정보를 재전송 */
   socket.on('rooms:refresh', data => {
-    socket.emit("rooms:info", roomMock4);
+    socket.emit("rooms:info", rooms);
   });
 
   /* 방에 만들 경우 & 참가할 경우 */
