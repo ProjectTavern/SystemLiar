@@ -223,8 +223,6 @@ roomspace.on('connection', (socket) => {
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
   const usersession = socket.handshake.session;
   console.log('[LOG] An user connected.', socket.id);
-  console.log("usersession handshake", socket.handshake);
-  console.log("usersession", usersession);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
@@ -240,7 +238,7 @@ roomspace.on('connection', (socket) => {
       console.log("[LOG] 유저의 방 데이터를 초기화합니다.");
       initRoom(socket);
 
-      console.log("[LOG] 방 데이터들을 확인합니다.");
+      console.log("[LOG] 방 데이터들을 확인합니다.", data);
       console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
       if (rooms.hasOwnProperty(data.id)) {
         /**
