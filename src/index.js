@@ -3,7 +3,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
-const redis = require('./routes/database/redis');
+const redis = require('./modules/database/redis');
 const bodyParser = require('body-parser');
 const expsession = require('express-session');
 const socketsession = require('express-socket.io-session');
@@ -64,6 +64,8 @@ app.get('/redis', function(request, response) {
 
 /* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
+  const datas = { id: "tes", nickname: "nicks" };
+  const session = setUserInfoToSession(request, datas);
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
@@ -176,10 +178,10 @@ app.post('/database/all/reset', (request, response, next) => {
 });
 
 /* socketio 채팅 */
-io.use(socketsession(app.session));
 const roomspace = io.of('/roomspace');
+roomspace.use(socketsession(app.session));
 let rooms = [];
-const roomMock1 = {
+let roomMock1 = {
   id : 1,
   name : "아무 일도 없었다.",
   members : ["삼다수", "백두무궁", "한라삼천"],
@@ -187,7 +189,7 @@ const roomMock1 = {
   status : "wait",
   ready: 0
 };
-const roomMock2 = {
+let roomMock2 = {
   id : 2,
   name : "방 리스트 테스트",
   members : ["카카로트", "베지터", "부르마"],
@@ -195,7 +197,7 @@ const roomMock2 = {
   status : "playing",
   ready: 3
 };
-const roomMock3 = {
+let roomMock3 = {
   id : 3,
   name : "종료된 방",
   members : ["드레이크", "네로", "아르토리아", "에미야"],
@@ -203,7 +205,7 @@ const roomMock3 = {
   status : "end",
   ready: 6
 };
-const roomMock4 = {
+let roomMock4 = {
   id : 0,
   name : "시작하지 않은 방",
   members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전"],
@@ -221,8 +223,6 @@ roomspace.on('connection', (socket) => {
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
   const usersession = socket.handshake.session;
   console.log('[LOG] An user connected.', socket.id);
-  console.log("usersession handshake", socket.handshake);
-  console.log("usersession", usersession);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
@@ -238,7 +238,7 @@ roomspace.on('connection', (socket) => {
       console.log("[LOG] 유저의 방 데이터를 초기화합니다.");
       initRoom(socket);
 
-      console.log("[LOG] 방 데이터들을 확인합니다.");
+      console.log("[LOG] 방 데이터들을 확인합니다.", data);
       console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
       if (rooms.hasOwnProperty(data.id)) {
         /**
