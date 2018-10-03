@@ -3,7 +3,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
-const redis = require('./routes/database/redis');
+const redis = require('./modules/database/redis');
 const bodyParser = require('body-parser');
 const expsession = require('express-session');
 const socketsession = require('express-socket.io-session');
@@ -181,7 +181,7 @@ app.post('/database/all/reset', (request, response, next) => {
 const roomspace = io.of('/roomspace');
 roomspace.use(socketsession(app.session));
 let rooms = [];
-const roomMock1 = {
+let roomMock1 = {
   id : 1,
   name : "아무 일도 없었다.",
   members : ["삼다수", "백두무궁", "한라삼천"],
@@ -189,7 +189,7 @@ const roomMock1 = {
   status : "wait",
   ready: 0
 };
-const roomMock2 = {
+let roomMock2 = {
   id : 2,
   name : "방 리스트 테스트",
   members : ["카카로트", "베지터", "부르마"],
@@ -197,7 +197,7 @@ const roomMock2 = {
   status : "playing",
   ready: 3
 };
-const roomMock3 = {
+let roomMock3 = {
   id : 3,
   name : "종료된 방",
   members : ["드레이크", "네로", "아르토리아", "에미야"],
@@ -205,7 +205,7 @@ const roomMock3 = {
   status : "end",
   ready: 6
 };
-const roomMock4 = {
+let roomMock4 = {
   id : 0,
   name : "시작하지 않은 방",
   members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전"],
