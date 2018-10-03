@@ -215,7 +215,8 @@ rooms.push(roomMock1);
 rooms.push(roomMock2);
 rooms.push(roomMock3);
 rooms.push(roomMock4);
-
+const roomMockData = { rooms: []}
+roomMockData.rooms = rooms;
 roomspace.on('connection', (socket) => {
   socket.userRooms = [];
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
@@ -223,10 +224,10 @@ roomspace.on('connection', (socket) => {
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("rooms:info", rooms);
+  socket.emit("rooms:info", roomMockData);
   /* 새로고침 누를 경우 방 정보를 재전송 */
   socket.on('rooms:refresh', data => {
-    socket.emit("rooms:info", rooms);
+    socket.emit("rooms:info", roomMockData);
   });
 
   /* 방에 만들 경우 & 참가할 경우 */
