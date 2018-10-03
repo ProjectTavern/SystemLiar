@@ -238,12 +238,12 @@ roomspace.on('connection', (socket) => {
       initRoom(socket);
 
       console.log("[LOG] 방 데이터들을 확인합니다.");
-      console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession.id);
+      console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
       if (rooms.hasOwnProperty(data.id)) {
         /**
          * 방에 입장합니다.
          * */
-        rooms[data.id].members.push(usersession.id);
+        rooms[data.id].members.push(usersession.nickname);
       } else {
         /**
          * 방을 생성합니다.
@@ -251,13 +251,13 @@ roomspace.on('connection', (socket) => {
          * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
          * */
         const roomId = Date.now();
-        rooms[roomId] = { id : roomId, name : data.room, members : [usersession.id], limit : 7, status : "wait", ready: 0 };
+        rooms[roomId] = { id : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 };
       }
-      socket.join(data.room);
-      socket.userRooms.push(data.room);
+      socket.join(data.id);
+      socket.userRooms.push(data.id);
       socket.emit("system:message", { message: "게임에 입장하였습니다." });
-      setNameTag(socket, data.name);
-      socket.broadcast.to(data.room).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+      setNameTag(socket, usersession.nickname);
+      socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
     } catch (error) {
       console.log("[ERROR] join:room.", error);
     }
