@@ -167,8 +167,9 @@ app.post('/database/all/reset', (request, response, next) => {
 const roomspace = io.of('/roomspace');
 roomspace.use(socketsession(app.session));
 let rooms = [];
+const iddata = Date.now();
 let roomMock1 = {
-  id : 1,
+  id : iddata + 1,
   name : "아무 일도 없었다.",
   members : ["삼다수", "백두무궁", "한라삼천"],
   limit : 7,
@@ -176,7 +177,7 @@ let roomMock1 = {
   ready: 0
 };
 let roomMock2 = {
-  id : 2,
+  id : iddata + 2,
   name : "방 리스트 테스트",
   members : ["카카로트", "베지터", "부르마"],
   limit : 7,
@@ -184,7 +185,7 @@ let roomMock2 = {
   ready: 3
 };
 let roomMock3 = {
-  id : 3,
+  id : iddata + 3,
   name : "종료된 방",
   members : ["드레이크", "네로", "아르토리아", "에미야"],
   limit : 7,
@@ -192,7 +193,7 @@ let roomMock3 = {
   ready: 6
 };
 let roomMock4 = {
-  id : 0,
+  id : iddata + 4,
   name : "시작하지 않은 방",
   members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전"],
   limit : 4,
@@ -246,7 +247,7 @@ roomspace.on('connection', (socket) => {
          * 자세한 방에 대한 정보를 저장할 것
          * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
          * */
-        const roomId = data.id;
+        const roomId = Date.now();
         rooms.push({ id : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 });
         isJoinSuccess = true;
       }
