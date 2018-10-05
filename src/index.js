@@ -220,16 +220,17 @@ roomspace.on('connection', (socket) => {
 
   /* 방 생성을 따로 만듬 */
   socket.on("create:room", (data) => {
-
+    console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
     if (data.id === "create") {
       const roomId = Date.now();
-      rooms.push({ id : roomId, name : data.name, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 });
+      const roomData = { id : roomId, name : data.name, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 }
+      rooms.push(roomData);
+      console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
       /* 합쳐야할지 고민 */
       socket.join(data.id);
       socket.userRooms.push(data.id);
       setNameTag(socket, usersession.nickname);
     }
-
   });
 
   /* 방에 만들 경우 */
