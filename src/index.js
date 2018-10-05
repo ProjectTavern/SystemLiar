@@ -241,7 +241,7 @@ roomspace.on('connection', (socket) => {
           isJoinSuccess = true;
         }
 
-      } else {
+      } else if(data.id === "create"){
         /**
          * 방을 생성합니다.
          * 자세한 방에 대한 정보를 저장할 것
