@@ -152,20 +152,6 @@ app.post('/user/create/nickname/', (request, response, next) => {
   });
 });
 
-/* 유저 상태 불러오기 */
-app.get('/user/status/:id', (request, response ,next) => {
-  const key = request.params.id;
-  request.redis.get(key, (error, data) => {
-    if (error) {
-      console.log(error);
-      response.send("[ERROR] REDIS ERROR: " + error);
-      return;
-    }
-    const value = JSON.parse(data);
-    response.json(value);
-  });
-});
-
 /**
  * 데이터 리셋 버튼! 주의!
  * */
