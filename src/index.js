@@ -195,7 +195,7 @@ let roomMock4 = {
   id : 0,
   name : "시작하지 않은 방",
   members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전"],
-  limit : 7,
+  limit : 4,
   status : "wait",
   ready: 0
 };
@@ -219,18 +219,26 @@ roomspace.on('connection', (socket) => {
 
   /* 방에 만들 경우 & 참가할 경우 */
   socket.on('join:room', data => {
-    console.log("[LOG] join:room 요청을 전송받았습니다. ", data);
+    console.log("[LOG][join:room] 요청을 전송받았습니다. ", data);
     try {
-      console.log("[LOG] 유저의 방 데이터를 초기화합니다.");
+      console.log("[LOG][join:room] 유저의 방 데이터를 초기화합니다.");
       initRoom(socket);
 
-      console.log("[LOG] 방 데이터들을 확인합니다.", data);
-      console.log("[LOG] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
+      console.log("[LOG][join:room] 방 데이터들을 확인합니다.", data);
+      console.log("[LOG][join:room] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
+
+      let isJoinSuccess = false;
+
       if (rooms.hasOwnProperty(data.id)) {
         /**
          * 방에 입장합니다.
+         * 입장 전에 방에 대한 유효성 검사 실시
          * */
-        rooms[data.id].members.push(usersession.nickname);
+        if(rooms[data.id].status === "wait" && rooms[data.id].members.length < rooms[data.id].limit) {
+          rooms[data.id].members.push(usersession.nickname);
+          isJoinSuccess = true;
+        }
+
       } else {
         /**
          * 방을 생성합니다.
@@ -239,12 +247,19 @@ roomspace.on('connection', (socket) => {
          * */
         const roomId = Date.now();
         rooms[roomId] = { id : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 };
+        isJoinSuccess = true;
       }
-      socket.join(data.id);
-      socket.userRooms.push(data.id);
-      socket.emit("system:message", { message: "게임에 입장하였습니다." });
-      setNameTag(socket, usersession.nickname);
-      socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+
+      if (isJoinSuccess) {
+        socket.join(data.id);
+        socket.userRooms.push(data.id);
+        socket.emit("join:room", true);
+        socket.emit("system:message", { message: "게임에 입장하였습니다." });
+        setNameTag(socket, usersession.nickname);
+        socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+      } else {
+        socket.emit("join:room", false);
+      }
     } catch (error) {
       console.log("[ERROR] join:room.", error);
     }
