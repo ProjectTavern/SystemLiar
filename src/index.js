@@ -229,13 +229,14 @@ roomspace.on('connection', (socket) => {
 
       let isJoinSuccess = false;
 
-      if (rooms.hasOwnProperty(data.id)) {
+      if (rooms.hasOwnProperty(data.roomId)) {
         /**
          * 방에 입장합니다.
          * 입장 전에 방에 대한 유효성 검사 실시
          * */
-        if(rooms[data.id].status === "wait" && rooms[data.id].members.length < rooms[data.id].limit) {
-          rooms[data.id].members.push(usersession.nickname);
+        const selectedRoom = rooms[data.roomId];
+        if(selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit) {
+          selectedRoom.members.push(usersession.nickname);
           isJoinSuccess = true;
         }
 
@@ -245,8 +246,8 @@ roomspace.on('connection', (socket) => {
          * 자세한 방에 대한 정보를 저장할 것
          * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
          * */
-        const roomId = Date.now();
-        rooms[roomId] = { id : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 };
+        const roomId = data.roomId;
+        rooms.push({ roomId : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 });
         isJoinSuccess = true;
       }
 
