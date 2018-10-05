@@ -218,7 +218,21 @@ roomspace.on('connection', (socket) => {
     socket.emit("rooms:info", rooms);
   });
 
-  /* 방에 만들 경우 & 참가할 경우 */
+  /* 방 생성을 따로 만듬 */
+  socket.on("create:room", (data) => {
+
+    if (data.id === "create") {
+      const roomId = Date.now();
+      rooms.push({ id : roomId, name : data.name, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 });
+      /* 합쳐야할지 고민 */
+      socket.join(data.id);
+      socket.userRooms.push(data.id);
+      setNameTag(socket, usersession.nickname);
+    }
+
+  });
+
+  /* 방에 만들 경우 */
   socket.on('join:room', data => {
     console.log("[LOG][join:room] 요청을 전송받았습니다. ", data);
     try {
@@ -228,40 +242,28 @@ roomspace.on('connection', (socket) => {
       console.log("[LOG][join:room] 방 데이터들을 확인합니다.", data);
       console.log("[LOG][join:room] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
 
-      let isJoinSuccess = false;
+      let resultJoin = false;
 
       if (rooms.hasOwnProperty(data.id)) {
-        /**
-         * 방에 입장합니다.
-         * 입장 전에 방에 대한 유효성 검사 실시
-         * */
         const selectedRoom = rooms[data.id];
-        if(selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit) {
+
+        if (isJoinable(selectedRoom)) {
           selectedRoom.members.push(usersession.nickname);
-          isJoinSuccess = true;
+
+          socket.join(data.id);
+          socket.userRooms.push(data.id);
+          setNameTag(socket, usersession.nickname);
+
+          socket.emit("system:message", { message: "게임에 입장하였습니다." });
+          socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
+          resultJoin = true;
         }
 
-      } else if(data.id === "create"){
-        /**
-         * 방을 생성합니다.
-         * 자세한 방에 대한 정보를 저장할 것
-         * status => 대기중 : wait ~ 게임중 : playing ~ 종료 : end
-         * */
-        const roomId = Date.now();
-        rooms.push({ id : roomId, name : data.room, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 });
-        isJoinSuccess = true;
+        function isJoinable(selectedRoom) {
+          return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit;
+        }
       }
-
-      if (isJoinSuccess) {
-        socket.join(data.id);
-        socket.userRooms.push(data.id);
-        socket.emit("join:room", true);
-        socket.emit("system:message", { message: "게임에 입장하였습니다." });
-        setNameTag(socket, usersession.nickname);
-        socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
-      } else {
-        socket.emit("join:room", false);
-      }
+      socket.emit("join:room", resultJoin);
     } catch (error) {
       console.log("[ERROR] join:room.", error);
     }
