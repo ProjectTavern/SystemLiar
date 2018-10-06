@@ -323,18 +323,6 @@ roomspace.on('connection', socket => {
       console.log("[ERROR] join:room.", error);
     }
 
-    function getSelectedRoom(rooms, id) {
-      const checkRoom = rooms.filter(element => {
-        return element.id + "" === id;
-      });
-      console.log("check",checkRoom);
-      let selectedRoom = {};
-      if (checkRoom.length) {
-        selectedRoom = checkRoom[0];
-      }
-      return selectedRoom;
-    }
-
     function isJoinable(selectedRoom, nickname) {
       const isNotJoined = !((selectedRoom.members.filter(element => {
         return element === nickname
@@ -354,15 +342,16 @@ roomspace.on('connection', socket => {
   });
 
   /* 방을 떠납니다. */
-  socket.on("leave:room", (data) => {
+  socket.on("leave:room", data => {
     console.log("[LOG][leave:room]", data);
     try {
       initRoom(socket);
-      rooms[data.number].members.splice(rooms[data.number].members.indexOf(data.nickname), 1);
-      roomspace.to(data.room).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
-      if (rooms[data.number].members.length === 0) {
+      let selectedRoom = getSelectedRoom(rooms, data.id);
+      selectedRoom.members.splice(selectedRoom.members.indexOf(data.nickname), 1);
+      roomspace.to(data.id).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
+      if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        delete rooms[data.number];
+        delete selectedRoom;
       }
     } catch (error) {
       console.log("[ERROR][leave:room] => ", error);
@@ -398,6 +387,21 @@ roomspace.on('connection', socket => {
       console.log("[ERROR] Can not parse to JSON from string object.");
     }
     return data;
+  }
+
+  /**
+   * 선택된 방을 찾음
+   * */
+  function getSelectedRoom(rooms, id) {
+    const checkRoom = rooms.filter(element => {
+      return element.id + "" === id;
+    });
+    console.log("check",checkRoom);
+    let selectedRoom = {};
+    if (checkRoom.length) {
+      selectedRoom = checkRoom[0];
+    }
+    return selectedRoom;
   }
 });
 
