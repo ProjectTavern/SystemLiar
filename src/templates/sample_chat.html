@@ -5,6 +5,9 @@
   <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, viewport-fit=cover">
   <title>Chat Room Test</title>
   <style>
+    ul { margin: 0; padding: 0 }
+  </style>
+  <style>
     fieldset {
       width: 50%;
       min-width: 360px;
@@ -60,29 +63,23 @@
         const $panelChat = $('#chatContent');
         const $userName = $('#userName');
         const $userMessage = $('#userMessage');
-
-        function checkValidation(data) {
-          if (data.name.trim()) {
-            return true;
-          } else {
-            window.alert('대화에 사용하실 이름이 필요합니다.');
-          }
-        }
+        const $listChatRooom = $('.list_chatroom');
 
         /* 버튼 이벤트 설치 */
         function bindBtnEvent() {
           /* 버튼 정보 수집 */
-          const $btnRoomEnter = $('#btnEnter');
+          const $btnRoomEnter = $('.list_chatroom');
           const $btnRoomQuit = $('#btnQuit');
           const $btnSendMessage = $('#btnSend');
+          const $btnRefresh = $('.btn_refresh');
+
+
           /* 방 입장 */
-          $btnRoomEnter.on('click', () => {
-            const data = {
-              type: 'joinRoom',
-              room: $roomName.val(),
-              name: $userName.val()
-            };
-            checkValidation(data) && $roomName.val() !== '' && socket.emit('join:room', data);
+          $btnRoomEnter.on('click', '.btn_enter', event => {
+            const $elem = $(event.currentTarget).closest('li');
+
+            const data = { id: $elem.data('id') };
+            socket.emit('join:room', data);
           });
 
           /* 메시지 전송 */
@@ -93,7 +90,7 @@
               name: $userName.val(),
               message : $userMessage.val(),
             };
-            checkValidation(data) && socket.emit('send:message', data);
+            socket.emit('send:message', data);
             $userMessage.val('');
           });
 
@@ -117,15 +114,28 @@
         /* 소켓 이벤트 설치 */
         function bindSocketEvent() {
           const $panelChatBackground = $panelChat.closest('.panel_chat');
-          socket.on('system:message', (data) => {
+          socket.on('system:message', data => {
             $panelChat.append(`<li>${data.message}</li>`);
             $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
           });
 
-          socket.on('user:message', (data) => {
+          socket.on('user:message', data => {
             console.log("getUserMessage", data);
             $panelChat.append(`<li>${data.name}: ${data.message}</li>`);
             $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
+          });
+        }
+
+        function initChatRoom() {
+          socket.on('rooms:info', rooms => {
+            rooms.forEach(element => {
+              const elem = `<li data-id="${element.id}">
+                              <strong>방제 : ${element.name}<strong>
+                              방인원: ${element.members.length} / ${element.limit}
+                              <button class="btn_enter">입장</button>
+                            </li>`;
+              $listChatRooom.append(elem);
+            })
           });
         }
 
@@ -133,6 +143,7 @@
         function documentOnReady() {
           bindBtnEvent();
           bindSocketEvent();
+          initChatRoom();
         }
 
         documentOnReady();
@@ -142,26 +153,60 @@
 </head>
 <body>
   <h1>Socket Chat Room Test Page</h1>
-  <fieldset>
-    <div class="room">
-      <label for="RoomName">입장중인 방</label>
-      <input id="RoomName"/>
-      <button id="btnEnter">입장</button>
-      <button id="btnQuit">나가기</button>
+  <div id="chatroom">
+    <style>
+      #chatroom {float:right;width:50%}
+    </style>
+    <h2>채팅방</h2>
+    <fieldset>
+      <div class="room">
+        <label for="RoomName">입장중인 방</label>
+        <input id="RoomName"/>
+        <button id="btnQuit">나가기</button>
+      </div>
+      <label for="userName">대화명:</label>
+      <input id="userName"/>
+    </fieldset>
+    <div class="wrap_message">
+      <button id="btnSend">Send</button>
+      <div class="input_message">
+        <label for="userMessage">메시지: </label>
+        <input id="userMessage"/>
+      </div>
     </div>
-    <label for="userName">대화명:</label>
-    <input id="userName"/>
-  </fieldset>
-  <div class="wrap_message">
-    <button id="btnSend">Send</button>
-    <div class="input_message">
-      <label for="userMessage">메시지: </label>
-      <input id="userMessage"/>
-    </div>
+    <fieldset class="panel_chat">
+      <legend>채팅 내용</legend>
+      <ul id="chatContent"></ul>
+    </fieldset>
   </div>
-  <fieldset class="panel_chat">
-    <legend>채팅 내용</legend>
-    <ul id="chatContent"></ul>
-  </fieldset>
+
+  <div id="listRooms">
+    <style>
+      #listRooms {float:right;width:50%}
+      #listRooms .list_chatroom li {
+        position: relative;
+        border: 1px solid #333;
+        border-bottom: none;
+        padding: 10px;
+      }
+      #listRooms .list_chatroom strong {
+        display: block;
+      }
+      #listRooms .list_chatroom li:last-child {
+        border-bottom: 1px solid #333;
+      }
+      #listRooms .list_chatroom .btn_enter {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 38px;
+        height: 38px;
+      }
+    </style>
+    <h2>채팅방 리스트</h2>
+    <button class="btn_createroom">생성하기</button>
+    <button class="btn_refresh">리프레시</button>
+    <ul class="list_chatroom"></ul>
+  </div>
 </body>
 </html>
