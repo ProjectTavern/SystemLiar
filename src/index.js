@@ -249,7 +249,7 @@ roomspace.on('connection', (socket) => {
       if (selectedRoom) {
         console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom);
 
-        if (isJoinable(selectedRoom)) {
+        if (isJoinable(selectedRoom, usersession.nickname)) {
           resultJoin = true;
           console.log("[LOG][join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
           selectedRoom.members.push(usersession.nickname);
@@ -282,8 +282,11 @@ roomspace.on('connection', (socket) => {
       return selectedRoom;
     }
 
-    function isJoinable(selectedRoom) {
-      return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit;
+    function isJoinable(selectedRoom, nickname) {
+      const isNotJoined = !(selectedRoom.members.filter(element => {
+        return element === nickname
+      }));
+      return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit && isNotJoined;
     }
   });
 
