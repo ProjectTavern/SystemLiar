@@ -41,8 +41,9 @@ app.use((request, response, next) => {
 /* 세션 값 생성 */
 app.session = expsession({
   secret: '&%^%SYSTEM%LIAR%^%&',
-  resave: false,
-  saveUninitialized: true
+  resave: true,
+  saveUninitialized: true,
+  autoSave: true
 });
 app.use(app.session);
 
@@ -205,11 +206,11 @@ rooms.push(roomMock2);
 rooms.push(roomMock3);
 rooms.push(roomMock4);
 
-roomspace.on('connection', (socket) => {
+roomspace.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
+  console.log('[LOG] An user connected.', socket);
   console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
-  console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
