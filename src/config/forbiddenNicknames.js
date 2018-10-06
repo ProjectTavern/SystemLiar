@@ -1,3 +1,5 @@
-export const forbiddenNicknames = [
+const forbiddenNicknames = [
   "FALSE"
 ];
+
+exports.forbiddenNicknames = forbiddenNicknames;
