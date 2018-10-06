@@ -357,8 +357,7 @@ roomspace.on('connection', socket => {
   socket.on("leave:room", (data) => {
     console.log("[LOG][leave:room]", data);
     try {
-      if (data.nickname) { console.log(`leave:room: ${data.nickname} is left this room.`); }
-      socket.leave(data.room);
+      initRoom(socket);
       rooms[data.number].members.splice(rooms[data.number].members.indexOf(data.nickname), 1);
       roomspace.to(data.room).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
       if (rooms[data.number].members.length === 0) {
@@ -375,6 +374,7 @@ roomspace.on('connection', socket => {
     currentRooms.forEach((elem) => {
       socket.leave(elem);
     });
+    socket.userRooms = [];
   }
 
   function setNameTag(socket, name) {
