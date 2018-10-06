@@ -351,10 +351,12 @@ roomspace.on('connection', socket => {
       roomspace.to(data.id).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        delete selectedRoom;
+        // delete selectedRoom;
       }
+      socket.emit("leave:room", true);
     } catch (error) {
       console.log("[ERROR][leave:room] => ", error);
+      socket.emit("leave:room", false);
     }
   });
 
