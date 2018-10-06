@@ -265,10 +265,8 @@ roomspace.on('connection', socket => {
     });
   });
 
-  /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
-  socket.emit("rooms:info", rooms);
-  /* 새로고침 누를 경우 방 정보를 재전송 */
-  socket.on('rooms:refresh', () => {
+  /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
+  socket.on("rooms:refresh", () => {
     socket.emit("rooms:info", rooms);
   });
 
