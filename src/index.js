@@ -64,8 +64,6 @@ app.get('/redis', function(request, response) {
 
 /* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
-  const datas = { id: "tester0000", nickname: "tess" };
-  const session = setUserInfoToSession(request, datas);
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
 });
 
@@ -165,7 +163,9 @@ app.post('/database/all/reset', (request, response, next) => {
 
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
-roomspace.use(socketsession(app.session));
+roomspace.use(socketsession(app.session, {
+  autoSave: true
+}));
 let rooms = [];
 const iddata = Date.now();
 let roomMock1 = {
@@ -207,8 +207,8 @@ rooms.push(roomMock4);
 
 roomspace.on('connection', (socket) => {
   socket.userRooms = [];
-  console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.");
   const usersession = socket.handshake.session;
+  console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
   console.log('[LOG] An user connected.', socket.id);
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
