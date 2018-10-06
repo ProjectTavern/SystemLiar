@@ -209,7 +209,7 @@ rooms.push(roomMock4);
 roomspace.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
-  console.log('[LOG][connection] An user connected.', socket);
+  console.log('[LOG][connection] An user connected.', socket.id);
   console.log("[LOG][connection] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
 
   /* 세션 데이터 취득 | 설정 */
@@ -292,11 +292,10 @@ roomspace.on('connection', socket => {
   socket.on('join:room', data => {
     console.log("[LOG][join:room] 요청을 전송받았습니다. ", data);
     try {
-      console.log("[LOG][join:room] 유저의 방 데이터를 초기화합니다.");
-      initRoom(socket);
-
       console.log("[LOG][join:room] 방 데이터들을 확인합니다.", data);
       console.log("[LOG][join:room] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
+      console.log("[LOG][join:room] 유저의 방 데이터를 초기화합니다.");
+      initRoom(socket);
 
       let resultJoin = false;
       let selectedRoom = getSelectedRoom(rooms, data.id);
@@ -304,8 +303,9 @@ roomspace.on('connection', socket => {
         console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom);
 
         if (isJoinable(selectedRoom, usersession.userinfo.nickname)) {
-          resultJoin = true;
           console.log("[LOG][join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
+
+          resultJoin = true;
           selectedRoom.members.push(usersession.userinfo.nickname);
 
           socket.join(data.id);
