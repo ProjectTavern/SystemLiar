@@ -59,7 +59,7 @@
         /* 소켓 설정 */
         const socket = io('/roomspace');
         /* 기본 데이터 자료 수집 */
-        const $roomName = $('#RoomName');
+        const $roomName = $('.txt_room');
         const $panelChat = $('#chatContent');
         const $userName = $('#userName');
         const $userMessage = $('#userMessage');
@@ -72,7 +72,12 @@
           const $btnRoomQuit = $('#btnQuit');
           const $btnSendMessage = $('#btnSend');
           const $btnRefresh = $('.btn_refresh');
+          const $btnCreate = $('.btn_createroom');
 
+          $btnCreate.on('click', () => {
+            const data = { id: "create", name : "방만들기 테스트13" };
+            socket.emit('create:room', data);
+          });
 
           /* 방 입장 */
           $btnRoomEnter.on('click', '.btn_enter', event => {
@@ -92,6 +97,10 @@
             };
             socket.emit('send:message', data);
             $userMessage.val('');
+          });
+
+          $btnRefresh.on('click', () => {
+            socket.emit('rooms:refresh');
           });
 
           $userMessage.on('keydown', event => {
@@ -124,26 +133,35 @@
             $panelChat.append(`<li>${data.name}: ${data.message}</li>`);
             $panelChatBackground.animate( { scrollTop: $panelChatBackground.height() }, 1)
           });
-        }
 
-        function initChatRoom() {
           socket.on('rooms:info', rooms => {
+            $listChatRooom.empty();
             rooms.forEach(element => {
               const elem = `<li data-id="${element.id}">
-                              <strong>방제 : ${element.name}<strong>
+                              <strong>방제 : ${element.name} (${element.status})<strong>
                               방인원: ${element.members.length} / ${element.limit}
+                              <div>참여자: ${element.members}</div>
                               <button class="btn_enter">입장</button>
                             </li>`;
               $listChatRooom.append(elem);
             })
           });
+
+          socket.on('join:room', response => {
+            const isJoinable = response.result;
+            console.log(response);
+            if (isJoinable) {
+              $roomName.html(response.name);
+            }
+          });
         }
+
+
 
         /* 문서 준비되었을 때 실행 */
         function documentOnReady() {
           bindBtnEvent();
           bindSocketEvent();
-          initChatRoom();
         }
 
         documentOnReady();
@@ -161,8 +179,8 @@
     <fieldset>
       <div class="room">
         <label for="RoomName">입장중인 방</label>
-        <input id="RoomName"/>
-        <button id="btnQuit">나가기</button>
+        <span id="RoomName" class="txt_room">로비</span>
+        <div><button id="btnQuit">나가기</button></div>
       </div>
       <label for="userName">대화명:</label>
       <input id="userName"/>
@@ -199,8 +217,8 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        width: 38px;
-        height: 38px;
+        width: 57px;
+        height: 57px;
       }
     </style>
     <h2>채팅방 리스트</h2>
