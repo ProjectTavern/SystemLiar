@@ -246,7 +246,7 @@ roomspace.on('connection', socket => {
     redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
       if(userNicknameLists.includes(userNickname)) {
         console.log("[LOG][user:create:nickname] 사용자의 닉네임이 이미 존재합니다.", userNickname);
-        redis.emit("user:status", false);
+        socket.emit("user:status", false);
       } else {
         console.log("[LOG][user:create:nickname] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
         redis.multi()
@@ -255,11 +255,11 @@ roomspace.on('connection', socket => {
           .exec((error, result) => {
             if (error) {
               console.log("[LOG][user:create:nickname] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
-              redis.emit("user:status", false);
+              socket.emit("user:status", false);
             }
             console.log("[LOG][user:create:nickname] 유저의 정보를 저장했습니다.", result);
             usersession.userinfo = { id: userGhashId, nickname: userNickname };
-            redis.emit("user:status", userNickname);
+            socket.emit("user:status", userNickname);
           });
       }
     });
