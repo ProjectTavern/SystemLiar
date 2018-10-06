@@ -5,7 +5,7 @@ const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
 const redis = require('./modules/database/redis');
 const bodyParser = require('body-parser');
-const expsession = require('express-session');
+const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 
 /* 임시 해쉬코드 작성 */
@@ -39,7 +39,7 @@ app.use((request, response, next) => {
 });
 
 /* 세션 값 생성 */
-app.session = expsession({
+app.session = expressSession({
   secret: '&%^%SYSTEM%LIAR%^%&',
   resave: true,
   saveUninitialized: true,
@@ -209,8 +209,61 @@ rooms.push(roomMock4);
 roomspace.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
-  console.log('[LOG] An user connected.', socket);
-  console.log("[LOG] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
+  console.log('[LOG][connection] An user connected.', socket);
+  console.log("[LOG][connection] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
+
+  /* 세션 데이터 취득 | 설정 */
+  socket.on("user:status", data => {
+    console.log("[LOG][user:status] 유저 조회할 받은 데이터", data);
+    const userGhash = data.id;
+    redis.hget(userGhash, "nickname", (error, value) => {
+      if (value) {
+        console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재합니다.", value);
+        console.log("[LOG][user:status] 세션에 유저 정보를 저장합니다.");
+        usersession.userinfo = { id: userGhash, nickname: value };
+        socket.emit("user:status", value);
+      } else {
+        console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
+        socket.emit("user:status", false);
+      }
+    });
+  });
+
+  socket.on("user:create:nickname", data => {
+    console.log("[LOG][user:create:nickname] 새롭게 닉네임을 생성합니다. 전송된 데이터: ", data);
+    let userInform = [];
+    for ( let userInformKey in data) {
+      if (data.hasOwnProperty(userInformKey)) {
+        userInform.push(userInformKey);
+        userInform.push(data[userInformKey]);
+      }
+    }
+
+    /* 유저 정보 */
+    const userNickname = data.nickname;
+    const userGhashId = data.id;
+
+    redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
+      if(userNicknameLists.includes(userNickname)) {
+        console.log("[LOG][user:create:nickname] 사용자의 닉네임이 이미 존재합니다.", userNickname);
+        redis.emit("user:create:nickname", false);
+      } else {
+        console.log("[LOG][user:create:nickname] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
+        redis.multi()
+          .sadd(configDataset.user.nicknames, userNickname)
+          .hset(userGhashId, userInform)
+          .exec((error, result) => {
+            if (error) {
+              console.log("[LOG][user:create:nickname] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+              redis.emit("user:create:nickname", false);
+            }
+            console.log("[LOG][user:create:nickname] 유저의 정보를 저장했습니다.", result);
+            usersession.userinfo = { id: userGhashId, nickname: userNickname };
+            redis.emit("user:create:nickname", true);
+          });
+      }
+    });
+  });
 
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
@@ -224,13 +277,13 @@ roomspace.on('connection', socket => {
     console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
     if (data.id === "create") {
       const roomId = Date.now();
-      const roomData = { id : roomId, name : data.name, members : [usersession.nickname], limit : 7, status : "wait", ready: 0 }
+      const roomData = { id : roomId, name : data.name, members : [usersession.userinfo.nickname], limit : 7, status : "wait", ready: 0 }
       rooms.push(roomData);
       console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
       /* 합쳐야할지 고민 */
       socket.join(data.id);
       socket.userRooms.push(data.id);
-      setNameTag(socket, usersession.nickname);
+      setNameTag(socket, usersession.userinfo.nickname);
     }
     socket.emit("rooms:info", rooms);
   });
@@ -250,14 +303,14 @@ roomspace.on('connection', socket => {
       if (selectedRoom.hasOwnProperty("id")) {
         console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom);
 
-        if (isJoinable(selectedRoom, usersession.nickname)) {
+        if (isJoinable(selectedRoom, usersession.userinfo.nickname)) {
           resultJoin = true;
           console.log("[LOG][join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
-          selectedRoom.members.push(usersession.nickname);
+          selectedRoom.members.push(usersession.userinfo.nickname);
 
           socket.join(data.id);
           socket.userRooms.push(data.id);
-          setNameTag(socket, usersession.nickname);
+          setNameTag(socket, usersession.userinfo.nickname);
 
           socket.emit("system:message", { message: "게임에 입장하였습니다." });
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
@@ -293,28 +346,28 @@ roomspace.on('connection', socket => {
 
   /* 대화 전송 */
   socket.on('send:message', (data) => {
-    console.log("[LOG] send:message: ",data);
+    console.log("[LOG][send:message] => ",data);
     try {
       roomspace.to(data.room).emit('user:message', data);
     } catch (error) {
-      console.log("[ERROR] send:message.", error);
+      console.log("[ERROR][send:message] => ", error);
     }
   });
 
   /* 방을 떠납니다. */
-  socket.on('leave:room', (data) => {
-    console.log('[LOG] leave:room 요청을 전송받았습니다. ', data);
+  socket.on("leave:room", (data) => {
+    console.log("[LOG][leave:room]", data);
     try {
       if (data.nickname) { console.log(`leave:room: ${data.nickname} is left this room.`); }
       socket.leave(data.room);
       rooms[data.number].members.splice(rooms[data.number].members.indexOf(data.nickname), 1);
-      roomspace.to(data.room).emit('system:message', { message: data.name + '님이 방에서 나가셨습니다.' });
+      roomspace.to(data.room).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
       if (rooms[data.number].members.length === 0) {
-        console.log("[LOG] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
+        console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
         delete rooms[data.number];
       }
     } catch (error) {
-      console.log("[ERROR] leave:room.", error);
+      console.log("[ERROR][leave:room] => ", error);
     }
   });
 
@@ -351,7 +404,7 @@ roomspace.on('connection', socket => {
 
 /* 서버 기동 포트: 30500 */
 server.listen(30500, () => {
-  console.log('[LOG] Socket IO server listening on port 30500');
+  console.log('[LOG][server on] Socket IO server listening on port 30500');
 });
 
 
