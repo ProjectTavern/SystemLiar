@@ -7,6 +7,7 @@ const redis = require('./modules/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
+const forbiddenNicknames = require('./config/forbiddenNicknames');
 
 /* 임시 해쉬코드 작성 */
 String.prototype.hashCode = function() {
@@ -242,6 +243,8 @@ roomspace.on('connection', socket => {
     /* 유저 정보 */
     const userNickname = data.nickname;
     const userGhashId = data.id;
+
+    if (forbiddenNicknames.indexOf(userNickname.toUpperCase())) return;
 
     redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
       if(userNicknameLists.includes(userNickname)) {
