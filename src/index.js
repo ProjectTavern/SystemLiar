@@ -313,11 +313,12 @@ roomspace.on('connection', socket => {
           socket.emit("system:message", { message: "게임에 입장하였습니다." });
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
+          selectedRoom.result = resultJoin;
+          socket.emit("join:room", selectedRoom);
         }
 
       }
-      selectedRoom.result = resultJoin;
-      socket.emit("join:room", selectedRoom);
+
     } catch (error) {
       console.log("[ERROR] join:room.", error);
     }
@@ -335,9 +336,9 @@ roomspace.on('connection', socket => {
     }
 
     function isJoinable(selectedRoom, nickname) {
-      const isNotJoined = !(selectedRoom.members.filter(element => {
+      const isNotJoined = !((selectedRoom.members.filter(element => {
         return element === nickname
-      }));
+      })).length);
       return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit && isNotJoined;
     }
   });
