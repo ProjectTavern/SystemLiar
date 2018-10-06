@@ -355,9 +355,10 @@ roomspace.on('connection', socket => {
       }
       /* 추후 삭제 */
       console.log("[LOG][leave:room] 현재 방의 정보들", rooms);
-      socket.emit("rooms:info", rooms);
+      socket.emit("leave:room", true);
     } catch (error) {
       console.log("[ERROR][leave:room] => ", error);
+      socket.emit("leave:room", false);
     }
   });
 
