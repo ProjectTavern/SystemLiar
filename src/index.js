@@ -214,7 +214,7 @@ roomspace.on('connection', (socket) => {
   /* 멀티로 진입한 유저에게 현재 생성되어 있는 방 정보를 전송 */
   socket.emit("rooms:info", rooms);
   /* 새로고침 누를 경우 방 정보를 재전송 */
-  socket.on('rooms:refresh', data => {
+  socket.on('rooms:refresh', () => {
     socket.emit("rooms:info", rooms);
   });
 
@@ -231,6 +231,7 @@ roomspace.on('connection', (socket) => {
       socket.userRooms.push(data.id);
       setNameTag(socket, usersession.nickname);
     }
+    socket.emit("rooms:info", rooms);
   });
 
   /* 방에 만들 경우 */
@@ -244,11 +245,13 @@ roomspace.on('connection', (socket) => {
       console.log("[LOG][join:room] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
 
       let resultJoin = false;
-
-      if (rooms.hasOwnProperty(data.id)) {
-        const selectedRoom = rooms[data.id];
+      let selectedRoom = getSelectedRoom(rooms, data.id);
+      if (selectedRoom) {
+        console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom);
 
         if (isJoinable(selectedRoom)) {
+          resultJoin = true;
+          console.log("[LOG][join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
           selectedRoom.members.push(usersession.nickname);
 
           socket.join(data.id);
@@ -257,16 +260,30 @@ roomspace.on('connection', (socket) => {
 
           socket.emit("system:message", { message: "게임에 입장하였습니다." });
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
-          resultJoin = true;
+
         }
 
-        function isJoinable(selectedRoom) {
-          return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit;
-        }
       }
-      socket.emit("join:room", resultJoin);
+      selectedRoom.result = resultJoin;
+      socket.emit("join:room", selectedRoom);
     } catch (error) {
       console.log("[ERROR] join:room.", error);
+    }
+
+    function getSelectedRoom(rooms, id) {
+      const checkRoom = rooms.filter(element => {
+        return element.id === id;
+      });
+      console.log("check",checkRoom);
+      let selectedRoom = {};
+      if (checkRoom.length) {
+        selectedRoom = checkRoom[0];
+      }
+      return selectedRoom;
+    }
+
+    function isJoinable(selectedRoom) {
+      return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit;
     }
   });
 
