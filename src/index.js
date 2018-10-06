@@ -298,7 +298,7 @@ roomspace.on('connection', socket => {
       let resultJoin = false;
       let selectedRoom = getSelectedRoom(rooms, data.id);
       if (selectedRoom.hasOwnProperty("id")) {
-        console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom);
+        console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom, isJoinable(selectedRoom, usersession.userinfo.nickname));
 
         if (isJoinable(selectedRoom, usersession.userinfo.nickname)) {
           console.log("[LOG][join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
