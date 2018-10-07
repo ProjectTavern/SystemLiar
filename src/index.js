@@ -355,11 +355,12 @@ roomspace.on('connection', socket => {
   socket.on("leave:room", data => {
     console.log("[LOG][leave:room]", data);
     try {
-      initRoom(socket);
+
       const roomId = socket.userRooms[0];
       const userNickname = usersession.userinfo.nickname;
       let selectedRoom = getSelectedRoom(rooms, roomId);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+      initRoom(socket);
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
@@ -424,12 +425,13 @@ roomspace.on('connection', socket => {
     console.log("[LOG][disconnect] 유저의 연결이 끊어졌습니다.");
 
     try {
-      initRoom(socket);
       /* 유저가 들어간 방 찾기 */
       const roomId = socket.userRooms[0];
       const userNickname = usersession.userinfo.nickname;
+      console.log(roomId, userNickname);
       let selectedRoom = getSelectedRoom(rooms, roomId);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+      initRoom(socket);
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][disconnect] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
