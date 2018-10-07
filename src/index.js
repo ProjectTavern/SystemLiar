@@ -212,7 +212,7 @@ let roomMock5 = {
   members : ["드래곤", "와이번", "드레이크"],
   limit : 7,
   status : "wait",
-  ready: 0
+  ready: 3
 };
 
 const foods =
@@ -467,19 +467,22 @@ roomspace.on('connection', socket => {
    * */
 
   socket.on("ready:user", () => {
+    console.log("[Log][ready:user] 유저의 준비 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     if (userinfo.ready) {
+      console.log("[Log][ready:user] 유저의 준비되지 않은 유저", usersession);
       userinfo.ready = false;
       selectedRoom.ready--;
       socket.emit("ready:user", userinfo);
-      socket.emit("ready:all", false);
+      socket.emit("all:ready", false);
     } else {
+      console.log("[Log][ready:user] 유저의 준비된 유저", usersession);
       userinfo.ready = true;
       selectedRoom.ready++;
       socket.emit("ready:user", userinfo);
-      selectedRoom.ready === selectedRoom.members.length && socket.emit("ready:all", true);
+      selectedRoom.ready >= 4 && selectedRoom.ready === selectedRoom.members.length && socket.emit("all:ready", true);
     }
   });
 
