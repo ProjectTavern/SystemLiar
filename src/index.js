@@ -172,6 +172,7 @@ const iddata = Date.now();
 let roomMock1 = {
   id : iddata + 1,
   name : "아무 일도 없었다.",
+  subject: "음식",
   members : ["삼다수", "백두무궁", "한라삼천"],
   limit : 7,
   status : "wait",
@@ -180,6 +181,7 @@ let roomMock1 = {
 let roomMock2 = {
   id : iddata + 2,
   name : "방 리스트 테스트",
+  subject: "직업",
   members : ["카카로트", "베지터", "부르마"],
   limit : 7,
   status : "playing",
@@ -188,6 +190,7 @@ let roomMock2 = {
 let roomMock3 = {
   id : iddata + 3,
   name : "종료된 방",
+  subject : "장소",
   members : ["드레이크", "네로", "아르토리아", "에미야"],
   limit : 7,
   status : "end",
@@ -196,6 +199,7 @@ let roomMock3 = {
 let roomMock4 = {
   id : iddata + 4,
   name : "시작하지 않은 방",
+  subject : "음식",
   members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전", "게타", "제이데커", "와룡"],
   limit : 7,
   status : "wait",
@@ -204,6 +208,7 @@ let roomMock4 = {
 let roomMock5 = {
   id : iddata + 5,
   name : "가능 방",
+  subject : "장소",
   members : ["드래곤", "와이번", "드레이크"],
   limit : 7,
   status : "wait",
@@ -284,7 +289,7 @@ roomspace.on('connection', socket => {
     console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
     if (data.id === "create") {
       const roomId = Date.now();
-      const roomData = { id : roomId, name : data.name, members : [usersession.userinfo.nickname], limit : 7, status : "wait", ready: 0 }
+      const roomData = { id : roomId, name : data.name, subject : data.subject, members : [usersession.userinfo.nickname], limit : 7, status : "wait", ready: 0 }
       rooms.push(roomData);
       console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
       /* 합쳐야할지 고민 */
