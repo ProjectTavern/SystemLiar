@@ -356,9 +356,11 @@ roomspace.on('connection', socket => {
     console.log("[LOG][leave:room]", data);
     try {
       initRoom(socket);
-      let selectedRoom = getSelectedRoom(rooms, data.id);
-      selectedRoom.members.splice(selectedRoom.members.indexOf(data.nickname), 1);
-      roomspace.to(data.id).emit("system:message", { message: data.name + '님이 방에서 나가셨습니다.' });
+      const roomId = socket.userRooms[0];
+      const userNickname = usersession.userinfo.nickname;
+      let selectedRoom = getSelectedRoom(rooms, roomId);
+      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+      roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
         // delete selectedRoom;
@@ -417,6 +419,27 @@ roomspace.on('connection', socket => {
     }
     return selectedRoom;
   }
+
+  socket.on('disconnect', () => {
+    console.log("[LOG][disconnect]", data);
+
+    try {
+      initRoom(socket);
+      /* 유저가 들어간 방 찾기 */
+      const roomId = socket.userRooms[0];
+      const userNickname = usersession.userinfo.nickname;
+      let selectedRoom = getSelectedRoom(rooms, roomId);
+      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+      roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
+      if (selectedRoom.members.length === 0) {
+        console.log("[LOG][disconnect] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
+        // delete selectedRoom;
+      }
+      console.log("[LOG][disconnect] 현재 방의 정보들", rooms);
+    } catch (error) {
+      console.log("[ERROR][disconnect] => ", error);
+    }
+  });
 });
 
 /* 서버 기동 포트: 30500 */
