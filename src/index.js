@@ -201,10 +201,19 @@ let roomMock4 = {
   status : "wait",
   ready: 0
 };
+let roomMock5 = {
+  id : iddata + 5,
+  name : "가능 방",
+  members : ["드래곤", "와이번", "드레이크"],
+  limit : 7,
+  status : "wait",
+  ready: 0
+};
 rooms.push(roomMock1);
 rooms.push(roomMock2);
 rooms.push(roomMock3);
 rooms.push(roomMock4);
+rooms.push(roomMock5);
 
 roomspace.on('connection', socket => {
   socket.userRooms = [];
