@@ -214,6 +214,19 @@ let roomMock5 = {
   status : "wait",
   ready: 0
 };
+
+const foods =
+  [
+    "라면",
+    "아이스크림",
+    "크림파스타",
+    "피자",
+    "햄버거",
+    "뿌셔뿌셔",
+    "드래곤스테이크",
+    "아메리카노"
+  ];
+
 rooms.push(roomMock1);
 rooms.push(roomMock2);
 rooms.push(roomMock3);
@@ -223,7 +236,7 @@ rooms.push(roomMock5);
 roomspace.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
-  console.log('[LOG][connection] An user connected.', socket.id);
+  console.log("[LOG][connection] An user connected.", socket.id);
   console.log("[LOG][connection] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
 
   /* 세션 데이터 취득 | 설정 */
@@ -382,6 +395,7 @@ roomspace.on('connection', socket => {
 
   function initRoom(socket) {
     const currentRooms = socket.userRooms;
+    usersession.userinfo.ready = false;
     currentRooms.forEach((elem) => {
       socket.leave(elem);
     });
@@ -447,6 +461,28 @@ roomspace.on('connection', socket => {
       console.log("[ERROR][disconnect] => ", error);
     }
   });
+
+  /**
+   * 게임 시작 관련 : 레디 / 시작 / 종료
+   * */
+
+  socket.on("ready:user", () => {
+    const userinfo = usersession.userinfo;
+    const userRoom = socket.userRooms[0];
+    let selectedRoom = getSelectedRoom(rooms, userRoom);
+    if (userinfo.ready) {
+      userinfo.ready = false;
+      selectedRoom.ready--;
+      socket.emit("ready:user", userinfo);
+      socket.emit("ready:all", false);
+    } else {
+      userinfo.ready = true;
+      selectedRoom.ready++;
+      socket.emit("ready:user", userinfo);
+      selectedRoom.ready === selectedRoom.members.length && socket.emit("ready:all", true);
+    }
+  });
+
 });
 
 /* 서버 기동 포트: 30500 */
