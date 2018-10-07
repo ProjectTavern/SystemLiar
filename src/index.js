@@ -421,7 +421,7 @@ roomspace.on('connection', socket => {
   }
 
   socket.on('disconnect', () => {
-    console.log("[LOG][disconnect]", data);
+    console.log("[LOG][disconnect] 유저의 연결이 끊어졌습니다.");
 
     try {
       initRoom(socket);
