@@ -335,7 +335,8 @@ roomspace.on('connection', socket => {
   socket.on('send:message', (data) => {
     console.log("[LOG][send:message] => ",data);
     try {
-      roomspace.to(data.room).emit('user:message', data);
+      data.nickname = usersession.userinfo.nickname;
+      roomspace.to(socket.userRooms[0]).emit('user:message', data);
     } catch (error) {
       console.log("[ERROR][send:message] => ", error);
     }
