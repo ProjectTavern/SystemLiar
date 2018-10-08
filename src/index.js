@@ -525,9 +525,6 @@ roomspace.on('connection', socket => {
       }
     });
 
-
-
-    roomspace.to(socket.userRooms[0]).emit("first:explain:game", { nextPlayer: firstOrder, message: "" });
   });
 
   socket.on("explain:game", (data) => {
