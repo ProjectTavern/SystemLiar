@@ -505,7 +505,7 @@ roomspace.on('connection', socket => {
       userinfo.ready = true;
       selectedRoom.ready++;
       socket.emit("ready:user", userinfo);
-      selectedRoom.ready >= 4 && selectedRoom.ready === selectedRoom.members.length && socket.emit("all:ready", true);
+      selectedRoom.ready >= 2 && selectedRoom.ready === selectedRoom.members.length && socket.emit("all:ready", true);
     }
   });
 
