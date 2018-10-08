@@ -300,27 +300,36 @@ roomspace.on('connection', socket => {
   /* 방 생성을 따로 만듬 */
   socket.on("create:room", (data) => {
     console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
-    if (data.id === "create") {
-      const roomId = Date.now();
-      const roomData = {
-        id : roomId,
-        name : data.name,
-        subject : data.subject,
-        members : [usersession.userinfo.nickname],
-        limit : 7,
-        status : "wait",
-        ready: 0,
-        currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }]
-      };
-      rooms.push(roomData);
-      console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
-      /* 합쳐야할지 고민 */
-      socket.join(data.id);
-      socket.userRooms.push(data.id);
+    try{
+      if (data.id === "create") {
+        const roomId = Date.now();
+        const roomData = {
+          id : roomId,
+          name : data.name,
+          subject : data.subject,
+          members : [usersession.userinfo.nickname],
+          limit : 7,
+          status : "wait",
+          ready: 0,
+          currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }]
+        };
+        rooms.push(roomData);
+        console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
+        /* 합쳐야할지 고민 */
+        socket.join(data.id);
+        socket.userRooms.push(data.id);
 
-      setNameTag(socket, usersession.userinfo.nickname);
+        setNameTag(socket, usersession.userinfo.nickname);
+        socket.emit("create:room", true);
+      } else {
+        console.log("[Log][create:room] 아이디 값이 create가 아닙니다.");
+        socket.emit("create:room", true);
+      }
+    } catch (e) {
+      console.log("[Log][create:room] 에러: ", e);
+      socket.emit("create:room", false);
     }
-    socket.emit("rooms:info", filterRooms(rooms));
+
   });
 
   /* 방에 만들 경우 */
