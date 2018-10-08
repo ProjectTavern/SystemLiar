@@ -505,7 +505,7 @@ roomspace.on('connection', socket => {
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     selectedRoom.playingMembers = selectedRoom.members;
-    /* 라이어 추출 */
+    /* 거짓말쟁이 추출 */
     const playersLength = selectedRoom.playingMembers.length;
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
     selectedRoom.currentUsers.forEach(memberData => {
@@ -522,20 +522,24 @@ roomspace.on('connection', socket => {
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
 
-    roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
+    roomspace.to(socket.userRooms[0]).emit("first:explain:game", { nextPlayer: firstOrder, message: "" });
   });
 
-  socket.on("explain:game", () => {
+  socket.on("explain:game", (data) => {
     console.log("[Log][explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.");
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
     const playersLength = selectedRoom.playingMembers.length;
     const targetNumber = Math.floor(Math.random() * playersLength);
-    const firstOrder = selectedRoom.playingMembers[targetNumber];
+    const nextOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
-
-    roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
+    const serviceData = { nextPlayer: nextOrder, message : data.message };
+    console.log("[Log][explain:game] 전달할 데이터", serviceData);
+    roomspace.to(socket.userRooms[0]).emit("explain:game", serviceData);
+    if (playersLength <= 0) {
+      console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
+    }
   });
 
 });
