@@ -531,6 +531,10 @@ roomspace.on('connection', socket => {
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
     const playersLength = selectedRoom.playingMembers.length;
+    if (playersLength <= 0) {
+      console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
+      return;
+    }
     const targetNumber = Math.floor(Math.random() * playersLength);
     const nextOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
