@@ -294,7 +294,7 @@ roomspace.on('connection', socket => {
 
   /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
   socket.on("rooms:refresh", () => {
-    socket.emit("rooms:info", rooms);
+    socket.emit("rooms:info", filterRooms(rooms));
   });
 
   /* 방 생성을 따로 만듬 */
@@ -320,7 +320,7 @@ roomspace.on('connection', socket => {
 
       setNameTag(socket, usersession.userinfo.nickname);
     }
-    socket.emit("rooms:info", rooms);
+    socket.emit("rooms:info", filterRooms(rooms));
   });
 
   /* 방에 만들 경우 */
@@ -558,4 +558,18 @@ function setUserInfoToSession(request, datas) {
   session.id = datas.id;
   session.nickname = datas.nickname;
   return session;
+}
+
+function filterRooms(rooms) {
+  return rooms.map(room => {
+    return {
+      id: room.id,
+      name: room.name,
+      subject: room.subject,
+      members: room.members,
+      limit: room.limit,
+      ready: room.ready,
+      status: room.status
+    }
+  })
 }
