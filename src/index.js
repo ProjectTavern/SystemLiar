@@ -508,21 +508,23 @@ roomspace.on('connection', socket => {
     /* 거짓말쟁이 추출 */
     const playersLength = selectedRoom.playingMembers.length;
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
-    selectedRoom.currentUsers.forEach(memberData => {
-      if (memberData.nickname === liar) {
-        console.log("[Log][start:game] 거짓말쟁이: ", memberData);
-        roomspace.to(memberData.socketId).emit("role:game", "거짓말쟁이");
-      } else {
-        console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
-        roomspace.to(memberData.socketId).emit("role:game", "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
-      }
-    });
-
+    /* 첫 시작 플레이어 추출 */
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
 
-    roomspace.to(socket.userRooms[0]).emit("first:explain:game", { nextPlayer: firstOrder, message: "" });
+    selectedRoom.currentUsers.forEach(memberData => {
+      if (memberData.nickname === liar) {
+        console.log("[Log][start:game] 거짓말쟁이: ", memberData);
+        const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
+        roomspace.to(memberData.socketId).emit("role:game", serviceData);
+      } else {
+        console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
+        const serviceData = { firstPlayer: firstOrder, role: "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티" };
+        roomspace.to(memberData.socketId).emit("role:game", serviceData);
+      }
+    });
+
   });
 
   socket.on("explain:game", (data) => {
