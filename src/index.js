@@ -514,6 +514,8 @@ roomspace.on('connection', socket => {
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     selectedRoom.playingMembers = selectedRoom.members;
+    console.log("[Log][start:game] 시작하려는 방 정보: ", selectedRoom);
+    console.log("[Log][start:game] 시작하려는 방 구성인원: ", selectedRoom.playingMembers);
     /* 거짓말쟁이 추출 */
     const playersLength = selectedRoom.playingMembers.length;
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
