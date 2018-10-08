@@ -247,7 +247,7 @@ roomspace.on('connection', socket => {
       if (value) {
         console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재합니다.", value);
         console.log("[LOG][user:status] 세션에 유저 정보를 저장합니다.");
-        usersession.userinfo = { id: userGhash, nickname: value };
+        usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
         socket.emit("user:status", value);
       } else {
         console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
@@ -302,12 +302,22 @@ roomspace.on('connection', socket => {
     console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
     if (data.id === "create") {
       const roomId = Date.now();
-      const roomData = { id : roomId, name : data.name, subject : data.subject, members : [usersession.userinfo.nickname], limit : 7, status : "wait", ready: 0 }
+      const roomData = {
+        id : roomId,
+        name : data.name,
+        subject : data.subject,
+        members : [usersession.userinfo.nickname],
+        limit : 7,
+        status : "wait",
+        ready: 0,
+        currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }]
+      };
       rooms.push(roomData);
       console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
       /* 합쳐야할지 고민 */
       socket.join(data.id);
       socket.userRooms.push(data.id);
+
       setNameTag(socket, usersession.userinfo.nickname);
     }
     socket.emit("rooms:info", rooms);
@@ -341,6 +351,9 @@ roomspace.on('connection', socket => {
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
           selectedRoom.result = resultJoin;
+          selectedRoom.currentUsers = [];
+          selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
+
           socket.emit("join:room", selectedRoom);
         }
 
@@ -484,6 +497,24 @@ roomspace.on('connection', socket => {
       socket.emit("ready:user", userinfo);
       selectedRoom.ready >= 4 && selectedRoom.ready === selectedRoom.members.length && socket.emit("all:ready", true);
     }
+  });
+
+  socket.on("start:game", () => {
+    console.log("[Log][start:game] 방장의 시작 요청.");
+    const userinfo = usersession.userinfo;
+    const userRoom = socket.userRooms[0];
+    let selectedRoom = getSelectedRoom(rooms, userRoom);
+    selectedRoom.playingMembers = selectedRoom.members;
+    /* 라이어 추출 */
+    const playersLength = selectedRoom.playingMembers.length;
+    const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
+    selectedRoom.currentUsers.forEach(memberData => {
+      if (memberData.nickname === liar) {
+        roomspace.to(memberData.socketId).emit('role:game', "거짓말쟁이");
+      } else {
+        roomspace.to(memberData.socketId).emit('role:game', "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
+      }
+    });
   });
 
 });
