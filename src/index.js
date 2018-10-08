@@ -317,7 +317,7 @@ roomspace.on('connection', socket => {
         console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
         /* 합쳐야할지 고민 */
         socket.join(data.id);
-        socket.userRooms.push(data.id);
+        socket.userRooms.push(roomId);
 
         setNameTag(socket, usersession.userinfo.nickname);
         socket.emit("create:room", true);
