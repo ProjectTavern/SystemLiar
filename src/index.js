@@ -510,11 +510,28 @@ roomspace.on('connection', socket => {
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
     selectedRoom.currentUsers.forEach(memberData => {
       if (memberData.nickname === liar) {
-        roomspace.to(memberData.socketId).emit('role:game', "거짓말쟁이");
+        roomspace.to(memberData.socketId).emit("role:game", "거짓말쟁이");
       } else {
-        roomspace.to(memberData.socketId).emit('role:game', "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
+        roomspace.to(memberData.socketId).emit("role:game", "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
       }
     });
+
+    const targetNumber = Math.floor(Math.random() * playersLength);
+    const firstOrder = selectedRoom.playingMembers[targetNumber];
+    selectedRoom.playingMembers.splice(targetNumber, 1);
+
+    roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
+  });
+
+  socket.on("order:game", () => {
+    const userRoom = socket.userRooms[0];
+    let selectedRoom = getSelectedRoom(rooms, userRoom);
+    const playersLength = selectedRoom.playingMembers.length;
+    const targetNumber = Math.floor(Math.random() * playersLength);
+    const firstOrder = selectedRoom.playingMembers[targetNumber];
+    selectedRoom.playingMembers.splice(targetNumber, 1);
+
+    roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
   });
 
 });
