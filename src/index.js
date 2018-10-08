@@ -471,6 +471,7 @@ roomspace.on('connection', socket => {
       const userNickname = usersession.userinfo.nickname;
       console.log(roomId, userNickname);
       let selectedRoom = getSelectedRoom(rooms, roomId);
+      console.log("[Log][disconnect] 선택된 방의 정보: ", selectedRoom);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
       initRoom(socket);
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
