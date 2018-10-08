@@ -524,8 +524,10 @@ roomspace.on('connection', socket => {
   });
 
   socket.on("explain:game", () => {
+    console.log("[Log][explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.");
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
+    console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
     const playersLength = selectedRoom.playingMembers.length;
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
