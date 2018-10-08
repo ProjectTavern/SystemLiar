@@ -523,7 +523,7 @@ roomspace.on('connection', socket => {
     roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
   });
 
-  socket.on("order:game", () => {
+  socket.on("explain:game", () => {
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     const playersLength = selectedRoom.playingMembers.length;
