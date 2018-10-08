@@ -514,13 +514,14 @@ roomspace.on('connection', socket => {
     selectedRoom.playingMembers.splice(targetNumber, 1);
 
     selectedRoom.currentUsers.forEach(memberData => {
+      console.log("[Log][start:game] 판별: ", memberData);
       if (memberData.nickname === liar) {
         console.log("[Log][start:game] 거짓말쟁이: ", memberData);
         const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
         roomspace.to(memberData.socketId).emit("role:game", serviceData);
       } else {
         console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
-        const serviceData = { firstPlayer: firstOrder, role: "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티" };
+        const serviceData = { firstPlayer: firstOrder, role: "굽네 볼케이노" };
         roomspace.to(memberData.socketId).emit("role:game", serviceData);
       }
     });
