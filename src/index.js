@@ -510,8 +510,10 @@ roomspace.on('connection', socket => {
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
     selectedRoom.currentUsers.forEach(memberData => {
       if (memberData.nickname === liar) {
+        console.log("[Log][start:game] 거짓말쟁이: ", memberData);
         roomspace.to(memberData.socketId).emit("role:game", "거짓말쟁이");
       } else {
+        console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
         roomspace.to(memberData.socketId).emit("role:game", "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
       }
     });
