@@ -522,7 +522,7 @@ roomspace.on('connection', socket => {
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
 
-    roomspace.to(socket.userRooms[0]).emit("first:explain:game", {nickname:firstOrder,message:""});
+    roomspace.to(socket.userRooms[0]).emit("first:explain:game", { nextPlayer: firstOrder, message: "" });
   });
 
   socket.on("explain:game", (data) => {
@@ -534,7 +534,7 @@ roomspace.on('connection', socket => {
     const targetNumber = Math.floor(Math.random() * playersLength);
     const nextOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
-    roomspace.to(socket.userRooms[0]).emit("explain:game", { nickname: nextOrder, message : data.message });
+    roomspace.to(socket.userRooms[0]).emit("explain:game", { nextPlayer: nextOrder, message : data.message });
   });
 
 });
