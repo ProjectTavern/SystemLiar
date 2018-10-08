@@ -521,7 +521,7 @@ roomspace.on('connection', socket => {
         roomspace.to(memberData.socketId).emit("role:game", serviceData);
       } else {
         console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
-        const serviceData = { firstPlayer: firstOrder, role: "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티" };
+        const serviceData = { firstPlayer: firstOrder, role: "굽네 볼케이노" };
         roomspace.to(memberData.socketId).emit("role:game", serviceData);
       }
     });
