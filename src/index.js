@@ -514,6 +514,7 @@ roomspace.on('connection', socket => {
     selectedRoom.playingMembers.splice(targetNumber, 1);
 
     selectedRoom.currentUsers.forEach(memberData => {
+      console.log("[Log][start:game] 판별: ", memberData);
       if (memberData.nickname === liar) {
         console.log("[Log][start:game] 거짓말쟁이: ", memberData);
         const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
