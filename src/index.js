@@ -510,8 +510,10 @@ roomspace.on('connection', socket => {
     const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
     selectedRoom.currentUsers.forEach(memberData => {
       if (memberData.nickname === liar) {
+        console.log("[Log][start:game] 거짓말쟁이: ", memberData);
         roomspace.to(memberData.socketId).emit("role:game", "거짓말쟁이");
       } else {
+        console.log("[Log][start:game] 제시어를 받은 사람: ", memberData);
         roomspace.to(memberData.socketId).emit("role:game", "밥에 비벼먹으면 맛있는 굽네 볼케이노 파티");
       }
     });
@@ -523,9 +525,11 @@ roomspace.on('connection', socket => {
     roomspace.to(socket.userRooms[0]).emit("order:game", firstOrder);
   });
 
-  socket.on("order:game", () => {
+  socket.on("explain:game", () => {
+    console.log("[Log][explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.");
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
+    console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
     const playersLength = selectedRoom.playingMembers.length;
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
