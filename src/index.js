@@ -452,7 +452,7 @@ roomspace.on('connection', socket => {
    * */
   function getSelectedRoom(rooms, id) {
     const checkRoom = rooms.filter(element => {
-      return element.id + "" === id;
+      return element.id + "" === id + "";
     });
     console.log("check",checkRoom);
     let selectedRoom = {};
