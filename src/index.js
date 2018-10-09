@@ -402,7 +402,7 @@ roomspace.on('connection', socket => {
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        delete selectedRoom;
+        rooms.splice(rooms.indexOf(selectedRoom), 1);
       }
       /* 추후 삭제 */
       console.log("[LOG][leave:room] 현재 방의 정보들", rooms);
@@ -475,7 +475,7 @@ roomspace.on('connection', socket => {
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][disconnect] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        delete selectedRoom;
+        rooms.splice(rooms.indexOf(selectedRoom), 1);
       }
       console.log("[LOG][disconnect] 현재 방의 정보들", rooms);
     } catch (error) {
