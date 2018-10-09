@@ -539,19 +539,29 @@ roomspace.on('connection', socket => {
   });
 
   socket.on("explain:game", (data) => {
-    console.log("[Log][explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.");
-    const userRoom = socket.userRooms[0];
-    let selectedRoom = getSelectedRoom(rooms, userRoom);
-    console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
-    const playersLength = selectedRoom.playingMembers.length;
-    const targetNumber = Math.floor(Math.random() * playersLength);
-    const nextOrder = selectedRoom.playingMembers[targetNumber];
-    selectedRoom.playingMembers.splice(targetNumber, 1);
-    const serviceData = { nextPlayer: nextOrder, message : data.message };
-    console.log("[Log][explain:game] 전달할 데이터", serviceData);
-    roomspace.to(socket.userRooms[0]).emit("explain:game", serviceData);
-    if (playersLength <= 0) {
-      console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
+    console.log("[Log][explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.", data);
+    try {
+      const userRoom = socket.userRooms[0];
+      let selectedRoom = getSelectedRoom(rooms, userRoom);
+      console.log("[Log][explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
+      const playersLength = selectedRoom.playingMembers.length;
+      const targetNumber = Math.floor(Math.random() * playersLength);
+      const nextOrder = selectedRoom.playingMembers[targetNumber];
+      selectedRoom.playingMembers.splice(targetNumber, 1);
+
+      if (data.hasOwnProperty("explain")) {
+        const serviceData = { nextPlayer: nextOrder, explain : data.explain };
+        console.log("[Log][explain:game] 전달할 데이터", serviceData);
+        roomspace.to(socket.userRooms[0]).emit("explain:game", serviceData);
+      } else {
+        console.log("[Warn][explain:game] None data exception: 전달할 메세지가 들어오지 않았습니다.", data);
+      }
+
+      if (playersLength <= 0) {
+        console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
+      }
+    } catch (e) {
+      console.log("[Error][explain:game]", e);
     }
   });
 
