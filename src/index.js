@@ -558,16 +558,19 @@ roomspace.on('connection', socket => {
       selectedRoom.playingMembers.splice(targetNumber, 1);
 
       if (data.hasOwnProperty("explain")) {
-        const serviceData = { nextPlayer: nextOrder, explain : data.explain };
-        console.log("[Log][explain:game] 전달할 데이터", serviceData);
-        roomspace.to(socket.userRooms[0]).emit("explain:game", serviceData);
+        if (playersLength > 0) {
+          const serviceData = { nextPlayer: nextOrder, explain : data.explain };
+          console.log("[Log][explain:game] 전달할 데이터", serviceData);
+          roomspace.to(socket.userRooms[0]).emit("explain:game", serviceData);
+        } else {
+          console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
+          roomspace.to(socket.userRooms[0]).emit("discuss:game", { explain: data.explain });
+        }
       } else {
         console.log("[Warn][explain:game] None data exception: 전달할 메세지가 들어오지 않았습니다.", data);
       }
 
-      if (playersLength <= 0) {
-        console.log("[Log][explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
-      }
+
     } catch (e) {
       console.log("[Error][explain:game]", e);
     }
