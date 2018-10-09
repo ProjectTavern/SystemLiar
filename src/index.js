@@ -514,7 +514,7 @@ roomspace.on('connection', socket => {
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
-    selectedRoom.playingMembers = selectedRoom.members;
+    selectedRoom.playingMembers = deepCopy(selectedRoom.members);
     console.log("[Log][start:game] 시작하려는 방 정보: ", selectedRoom);
     console.log("[Log][start:game] 시작하려는 방 구성인원: ", selectedRoom.playingMembers);
     /* 거짓말쟁이 추출 */
@@ -584,4 +584,8 @@ function filterRooms(rooms) {
       status: room.status
     }
   })
+}
+
+function deepCopy(data) {
+  return JSON.parse(JSON.stringify(data));
 }
