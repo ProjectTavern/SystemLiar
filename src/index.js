@@ -360,7 +360,6 @@ roomspace.on('connection', socket => {
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
           selectedRoom.result = resultJoin;
-          selectedRoom.currentUsers = [];
           selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
 
           socket.emit("join:room", selectedRoom);
@@ -524,8 +523,7 @@ roomspace.on('connection', socket => {
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
-
-    selectedRoom.members.forEach(memberData => {
+    selectedRoom.currentUsers.forEach(memberData => {
       console.log("[Log][start:game] 판별: ", memberData);
       if (memberData.nickname === liar) {
         console.log("[Log][start:game] 거짓말쟁이: ", memberData);
