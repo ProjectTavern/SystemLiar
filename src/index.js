@@ -318,6 +318,9 @@ roomspace.on('connection', socket => {
         /* 합쳐야할지 고민 */
         socket.join(roomId);
         socket.userRooms.push(roomId);
+        let socketSession = usersession || {};
+        let userinfo = socketSession.userinfo || {};
+        userinfo.room = roomId;
 
         setNameTag(socket, usersession.userinfo.nickname);
         socket.emit("create:room", true);
@@ -343,6 +346,10 @@ roomspace.on('connection', socket => {
 
       let resultJoin = false;
       let selectedRoom = getSelectedRoom(rooms, data.id);
+
+      let socketSession = usersession || {};
+      let userinfo = socketSession.userinfo || {};
+
       if (selectedRoom.hasOwnProperty("id")) {
         console.log("[LOG][join:room] 존재하는 방입니다.", selectedRoom, isJoinable(selectedRoom, usersession.userinfo.nickname));
 
@@ -354,6 +361,8 @@ roomspace.on('connection', socket => {
 
           socket.join(data.id);
           socket.userRooms.push(data.id);
+          userinfo.room = data.id;
+
           setNameTag(socket, usersession.userinfo.nickname);
 
           socket.emit("system:message", { message: "게임에 입장하였습니다." });
@@ -465,7 +474,7 @@ roomspace.on('connection', socket => {
 
     try {
       /* 유저가 들어간 방 찾기 */
-      const roomId = socket.userRooms[0];
+      const roomId = usersession.userinfo.room;
       const userNickname = usersession.userinfo.nickname;
       console.log(roomId, userNickname);
       let selectedRoom = getSelectedRoom(rooms, roomId);
