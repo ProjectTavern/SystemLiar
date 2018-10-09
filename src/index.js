@@ -3,7 +3,7 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const crossdomain = require('crossdomain');
-const redis = require('./modules/database/redis');
+const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
@@ -394,7 +394,6 @@ roomspace.on('connection', socket => {
   socket.on("leave:room", data => {
     console.log("[LOG][leave:room]", data);
     try {
-
       const roomId = socket.userRooms[0];
       const userNickname = usersession.userinfo.nickname;
       let selectedRoom = getSelectedRoom(rooms, roomId);
@@ -403,7 +402,7 @@ roomspace.on('connection', socket => {
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        // delete selectedRoom;
+        delete selectedRoom;
       }
       /* 추후 삭제 */
       console.log("[LOG][leave:room] 현재 방의 정보들", rooms);
@@ -476,7 +475,7 @@ roomspace.on('connection', socket => {
       roomspace.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         console.log("[LOG][disconnect] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        // delete selectedRoom;
+        delete selectedRoom;
       }
       console.log("[LOG][disconnect] 현재 방의 정보들", rooms);
     } catch (error) {
