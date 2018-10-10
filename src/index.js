@@ -7,8 +7,8 @@ const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
+const { logger } = require('./utilities/logger/winston');
 
-/* 임시 해쉬코드 작성 */
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
   if (this.length === 0) return hash;
@@ -76,6 +76,7 @@ app.post('/user/status', (request, response, next) => {
   const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
+  logger.info("조회 받은 데이터", value);
   console.log("[LOG] 유저 조회할 받은 데이터", value);
 
   /**
@@ -573,7 +574,7 @@ roomspace.on('connection', socket => {
 
 
     } catch (e) {
-      console.log("[Error][explain:game]", e);
+      logger.error(`[explain:game]${e}`);
     }
   });
 
@@ -581,7 +582,7 @@ roomspace.on('connection', socket => {
 
 /* 서버 기동 포트: 30500 */
 server.listen(30500, () => {
-  console.log('[LOG][server on] Socket IO server listening on port 30500');
+  logger.info("SystemLiar All green. Listening on PORT: 30500");
 });
 
 
