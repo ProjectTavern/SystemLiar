@@ -2,12 +2,14 @@ const path = require('path');
 const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const cors = require('cors');
 const crossdomain = require('crossdomain');
 const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 const { logger, dataLogger } = require('./utilities/logger/winston');
+
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
@@ -31,6 +33,9 @@ const configDataset = {
 /* 바디 파서 등록 */
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+
+/* CORS 해제 */
+app.use(cors());
 
 /* 응답객체에 레디스 등록 */
 app.use((request, response, next) => {
