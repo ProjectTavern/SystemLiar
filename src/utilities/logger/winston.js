@@ -1,5 +1,5 @@
 const { createLogger, format, transports } = require("winston");
-const { combine, timestamp, label, printf } = format;
+const { combine, timestamp, label, printf, prettyPrint } = format;
 const Winston = require("winston");
 const path = require("path");
 
@@ -34,6 +34,24 @@ const logger = createLogger({
   ]
 });
 
+const dataLogger = createLogger({
+  format: combine(
+    label({ label: "SystemLiar" }),
+    timestamp(),
+    prettyPrint()
+  ),
+  transports: [
+    new transports.Console({}),
+    new Winston.transports.File({
+      filename: `${__dirname}/log/${(new Date).currentDay()}.log`,
+      level: "info",
+      maxsize:1000000,
+      maxFiles:5
+    })
+  ]
+});
+
 exports.logger = logger;
+exports.dataLogger = dataLogger;
 
 

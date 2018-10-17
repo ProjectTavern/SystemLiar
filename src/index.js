@@ -2,12 +2,14 @@ const path = require('path');
 const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const cors = require('cors');
 const crossdomain = require('crossdomain');
 const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
-const { logger } = require('./utilities/logger/winston');
+const { logger, dataLogger } = require('./utilities/logger/winston');
+
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
@@ -31,6 +33,9 @@ const configDataset = {
 /* 바디 파서 등록 */
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+
+/* CORS 해제 */
+app.use(cors());
 
 /* 응답객체에 레디스 등록 */
 app.use((request, response, next) => {
@@ -71,30 +76,22 @@ app.get('/chat', function(request, response) {
 /* 유저 상태 확인 */
 app.post('/user/status', (request, response, next) => {
   request.accepts('application/json');
-  request.on('data', (data) => console.log("[LOG] DATA: ", data));
+  request.on('data', (data) => dataLogger.info(data));
 
   const userGhash = request.body.id;
   const value = JSON.stringify(request.body);
 
-  logger.info("조회 받은 데이터", value);
-  console.log("[LOG] 유저 조회할 받은 데이터", value);
+  logger.info('조회 받은 데이터 정보를 통해 유저의 정보를 데이터베이스에서 가져옵니다.');
 
-  /**
-   * 구글 아이디를 저장하는 로직
-   * 구글 아이디가 있는 경우 닉네임(string)을 바로 전송
-   * 구글 아이디가 없는 경우 false 값을 전송
-   * */
   request.redis.hget(userGhash, "nickname", (error, value) => {
     if (value) {
-      console.log("[LOG] 유저 정보가 기존 데이터셋에 존재합니다.", value);
-      console.log("[LOG] 세션에 유저 정보를 저장합니다.");
-
+      logger.info('유저 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
       /* 세션에 데이터 저장 */
       const datas = { id: userGhash, nickname: value };
       const session = setUserInfoToSession(request, datas);
       response.send(value);
     } else {
-      console.log("[LOG] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
+      logger.info(`유저 정보가 기존 데이터에 존재하지 않습니다. 생성 요청을 전송합니다.`);
       response.send(false);
     }
   });
@@ -109,9 +106,10 @@ app.post('/user/status', (request, response, next) => {
  * */
 app.post('/user/create/nickname/', (request, response, next) => {
   request.accepts('application/json');
-  request.on('data', (data) => console.log("[LOG] DATA: ", data));
+  request.on('data', data => dataLogger.info(data));
 
   const userData = request.body;
+  dataLogger.info(userData);
 
   /* 유저 정보 배열로 전환 */
   let userInform = [];
@@ -121,27 +119,28 @@ app.post('/user/create/nickname/', (request, response, next) => {
       userInform.push(userData[userInformKey]);
     }
   }
-  console.log("[LOG] 저장할 받은 데이터: ", userData);
+
   /* 유저 정보 */
   const userNickname = userData.nickname;
   const userGhashId = userData.id;
 
   request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
     if(userNicknameLists.includes(userNickname)) {
-      console.log("[LOG] 사용자의 닉네임이 이미 존재합니다.", userNickname);
+      logger.info(`사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
       response.send(false);
     } else {
-      console.log("[LOG] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
+      logger.info(`${userNickname}은 사용할 수 있는 대화명입니다. 데이터 베이스에 저장을 진행합니다.`);
       request.redis
         .multi()
         .sadd(configDataset.user.nicknames, userNickname)
         .hset(userGhashId, userInform)
         .exec((error, result) => {
           if (error) {
-            console.log("[LOG] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+            logger.error(`유저의 정보를 저장하려고 시도했으나 실패했습니다. 실패 보고를 전송합니다. 이유는 다음과 같습니다.`);
+            dataLogger.error(error);
             response.send(false);
           }
-          console.log("[LOG] 유저의 정보를 저장했습니다.", result);
+          logger.info('유저의 정보를 성공적으로 저장했습니다. 세션에 유저의 정보를 저장하고 성공 보고를 전송합니다.');
           /* 세션에 데이터 저장 */
           const datas = { id: userGhashId, nickname: userNickname };
           const session = setUserInfoToSession(request, datas);
@@ -237,28 +236,30 @@ rooms.push(roomMock5);
 roomspace.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
-  console.log("[LOG][connection] An user connected.", socket.id);
-  console.log("[LOG][connection] 소켓에 유저의 세션 정보를 불러옵니다.", usersession);
+  logger.info(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다.`);
+  logger.info(`소켓 접속에 사용자의 세션 정보를 불러오겠습니다.`);
 
   /* 세션 데이터 취득 | 설정 */
   socket.on("user:status", data => {
-    console.log("[LOG][user:status] 유저 조회할 받은 데이터", data);
+    logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
+
     const userGhash = data.id;
     redis.hget(userGhash, "nickname", (error, value) => {
       if (value) {
-        console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재합니다.", value);
-        console.log("[LOG][user:status] 세션에 유저 정보를 저장합니다.");
+        logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
         usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
         socket.emit("user:status", value);
       } else {
-        console.log("[LOG][user:status] 유저 정보가 기존 데이터셋에 존재하지 않습니다.", value);
+        logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
         socket.emit("user:status", false);
       }
     });
   });
 
   socket.on("user:create:nickname", data => {
-    console.log("[LOG][user:create:nickname] 새롭게 닉네임을 생성합니다. 전송된 데이터: ", data);
+    logger.info(`새로운 대화명 생성 요청을 전송받았습니다.`);
+    dataLogger.info(data);
+
     let userInform = [];
     for ( let userInformKey in data) {
       if (data.hasOwnProperty(userInformKey)) {
@@ -273,19 +274,20 @@ roomspace.on('connection', socket => {
 
     redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
       if(userNicknameLists.includes(userNickname)) {
-        console.log("[LOG][user:create:nickname] 사용자의 닉네임이 이미 존재합니다.", userNickname);
+        logger.info(`사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
         socket.emit("user:status", false);
       } else {
-        console.log("[LOG][user:create:nickname] 사용할 수 있는 닉네임입니다. 저장을 시작합니다.", userNickname);
+        logger.info(`${userNickname}은 사용할 수 있는 대화명입니다. 데이터 베이스에 저장을 진행합니다.`);
         redis.multi()
           .sadd(configDataset.user.nicknames, userNickname)
           .hset(userGhashId, userInform)
           .exec((error, result) => {
             if (error) {
-              console.log("[LOG][user:create:nickname] 유저의 정보를 저장하려 시도했으나 실패했습니다.", error);
+              logger.error(`사용자의 정보를 저장하려고 시도했으나 실패했습니다. 실패 보고를 전송합니다. 이유는 다음과 같습니다.`);
+              dataLogger.error(error);
               socket.emit("user:status", false);
             }
-            console.log("[LOG][user:create:nickname] 유저의 정보를 저장했습니다.", result);
+            logger.info('사용자의 정보를 성공적으로 저장했습니다. 세션에 유저의 정보를 저장하고 성공 보고를 전송합니다.');
             usersession.userinfo = { id: userGhashId, nickname: userNickname };
             socket.emit("user:status", userNickname);
           });
@@ -295,12 +297,13 @@ roomspace.on('connection', socket => {
 
   /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
   socket.on("rooms:refresh", () => {
+    logger.info(`사용자의 요청으로 방을 새로 고침합니다.`);
     socket.emit("rooms:info", filterRooms(rooms));
   });
 
   /* 방 생성을 따로 만듬 */
   socket.on("create:room", (data) => {
-    console.log("[LOG][create:room] 요청을 전송받았습니다. ", data);
+    logger.info(`거짓말쟁이 대화방 생성 요청을 전송받았습니다.`);
     try{
       if (data.id === "create") {
         const roomId = Date.now();
@@ -315,7 +318,8 @@ roomspace.on('connection', socket => {
           currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }]
         };
         rooms.push(roomData);
-        console.log("[LOG][create:room] 방이 생성되었습니다.", roomData);
+        logger.info(`대화방 생성에 성공하였습니다.`);
+        dataLogger.info(roomData);
         /* 합쳐야할지 고민 */
         socket.join(roomId);
         socket.userRooms.push(roomId);
@@ -326,11 +330,12 @@ roomspace.on('connection', socket => {
         setNameTag(socket, usersession.userinfo.nickname);
         socket.emit("create:room", true);
       } else {
-        console.log("[Log][create:room] 아이디 값이 create가 아닙니다.");
+        logger.info(`잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
         socket.emit("create:room", true);
       }
     } catch (e) {
-      console.log("[Log][create:room] 에러: ", e);
+      logger.error(`에러가 발생했습니다. 원인은 다음과 같습니다.`);
+      dataLogger.error(e);
       socket.emit("create:room", false);
     }
 
