@@ -3,7 +3,6 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const cors = require('cors');
-const crossdomain = require('crossdomain');
 const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
@@ -52,12 +51,6 @@ app.session = expressSession({
 });
 app.use(app.session);
 
-/* 크로스도메인 해제 : 나중에 서버 제대로 개설되면 제거 */
-app.all('/crossdomain.xml', function (request, response, next) {
-  response.set('Content-Type', 'application/xml; charset=utf-8');
-  response.send(crossdomain({ domain: '*' }), 200);
-});
-
 /* 테스트를 위한 샘플 페이지 */
 app.get('/', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/index.html'));
@@ -71,6 +64,10 @@ app.get('/redis', function(request, response) {
 /* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
   response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
+});
+
+app.get('/get/chat', function(request, response) {
+  response.json({ name: "Kintergod" });
 });
 
 /* 유저 상태 확인 */
@@ -583,6 +580,25 @@ roomspace.on('connection', socket => {
     }
   });
 
+
+
+  socket.emit("rooms:info", filterRooms(rooms));
+
+  socket.on("userStatus", data => {
+    logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
+
+    const userGhash = data.id;
+    redis.hget(userGhash, "nickname", (error, value) => {
+      if (value) {
+        logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
+        usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
+        socket.emit("userStatus", value);
+      } else {
+        logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
+        socket.emit("userStatus", false);
+      }
+    });
+  });
 });
 
 /* 서버 기동 포트: 30500 */
