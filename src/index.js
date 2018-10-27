@@ -1,5 +1,3 @@
-require('./modules/polyfills/index');
-
 const path = require('path');
 const app = require('express')();
 const server = require('http').createServer(app);
