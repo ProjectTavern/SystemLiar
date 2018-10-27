@@ -585,20 +585,10 @@ roomspace.on('connection', socket => {
 
   socket.emit("rooms:info", filterRooms(rooms));
 
-  socket.on("userStatus", data => {
-    logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
-
-    const userGhash = data.id;
-    redis.hget(userGhash, "nickname", (error, value) => {
-      if (value) {
-        logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
-        usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
-        socket.emit("userStatus", value);
-      } else {
-        logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
-        socket.emit("userStatus", false);
-      }
-    });
+  /* 토론의 종료 */
+  socket.on('end:discuss', (data) => {
+    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    roomspace.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers);
   });
 });
 
