@@ -12,12 +12,12 @@ module.exports = (app) => {
 
   /* 레디스 테스트 페이지 */
   router.get('/redis', function(request, response) {
-    response.sendFile(path.join(__dirname, '/resources/templates/sample_redis.html'));
+    response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
   });
 
   /* 채팅 테스트 페이지 */
   router.get('/chat', function(request, response) {
-    response.sendFile(path.join(__dirname, '/resources/templates/sample_chat.html'));
+    response.sendFile(path.join(__dirname, '../../resources/templates/sample_chat.html'));
   });
 
   router.get('/get/chat', function(request, response) {

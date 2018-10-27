@@ -41,7 +41,13 @@ app.session = expressSession({
 
 app.use(app.session);
 app.use('/', routerIndex);
-
+app.post('/database/all/reset', (request, response, next) => {
+  request.redis.flushall()
+    .then(value => {
+      console.log(value);
+      response.send(true);
+    });
+});
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
 roomspace.use(socketsession(app.session, { autoSave: true }));
@@ -157,7 +163,7 @@ roomspace.on('connection', socket => {
   });
 
   /* 방에 만들 경우 */
-  socket.on('join:room', data => {
+  socket.on(data => {
     console.log("[LOG][join:room] 요청을 전송받았습니다. ", data);
     try {
       console.log("[LOG][join:room] 방 데이터들을 확인합니다.", data);
@@ -208,7 +214,7 @@ roomspace.on('connection', socket => {
       })).length);
       return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit && isNotJoined;
     }
-  });
+  }, 'join:room');
 
   /* 대화 전송 */
   socket.on('send:message', (data) => {
