@@ -9,7 +9,6 @@ const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 const { logger, dataLogger } = require('./utilities/logger/winston');
 
-
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
   if (this.length === 0) return hash;
