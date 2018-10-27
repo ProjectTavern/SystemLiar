@@ -1,3 +1,5 @@
+require('./modules/polyfills/index');
+
 const path = require('path');
 const app = require('express')();
 const server = require('http').createServer(app);
@@ -8,18 +10,7 @@ const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 const { logger, dataLogger } = require('./modules/logger/winston');
-
-
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr;
-  if (this.length === 0) return hash;
-  for (i = 0; i < this.length; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash;
-};
+const routerIndex = require('./controllers/routes/index')();
 
 const configDataset = {
   user : {
@@ -30,11 +21,9 @@ const configDataset = {
 };
 
 /* 바디 파서 등록 */
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
-
-/* CORS 해제 */
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 
 /* 응답객체에 레디스 등록 */
 app.use((request, response, next) => {
@@ -49,186 +38,15 @@ app.session = expressSession({
   saveUninitialized: true,
   autoSave: true
 });
+
 app.use(app.session);
-
-/* 테스트를 위한 샘플 페이지 */
-app.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname, '/resources/templates/index.html'));
-});
-
-/* 레디스 테스트 페이지 */
-app.get('/redis', function(request, response) {
-  response.sendFile(path.join(__dirname, '/resources/templates/sample_redis.html'));
-});
-
-/* 채팅 테스트 페이지 */
-app.get('/chat', function(request, response) {
-  response.sendFile(path.join(__dirname, '/resources/templates/sample_chat.html'));
-});
-
-app.get('/get/chat', function(request, response) {
-  response.json({ name: "Kintergod" });
-});
-
-/* 유저 상태 확인 */
-app.post('/user/status', (request, response, next) => {
-  request.accepts('application/json');
-  request.on('data', (data) => dataLogger.info(data));
-
-  const userGhash = request.body.id;
-  const value = JSON.stringify(request.body);
-
-  logger.info('조회 받은 데이터 정보를 통해 유저의 정보를 데이터베이스에서 가져옵니다.');
-
-  request.redis.hget(userGhash, "nickname", (error, value) => {
-    if (value) {
-      logger.info('유저 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
-      /* 세션에 데이터 저장 */
-      const datas = { id: userGhash, nickname: value };
-      const session = setUserInfoToSession(request, datas);
-      response.send(value);
-    } else {
-      logger.info(`유저 정보가 기존 데이터에 존재하지 않습니다. 생성 요청을 전송합니다.`);
-      response.send(false);
-    }
-  });
-});
-
-/**
- * 구글 아이디 + 닉네임 저장
- * 닉네임이 사용되고 있는 것인지 체크 후에 사용 가능하면 바로 저장
- *
- * 사용가능하여 저장된 경우에는 true
- * 사용하고 있는 닉네임이 있는 경우에는 false
- * */
-app.post('/user/create/nickname/', (request, response, next) => {
-  request.accepts('application/json');
-  request.on('data', data => dataLogger.info(data));
-
-  const userData = request.body;
-  dataLogger.info(userData);
-
-  /* 유저 정보 배열로 전환 */
-  let userInform = [];
-  for ( let userInformKey in userData) {
-    if (userData.hasOwnProperty(userInformKey)) {
-      userInform.push(userInformKey);
-      userInform.push(userData[userInformKey]);
-    }
-  }
-
-  /* 유저 정보 */
-  const userNickname = userData.nickname;
-  const userGhashId = userData.id;
-
-  request.redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
-    if(userNicknameLists.includes(userNickname)) {
-      logger.info(`사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
-      response.send(false);
-    } else {
-      logger.info(`${userNickname}은 사용할 수 있는 대화명입니다. 데이터 베이스에 저장을 진행합니다.`);
-      request.redis
-        .multi()
-        .sadd(configDataset.user.nicknames, userNickname)
-        .hset(userGhashId, userInform)
-        .exec((error, result) => {
-          if (error) {
-            logger.error(`유저의 정보를 저장하려고 시도했으나 실패했습니다. 실패 보고를 전송합니다. 이유는 다음과 같습니다.`);
-            dataLogger.error(error);
-            response.send(false);
-          }
-          logger.info('유저의 정보를 성공적으로 저장했습니다. 세션에 유저의 정보를 저장하고 성공 보고를 전송합니다.');
-          /* 세션에 데이터 저장 */
-          const datas = { id: userGhashId, nickname: userNickname };
-          const session = setUserInfoToSession(request, datas);
-
-          response.send(true);
-        });
-    }
-  });
-});
-
-/**
- * 데이터 리셋 버튼! 주의!
- * */
-app.post('/database/all/reset', (request, response, next) => {
-  request.redis.flushall()
-    .then(value => {
-      console.log(value);
-      response.send(true);
-    });
-});
+app.use('/', routerIndex);
 
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
-roomspace.use(socketsession(app.session, {
-  autoSave: true
-}));
-let rooms = [];
-const iddata = Date.now();
-let roomMock1 = {
-  id : iddata + 1,
-  name : "아무 일도 없었다.",
-  subject: "음식",
-  members : ["삼다수", "백두무궁", "한라삼천"],
-  limit : 7,
-  status : "wait",
-  ready: 0
-};
-let roomMock2 = {
-  id : iddata + 2,
-  name : "방 리스트 테스트",
-  subject: "직업",
-  members : ["카카로트", "베지터", "부르마"],
-  limit : 7,
-  status : "playing",
-  ready: 3
-};
-let roomMock3 = {
-  id : iddata + 3,
-  name : "종료된 방",
-  subject : "장소",
-  members : ["드레이크", "네로", "아르토리아", "에미야"],
-  limit : 7,
-  status : "end",
-  ready: 6
-};
-let roomMock4 = {
-  id : iddata + 4,
-  name : "시작하지 않은 방",
-  subject : "음식",
-  members : ["창세기전", "에픽세븐", "페이트그랜드오더", "슈퍼로봇대전", "게타", "제이데커", "와룡"],
-  limit : 7,
-  status : "wait",
-  ready: 0
-};
-let roomMock5 = {
-  id : iddata + 5,
-  name : "가능 방",
-  subject : "장소",
-  members : ["드래곤", "와이번", "드레이크"],
-  limit : 7,
-  status : "wait",
-  ready: 3
-};
+roomspace.use(socketsession(app.session, { autoSave: true }));
 
-const foods =
-  [
-    "라면",
-    "아이스크림",
-    "크림파스타",
-    "피자",
-    "햄버거",
-    "뿌셔뿌셔",
-    "드래곤스테이크",
-    "아메리카노"
-  ];
-
-rooms.push(roomMock1);
-rooms.push(roomMock2);
-rooms.push(roomMock3);
-rooms.push(roomMock4);
-rooms.push(roomMock5);
+let rooms = require('./_mockup/RoomDatas') || [];
 
 roomspace.on('connection', socket => {
   socket.userRooms = [];
@@ -580,25 +398,29 @@ roomspace.on('connection', socket => {
     }
   });
 
+  socket.on('end:discuss', (data) => {
+    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    roomspace.to(socket.userRooms[0]).emit("vote:list", selectedRoom.playingMembers);
+  });
 
-
+  /* 방 정보 전달 */
   socket.emit("rooms:info", filterRooms(rooms));
 
-  socket.on("userStatus", data => {
-    logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
-
-    const userGhash = data.id;
-    redis.hget(userGhash, "nickname", (error, value) => {
-      if (value) {
-        logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
-        usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
-        socket.emit("userStatus", value);
-      } else {
-        logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
-        socket.emit("userStatus", false);
-      }
-    });
-  });
+  // socket.on("userStatus", data => {
+  //   logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
+  //
+  //   const userGhash = data.id;
+  //   redis.hget(userGhash, "nickname", (error, value) => {
+  //     if (value) {
+  //       logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
+  //       usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
+  //       socket.emit("userStatus", value);
+  //     } else {
+  //       logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
+  //       socket.emit("userStatus", false);
+  //     }
+  //   });
+  // });
 });
 
 /* 서버 기동 포트: 30500 */
