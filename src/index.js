@@ -190,6 +190,7 @@ roomspace.on('connection', socket => {
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
           selectedRoom.result = resultJoin;
+          console.log('선택된 방에 대한 정보',selectedRoom);
           selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
 
           socket.emit("join:room", selectedRoom);
@@ -392,12 +393,12 @@ roomspace.on('connection', socket => {
         console.log("[Warn][explain:game] None data exception: 전달할 메세지가 들어오지 않았습니다.", data);
       }
 
-
     } catch (e) {
       logger.error(`[explain:game]${e}`);
     }
   });
 
+  /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     roomspace.to(socket.userRooms[0]).emit("vote:list", selectedRoom.playingMembers);
@@ -406,21 +407,6 @@ roomspace.on('connection', socket => {
   /* 방 정보 전달 */
   socket.emit("rooms:info", filterRooms(rooms));
 
-  // socket.on("userStatus", data => {
-  //   logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
-  //
-  //   const userGhash = data.id;
-  //   redis.hget(userGhash, "nickname", (error, value) => {
-  //     if (value) {
-  //       logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
-  //       usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
-  //       socket.emit("userStatus", value);
-  //     } else {
-  //       logger.info(`사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
-  //       socket.emit("userStatus", false);
-  //     }
-  //   });
-  // });
 });
 
 /* 서버 기동 포트: 30500 */
