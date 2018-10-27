@@ -7,7 +7,7 @@ const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
-const { logger, dataLogger } = require('./utilities/logger/winston');
+const { logger, dataLogger } = require('./modules/logger/winston');
 
 
 String.prototype.hashCode = function() {
@@ -53,17 +53,17 @@ app.use(app.session);
 
 /* 테스트를 위한 샘플 페이지 */
 app.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/index.html'));
+  response.sendFile(path.join(__dirname, '/resources/templates/index.html'));
 });
 
 /* 레디스 테스트 페이지 */
 app.get('/redis', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/sample_redis.html'));
+  response.sendFile(path.join(__dirname, '/resources/templates/sample_redis.html'));
 });
 
 /* 채팅 테스트 페이지 */
 app.get('/chat', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
+  response.sendFile(path.join(__dirname, '/resources/templates/sample_chat.html'));
 });
 
 app.get('/get/chat', function(request, response) {
