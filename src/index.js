@@ -190,6 +190,7 @@ roomspace.on('connection', socket => {
           socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
           selectedRoom.result = resultJoin;
+          console.log('선택된 방에 대한 정보',selectedRoom);
           selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
 
           socket.emit("join:room", selectedRoom);
