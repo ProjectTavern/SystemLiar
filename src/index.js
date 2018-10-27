@@ -9,7 +9,6 @@ const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 const { logger, dataLogger } = require('./utilities/logger/winston');
 
-
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
   if (this.length === 0) return hash;
@@ -224,11 +223,11 @@ const foods =
     "아메리카노"
   ];
 
-rooms.push(roomMock1);
-rooms.push(roomMock2);
-rooms.push(roomMock3);
-rooms.push(roomMock4);
-rooms.push(roomMock5);
+// rooms.push(roomMock1);
+// rooms.push(roomMock2);
+// rooms.push(roomMock3);
+// rooms.push(roomMock4);
+// rooms.push(roomMock5);
 
 roomspace.on('connection', socket => {
   socket.userRooms = [];
