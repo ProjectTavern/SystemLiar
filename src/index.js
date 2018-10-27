@@ -240,6 +240,7 @@ roomspace.on('connection', socket => {
     logger.info('조회 받은 데이터 정보를 통해 사용자의 정보를 데이터베이스에서 가져옵니다.');
 
     const userGhash = data.id;
+    console.log('user구글 아이디', data);
     redis.hget(userGhash, "nickname", (error, value) => {
       if (value) {
         logger.info('사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
@@ -267,6 +268,7 @@ roomspace.on('connection', socket => {
     /* 유저 정보 */
     const userNickname = data.nickname;
     const userGhashId = data.id;
+    console.log('user구글 아이디', data);
 
     redis.smembers(configDataset.user.nicknames, (error, userNicknameLists) => {
       if(userNicknameLists.includes(userNickname)) {
