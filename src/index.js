@@ -1,5 +1,3 @@
-require('./modules/polyfills/index');
-
 const path = require('path');
 const app = require('express')();
 const server = require('http').createServer(app);
@@ -9,8 +7,18 @@ const redis = require('./controllers/database/redis');
 const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
-const { logger, dataLogger } = require('./modules/logger/winston');
-const routerIndex = require('./controllers/routes/index')();
+const { logger, dataLogger } = require('./utilities/logger/winston');
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash;
+};
 
 const configDataset = {
   user : {
