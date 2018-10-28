@@ -20,7 +20,6 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-
 const configDataset = {
   user : {
     ghashes : "user:ghash",
