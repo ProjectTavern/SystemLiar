@@ -593,9 +593,9 @@ roomspace.on('connection', socket => {
   });
 });
 
-/* 서버 기동 포트: 30500 */
-server.listen(30500, () => {
-  logger.info("SystemLiar All green. Listening on PORT: 30500");
+/* 서버 기동 포트: 50000 */
+server.listen(50000, () => {
+  logger.info("SystemLiar All green. Listening on PORT: 50000");
 });
 
 
