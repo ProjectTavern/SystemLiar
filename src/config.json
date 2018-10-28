@@ -1,7 +1,7 @@
 {
   "SERVER" : {
     "port" : 6379,
-    "host" : "qoov.iptime.org",
+    "host" : "localhost",
     "password" : "PASSWORD",
     "db" : 0
   },
