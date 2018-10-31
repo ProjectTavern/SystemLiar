@@ -51,9 +51,14 @@ app.session = expressSession({
 });
 app.use(app.session);
 
+app.get('/', (request, response) => {
+  response.redirect('/Main');
+});
+
 app.get('/Main', (request, response) => {
   response.sendFile(path.join(__dirname, '/resources/templates/index.html'));
 });
+
 app.get('/Data/Redis', (request, response) => {
   response.sendFile(path.join(__dirname, '/resources/templates/sample_redis.html'));
 });
