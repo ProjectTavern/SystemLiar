@@ -51,23 +51,14 @@ app.session = expressSession({
 });
 app.use(app.session);
 
-/* 테스트를 위한 샘플 페이지 */
-app.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/index.html'));
+app.get('/Main', (request, response) => {
+  response.sendFile(path.join(__dirname, '/resources/templates/index.html'));
 });
-
-/* 레디스 테스트 페이지 */
-app.get('/redis', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/sample_redis.html'));
+app.get('/Data/Redis', (request, response) => {
+  response.sendFile(path.join(__dirname, '/resources/templates/sample_redis.html'));
 });
-
-/* 채팅 테스트 페이지 */
-app.get('/chat', function(request, response) {
-  response.sendFile(path.join(__dirname, '/templates/sample_chat.html'));
-});
-
-app.get('/get/chat', function(request, response) {
-  response.json({ name: "Kintergod" });
+app.get('/Test/Chat', (request, response) => {
+  response.sendFile(path.join(__dirname, '/resources/templates/sample_chat.html'));
 });
 
 /* 유저 상태 확인 */
