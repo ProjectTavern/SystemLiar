@@ -1,28 +1,29 @@
 const path = require('path');
+var express = require('express');
+var router = express.Router();
 
-module.exports = (app) => {
-  const express = require('express');
-  const router = express.Router();
-  console.log(path.join(__dirname, '../../resources/templates/index.html'));
+router.use('/', function timeLog(req, res, next) {
+  next();
+});
 
-  router.get('/', function(request, response) {
-    console.log('request');
-    response.sendFile(path.join(__dirname, '../../resources/templates/index.html'));
-  });
+router.get('/', (request, response) => {
+  response.redirect('/Main');
+});
 
-  /* 레디스 테스트 페이지 */
-  router.get('/redis', function(request, response) {
-    response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
-  });
+router.get('/Main', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/templates/index.html'));
+});
 
-  /* 채팅 테스트 페이지 */
-  router.get('/chat', function(request, response) {
-    response.sendFile(path.join(__dirname, '../../resources/templates/sample_chat.html'));
-  });
+router.get('/Data/Redis', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
+});
 
-  router.get('/get/chat', function(request, response) {
-    response.json({ name: "Kintergod" });
-  });
+router.get('/Test/Chat', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/templates/sample_chat.html'));
+});
 
-  return router;
-};
+router.get('/Log/Today', (request, response) => {
+  response.sendFile(path.join(__dirname, `../../utilities/logger/log/${(new Date).currentDay()}.log`));
+});
+
+module.exports = router;
