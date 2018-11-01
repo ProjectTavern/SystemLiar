@@ -47,6 +47,10 @@ app.get('/Test/Chat', (request, response) => {
   response.sendFile(path.join(__dirname, '/resources/templates/sample_chat.html'));
 });
 
+app.get('/Log/Today', (request, response) => {
+  response.sendFile(path.join(__dirname, `./utilities/logger/log/${(new Date).currentDay()}.log`));
+});
+
 /**
  * 데이터 리셋 버튼! 주의!
  * */
