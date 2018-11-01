@@ -1,0 +1,7 @@
+{
+  "user": {
+    "ghashes": "user:ghash",
+    "nicknames": "user:nickname",
+    "status": "user:status"
+  }
+}
