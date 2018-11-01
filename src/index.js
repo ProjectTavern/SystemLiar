@@ -1,51 +1,15 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const pages = require('./controllers/routes/index');
-const bodyParser = require('body-parser');
-const expressSession = require('express-session');
 const socketsession = require('express-socket.io-session');
 const redis = require('./controllers/database/redis');
 const io = require('socket.io')(server);
 const dataScheme = require('./config/dataset');
-const { logger, dataLogger } = require('./utilities/logger/winston');
-const cors = require('cors');
 const configuration = require('./utilities/main.config');
+const { logger, dataLogger } = require('./utilities/logger/winston');
 
 configuration(app);
-/* 바디 파서 등록 */
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
-
-/* CORS 해제 */
-app.use(cors());
-
-/* 응답객체에 레디스 등록 */
-app.use((request, response, next) => {
-  request.redis = redis;
-  next();
-});
-
-/* 세션 값 생성 */
-app.session = expressSession({
-  secret: '&%^%SYSTEM%LIAR%^%&',
-  resave: true,
-  saveUninitialized: true,
-  autoSave: true
-});
-app.use(app.session);
-
 app.use('/', pages);
-
-/**
- * 데이터 리셋 버튼! 주의!
- * */
-app.post('/database/all/reset', (request, response, next) => {
-  request.redis.flushall()
-    .then(value => {
-      logger.custLog('데이터 제거 중입니다.' ,value);
-      response.send(true);
-    });
-});
 
 /* socketio 채팅 */
 const roomspace = io.of('/roomspace');
