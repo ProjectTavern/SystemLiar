@@ -51,6 +51,11 @@ const dataLogger = createLogger({
   ]
 });
 
+logger.custLog = function (info, ...dataLogs) {
+  this.info(info);
+  dataLogs.forEach(dataLog => dataLogger.info(dataLog));
+};
+
 exports.logger = logger;
 exports.dataLogger = dataLogger;
 
