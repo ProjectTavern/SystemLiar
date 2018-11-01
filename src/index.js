@@ -289,7 +289,7 @@ roomspace.on('connection', socket => {
       /* 유저가 들어간 방 찾기 */
       const roomId = usersession.userinfo.room;
       const userNickname = usersession.userinfo.nickname;
-      logger.custLog(roomId, userNickname);
+      logger.custLog("유저의 로그 데이터: ", roomId, userNickname);
       let selectedRoom = getSelectedRoom(rooms, roomId);
       logger.custLog("[Log][disconnect] 선택된 방의 정보: ", selectedRoom);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
