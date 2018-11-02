@@ -18,9 +18,7 @@ let rooms = [];
 
 const ChatProgram = require('./controllers/socketio/ChatProgramOn/index');
 
-ChatSocketIO.on('connection', socket => {
-
-});
+ChatSocketIO.on('connection', ChatProgram);
 
 // ChatSocketIO.on('connection', socket => {
 //
