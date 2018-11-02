@@ -297,10 +297,12 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[start:game] 판별: ", memberData);
       if (memberData.nickname === liar) {
         logger.custLog("[start:game] 거짓말쟁이: ", memberData);
+        memberData.role = 'liar';
         const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
         ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
       } else {
         logger.custLog("[start:game] 제시어를 받은 사람: ", memberData);
+        memberData.role = 'innocent';
         const serviceData = { firstPlayer: firstOrder, role: "굽네 볼케이노" };
         ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
       }
@@ -350,7 +352,24 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('vote:game', (data) => {
-    logger.custLog('투표한 사람에 대한 데이터: ',data);
+    logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ',data);
+    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    selectedRoom.ballotBox = selectedRoom.ballotBox || [];
+    selectedRoom.ballotBox.push(data);
+
+    if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
+      const ballotBox = selectedRoom.ballotBox;
+      let voteResult = {};
+      ballotBox.forEach((member) => {
+        voteResult[member] = voteResult[member] ? voteResult[member]++ : 1;
+      });
+      logger.custLog(voteResult);
+      const result = {
+        liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar'),
+        result: voteResult
+      };
+      ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
+    }
   })
 });
 
