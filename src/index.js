@@ -203,6 +203,7 @@ ChatSocketIO.on('connection', socket => {
         logger.custLog("[leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
         rooms.splice(rooms.indexOf(selectedRoom), 1);
       }
+
       /* 추후 삭제 */
       logger.custLog("[leave:room] 현재 방의 정보들", rooms);
       socket.emit("leave:room", true);
