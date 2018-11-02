@@ -369,6 +369,7 @@ ChatSocketIO.on('connection', socket => {
         liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
         result: voteResult
       };
+      logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
     }
   })
