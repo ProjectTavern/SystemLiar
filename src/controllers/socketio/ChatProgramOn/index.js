@@ -1,4 +1,4 @@
-const { logger, dataLogger } = require('./utilities/logger/winston');
+const { logger, dataLogger } = require('../../../utilities/logger/winston');
 
 module.exports = (ChatRoom) => {
   ChatRoom.on('connection', socket => {
