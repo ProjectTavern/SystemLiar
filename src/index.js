@@ -345,6 +345,10 @@ ChatSocketIO.on('connection', socket => {
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
   });
+
+  socket.on('vote:game', (data) => {
+    logger.custLog('투표한 사람에 대한 데이터: ',data);
+  })
 });
 
 /* 서버 기동 포트: 30500 */
