@@ -354,3 +354,42 @@ server.listen(30500, () => {
 
 
 
+function setUserInfoToSession(request, datas) {
+  let session = request.session;
+  session.id = datas.id;
+  session.nickname = datas.nickname;
+  return session;
+}
+
+function filterRooms(rooms) {
+  return rooms.map(room => {
+    return {
+      id: room.id,
+      name: room.name,
+      subject: room.subject,
+      members: room.members,
+      limit: room.limit,
+      ready: room.ready,
+      status: room.status
+    }
+  })
+}
+
+function deepCopy(data) {
+  return JSON.parse(JSON.stringify(data));
+}
+
+/**
+ * 선택된 방을 찾음
+ * */
+function getSelectedRoom(rooms, id) {
+  const checkRoom = rooms.filter(element => {
+    return element.id + "" === id + "";
+  });
+  logger.custLog("check",checkRoom);
+  let selectedRoom = {};
+  if (checkRoom.length) {
+    selectedRoom = checkRoom[0];
+  }
+  return selectedRoom;
+}
