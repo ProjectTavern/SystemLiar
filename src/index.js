@@ -343,7 +343,10 @@ ChatSocketIO.on('connection', socket => {
   /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-    ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
+    if (!selectedRoom.discussEnd) {
+      selectedRoom.discussEnd = true;
+      ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
+    }
   });
 
   socket.on('vote:game', (data) => {
