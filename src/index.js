@@ -285,6 +285,7 @@ ChatSocketIO.on('connection', socket => {
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
     selectedRoom.playingMembers = deepCopy(selectedRoom.members);
+    selectedRoom.ballotBox.filter((member) => (member));
     logger.custLog("[start:game] 시작하려는 방 정보: ", selectedRoom);
     logger.custLog("[start:game] 시작하려는 방 구성인원: ", selectedRoom.playingMembers);
     selectedRoom.status = "playing";
@@ -356,6 +357,8 @@ ChatSocketIO.on('connection', socket => {
   socket.on('vote:game', (data) => {
     logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ',data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+
+    selectedRoom.ballotBox.filter((member) => (member));
     selectedRoom.ballotBox.push(data);
 
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
@@ -406,9 +409,8 @@ function deepCopy(data) {
  * */
 function getSelectedRoom(rooms, id) {
   const checkRoom = rooms.filter(element => {
-    return element.id + "" === id + "";
+    return element.id + '' === id + '';
   });
-  logger.custLog("check",checkRoom);
   let selectedRoom = {};
   if (checkRoom.length) {
     selectedRoom = checkRoom[0];
