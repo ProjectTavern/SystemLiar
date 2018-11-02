@@ -99,7 +99,8 @@ ChatSocketIO.on('connection', socket => {
           limit : 7,
           status : "wait",
           ready: 0,
-          currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }]
+          currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }],
+          ballotBox: []
         };
         rooms.push(roomData);
         logger.custLog(`[create:room]대화방 생성에 성공하였습니다.`, roomData);
@@ -354,7 +355,6 @@ ChatSocketIO.on('connection', socket => {
   socket.on('vote:game', (data) => {
     logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ',data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-    selectedRoom.ballotBox = typeof selectedRoom.ballotBox === typeof [] ? selectedRoom.ballotBox : [];
     selectedRoom.ballotBox.push(data);
 
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
