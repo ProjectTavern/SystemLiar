@@ -13,11 +13,12 @@ app.use('/', pages);
 
 /* socketio 채팅 */
 const ChatSocketIO = io.of('/roomspace');
+
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
-let rooms = [];
+
+
 
 const ChatProgram = require('./controllers/socketio/ChatProgramOn/index');
-
 ChatSocketIO.on('connection', ChatProgram);
 
 // ChatSocketIO.on('connection', socket => {
@@ -353,43 +354,4 @@ server.listen(30500, () => {
 });
 
 
-function setUserInfoToSession(request, datas) {
-  let session = request.session;
-  session.id = datas.id;
-  session.nickname = datas.nickname;
-  return session;
-}
-
-function filterRooms(rooms) {
-  return rooms.map(room => {
-    return {
-      id: room.id,
-      name: room.name,
-      subject: room.subject,
-      members: room.members,
-      limit: room.limit,
-      ready: room.ready,
-      status: room.status
-    }
-  })
-}
-
-function deepCopy(data) {
-  return JSON.parse(JSON.stringify(data));
-}
-
-/**
- * 선택된 방을 찾음
- * */
-function getSelectedRoom(rooms, id) {
-  const checkRoom = rooms.filter(element => {
-    return element.id + "" === id + "";
-  });
-  logger.custLog("check",checkRoom);
-  let selectedRoom = {};
-  if (checkRoom.length) {
-    selectedRoom = checkRoom[0];
-  }
-  return selectedRoom;
-}
 
