@@ -354,18 +354,19 @@ ChatSocketIO.on('connection', socket => {
   socket.on('vote:game', (data) => {
     logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ',data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-    selectedRoom.ballotBox = selectedRoom.ballotBox || [];
+    selectedRoom.ballotBox = typeof selectedRoom.ballotBox === typeof [] ? selectedRoom.ballotBox : [];
     selectedRoom.ballotBox.push(data);
 
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
       const ballotBox = selectedRoom.ballotBox;
       let voteResult = {};
+      logger.custLog('투표함: ', ballotBox);
       ballotBox.forEach((member) => {
         voteResult[member] = voteResult[member] ? voteResult[member]++ : 1;
       });
       logger.custLog(voteResult);
       const result = {
-        liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar'),
+        liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
         result: voteResult
       };
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
