@@ -16,8 +16,11 @@ const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
 let rooms = [];
 
-const ChatProgramOn = require('./controllers/socketio/ChatProgramOn/index');
-ChatProgramOn(ChatSocketIO);
+const ChatProgram = require('./controllers/socketio/ChatProgramOn/index');
+
+ChatSocketIO.on('connection', socket => {
+
+});
 
 // ChatSocketIO.on('connection', socket => {
 //
