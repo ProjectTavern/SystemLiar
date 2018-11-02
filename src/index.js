@@ -358,16 +358,9 @@ ChatSocketIO.on('connection', socket => {
     selectedRoom.ballotBox.push(data);
 
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
-      const ballotBox = selectedRoom.ballotBox;
-      let voteResult = {};
-      logger.custLog('투표함: ', ballotBox);
-      ballotBox.forEach((member) => {
-        voteResult[member] = voteResult[member] ? voteResult[member]++ : 1;
-      });
-      logger.custLog(voteResult);
       const result = {
         liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
-        result: voteResult
+        result: selectedRoom.ballotBox
       };
       logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
