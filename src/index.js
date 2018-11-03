@@ -268,7 +268,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on("start:game", () => {
-    logger.custLog("[start:game] 방장의 시작 요청.");
+    logger.custLog("[start:game] 방장의 시작 요청.");logger.custLog('보낼 결과물: ', result);
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
@@ -356,6 +356,16 @@ ChatSocketIO.on('connection', socket => {
       };
       logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
+    }
+  });
+
+  socket.on('last:chance', (word) => {
+    logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
+    const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    if (selectRoom.subject === word) {
+      ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", true);
+    } else {
+      ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", false);
     }
   });
 
