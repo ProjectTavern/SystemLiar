@@ -11,9 +11,7 @@ const { logger, dataLogger } = require('./utilities/logger/winston');
 configure(app);
 app.use('/', pages);
 
-/* socketio 채팅 */
 const ChatSocketIO = io.of('/roomspace');
-
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
 
 let rooms = [];
@@ -126,43 +124,33 @@ ChatSocketIO.on('connection', socket => {
   });
 
   /* 방에 만들 경우 */
-  socket.on('join:room', data => {
-    logger.custLog("[join:room] 요청을 전송받았습니다. ", data);
+  socket.on('join:room', (data) => {
+    logger.custLog('[join:room] 요청을 전송받았습니다. ', data);
     try {
-      logger.custLog("[join:room] 방 데이터들을 확인합니다.", data);
-      logger.custLog("[join:room] 방 입장/생성을 하려는 유저의 세션 정보입니다.", usersession);
-      logger.custLog("[join:room] 유저의 방 데이터를 초기화합니다.");
-      initRoom(socket);
+      logger.custLog('[join:room] 데이터를 확인합니다. 유저세션 값입니다.', data, usersession);
+      leaveAllRoom(socket);
 
-      let resultJoin = false;
       let selectedRoom = getSelectedRoom(rooms, data.id);
 
       let socketSession = usersession || {};
       let userinfo = socketSession.userinfo || {};
 
-      if (selectedRoom.hasOwnProperty("id")) {
-        logger.custLog("[join:room] 존재하는 방입니다.", selectedRoom, isJoinable(selectedRoom, usersession.userinfo.nickname));
+      if (selectedRoom.hasOwnProperty("id") && isJoinable(selectedRoom, usersession.userinfo.nickname)) {
+        logger.custLog('[join:room] 방 입장이 가능하여 입장되었습니다.');
+        selectedRoom.members.push(usersession.userinfo.nickname);
 
-        if (isJoinable(selectedRoom, usersession.userinfo.nickname)) {
-          logger.custLog("[join:room] 방 입장이 가능하여 입장되었습니다. resultJoin: ", resultJoin);
+        socket.join(data.id);
+        socket.userRooms.push(data.id);
+        userinfo.room = data.id;
 
-          resultJoin = true;
-          selectedRoom.members.push(usersession.userinfo.nickname);
+        setNameTag(socket, usersession.userinfo.nickname);
 
-          socket.join(data.id);
-          socket.userRooms.push(data.id);
-          userinfo.room = data.id;
+        socket.emit("system:message", { message: "게임에 입장하였습니다." });
+        socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
 
-          setNameTag(socket, usersession.userinfo.nickname);
+        selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
 
-          socket.emit("system:message", { message: "게임에 입장하였습니다." });
-          socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
-
-          selectedRoom.result = resultJoin;
-          selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
-
-          socket.emit("join:room", selectedRoom);
-        }
+        socket.emit("join:room", selectedRoom);
 
       }
 
@@ -197,7 +185,7 @@ ChatSocketIO.on('connection', socket => {
       const userNickname = usersession.userinfo.nickname;
       let selectedRoom = getSelectedRoom(rooms, roomId);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      initRoom(socket);
+      leaveAllRoom(socket);
       ChatSocketIO.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         logger.custLog("[leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
@@ -213,7 +201,7 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  function initRoom(socket) {
+  function leaveAllRoom(socket) {
     const currentRooms = socket.userRooms;
     usersession.userinfo.ready = false;
     currentRooms.forEach((elem) => {
@@ -243,7 +231,7 @@ ChatSocketIO.on('connection', socket => {
       let selectedRoom = getSelectedRoom(rooms, roomId);
       logger.custLog("[disconnect] 선택된 방의 정보: ", selectedRoom);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      initRoom(socket);
+      leaveAllRoom(socket);
       ChatSocketIO.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
       if (selectedRoom.members.length === 0) {
         logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
@@ -369,6 +357,22 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
     }
+  });
+
+  socket.on('end:game', (data) => {
+    // 참여하고 있는 방
+    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    if( selectedRoom.ready === 0 ) {
+
+    } else {
+      selectedRoom.status = 'wait';
+      selectedRoom.ready = 0;
+      selectedRoom.ballotBox = [];
+    }
+
+    // 개별 유저
+    const userinfo = usersession.userinfo;
+    userinfo.ready = false;
   })
 });
 
@@ -376,8 +380,6 @@ ChatSocketIO.on('connection', socket => {
 server.listen(30500, () => {
   logger.custLog("SystemLiar All green. Listening on PORT: 30500");
 });
-
-
 
 function setUserInfoToSession(request, datas) {
   let session = request.session;
