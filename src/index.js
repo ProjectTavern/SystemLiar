@@ -366,6 +366,7 @@ ChatSocketIO.on('connection', socket => {
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     const subject = selectRoom.subject;
     logger.custLog('FOODS: ', foods);
+
     let selectedWords = deepCopy(foods);
     selectedWords.splice(selectedWords.indexOf(subject), 1);
     for (let index = 0; index < 25; index++) {
@@ -377,6 +378,7 @@ ChatSocketIO.on('connection', socket => {
     const result = selectedWords.slice(0, 24);
     const collectTarget = Math.floor(Math.random() * result.length);
     result.splice(collectTarget, 0, subject);
+
     ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
   });
 
