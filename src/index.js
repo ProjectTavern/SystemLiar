@@ -362,7 +362,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('last:chance', () => {
-    logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
+    logger.custLog('[last:chance]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     const subject = selectRoom.subject;
     logger.custLog('FOODS: ', foods);
@@ -383,7 +383,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('last:answer', (word) => {
-    logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
+    logger.custLog('[last:answer]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     if (selectRoom.subject === word) {
       logger.custLog('거짓말쟁이가 제시어를 맞췄습니다!');
