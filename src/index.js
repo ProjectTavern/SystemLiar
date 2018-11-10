@@ -18,6 +18,8 @@ let rooms = [];
 // const ChatProgram = require('./controllers/socketio/ChatProgramOn/index');
 // ChatSocketIO.on('connection', ChatProgram);
 
+
+const { foods } = require('./_mockup/Subjects');
 ChatSocketIO.on('connection', socket => {
 
   socket.userRooms = [];
@@ -359,13 +361,32 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  socket.on('last:chance', (word) => {
+  socket.on('last:chance', () => {
+    logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
+    const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    const subject = selectRoom.subject;
+    let selectedWords = deepCopy(foods);
+    selectedWords.splice(selectedWords.indexOf(subject), 1);
+    for (let index = 0; index < 25; index++) {
+      const target = Math.floor(Math.random() * selectedWords.length);
+      const temp = selectedWords[target];
+      selectedWords.splice(target, 1);
+      selectedWords.splice(0, 0, temp);
+    }
+    const result = selectedWords.slice(0, 25);
+    result.push(subject);
+    ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
+  });
+
+  socket.on('last:answer', (word) => {
     logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     if (selectRoom.subject === word) {
-      ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", true);
+      logger.custLog('거짓말쟁이가 제시어를 맞췄습니다!');
+      ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", true);
     } else {
-      ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", false);
+      logger.custLog('거짓말쟁이가 제시어를 틀렸습니다!');
+      ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", false);
     }
   });
 
