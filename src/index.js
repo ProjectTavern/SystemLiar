@@ -414,7 +414,7 @@ ChatSocketIO.on('connection', socket => {
 
 /* 서버 기동 포트: 30500 */
 server.listen(30500, () => {
-  logger.custLog("SystemLiar All green. Listening on PORT: 30500");
+  logger.custLog("SystemLiar All green. Listening on PORT: 30500, 201811101707");
 });
 
 function setUserInfoToSession(request, datas) {
