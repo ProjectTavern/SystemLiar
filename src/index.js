@@ -270,7 +270,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on("start:game", () => {
-    logger.custLog("[start:game] 방장의 시작 요청.");logger.custLog('보낼 결과물: ', result);
+    logger.custLog("[start:game] 방장의 시작 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
     let selectedRoom = getSelectedRoom(rooms, userRoom);
@@ -345,7 +345,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('vote:game', (data) => {
-    logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ',data);
+    logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ', data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
 
     selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
