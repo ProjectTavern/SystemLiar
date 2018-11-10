@@ -365,6 +365,7 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog('거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     const subject = selectRoom.subject;
+    logger.custLog('FOODS: ', foods);
     let selectedWords = deepCopy(foods);
     selectedWords.splice(selectedWords.indexOf(subject), 1);
     for (let index = 0; index < 25; index++) {
@@ -373,8 +374,9 @@ ChatSocketIO.on('connection', socket => {
       selectedWords.splice(target, 1);
       selectedWords.splice(0, 0, temp);
     }
-    const result = selectedWords.slice(0, 25);
-    result.push(subject);
+    const result = selectedWords.slice(0, 24);
+    const collectTarget = Math.floor(Math.random() * result.length);
+    result.splice(collectTarget, 0, subject);
     ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
   });
 
