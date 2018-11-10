@@ -287,6 +287,7 @@ ChatSocketIO.on('connection', socket => {
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
     /* 메뉴 선택 */
+    logger.custLog(foods);
     let selectedWords = deepCopy(foods);
     const targetFood = Math.floor(Math.random() * selectedWords.length);
     const selectedFood = selectedWords[targetFood];
