@@ -286,6 +286,11 @@ ChatSocketIO.on('connection', socket => {
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
+    /* 메뉴 선택 */
+    let selectedWords = deepCopy(foods);
+    const targetFood = Math.floor(Math.random() * selectedWords.length);
+    const selectedFood = selectedWords[targetFood];
+    selectedRoom.gameRole = selectedFood;
     selectedRoom.currentUsers.forEach(memberData => {
       logger.custLog("[start:game] 판별: ", memberData);
       if (memberData.nickname === liar) {
@@ -296,7 +301,7 @@ ChatSocketIO.on('connection', socket => {
       } else {
         logger.custLog("[start:game] 제시어를 받은 사람: ", memberData);
         memberData.role = 'innocent';
-        const serviceData = { firstPlayer: firstOrder, role: "굽네 볼케이노" };
+        const serviceData = { firstPlayer: firstOrder, role: selectedFood };
         ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
       }
     });
@@ -364,7 +369,7 @@ ChatSocketIO.on('connection', socket => {
   socket.on('last:chance', () => {
     logger.custLog('[last:chance]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-    const subject = selectRoom.subject;
+    const subject = selectRoom.gameRole;
     logger.custLog('FOODS: ', foods);
 
     let selectedWords = deepCopy(foods);
