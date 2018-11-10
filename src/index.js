@@ -19,7 +19,8 @@ let rooms = [];
 // ChatSocketIO.on('connection', ChatProgram);
 
 
-const { foods } = require('./_mockup/Subjects');
+const foods = require('./_mockup/Subjects');
+
 ChatSocketIO.on('connection', socket => {
 
   socket.userRooms = [];
