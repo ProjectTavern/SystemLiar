@@ -391,7 +391,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('end:game', (data) => {
-    // 참여하고 있는 방
+
     logger.custLog('경기 종료, 초기화를 진행합니다.');
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     if( selectedRoom.ready === 0 ) {
