@@ -115,8 +115,8 @@ ChatSocketIO.on('connection', socket => {
         setNameTag(socket, usersession.userinfo.nickname);
         socket.emit("create:room", true);
       } else {
-        logger.custLog(`[create:room]잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
-        socket.emit("create:room", true);
+        logger.custLog(`[create:room] 잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
+        socket.emit("create:room", false);
       }
     } catch (e) {
       logger.error(`[create:room]에러가 발생했습니다. 원인은 다음과 같습니다.`);
