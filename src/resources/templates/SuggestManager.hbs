@@ -13,21 +13,15 @@
   <button type="submit">추가</button>
 </form>
 <strong>제시어 추가</strong>
-// 선택을 좀 편하게 하도록 셀렉트 옵션 대신 바로 직빵으로 하게끔~
-<form method="POST" action="/Suggest/Manager/Add/Suggest">
-  <label for="subject">주제</label>
-  <select id="subject" name="subject">
-    {{#documents}}
-    <option>{{subject}}</option>
-    {{/documents}}
-  </select>
-  <label for="suggest">제시어</label>
-  <input type="text" id="suggest" name="suggest"/>
-  <button type="submit">추가</button>
-</form>
 <h2>제시어 목록</h2>
 {{#documents}}
   <strong>{{subject}}</strong>
+  <form method="POST" action="/Suggest/Manager/Add/Suggest">
+    <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
+    <label for="suggest">제시어</label>
+    <input type="text" id="suggest" name="suggest"/>
+    <button type="submit">추가</button>
+  </form>
   <ul>
   {{#suggests}}
   <li>

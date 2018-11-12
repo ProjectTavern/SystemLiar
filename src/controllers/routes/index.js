@@ -54,6 +54,7 @@ router.get('/Suggest/Manager', (request, response) => {
   });
 
   getSuggests.then((suggestDatas) => {
+    console.log(suggestDatas);
     response.send(suggestManagerTemplate(suggestDatas));
   });
 
