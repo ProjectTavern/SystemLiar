@@ -6,33 +6,39 @@
 </head>
 <body>
 <h1>제시어 관리</h1>
-<strong>주제 추가</strong>
-<form method="POST" action="/Suggest/Manager/Add/Subject">
-  <label for="subject">주제</label>
-  <input type="text" id="subject" name="subject"/>
-  <button type="submit">추가</button>
-</form>
-<strong>제시어 추가</strong>
-<h2>제시어 목록</h2>
-{{#documents}}
-  <strong>{{subject}}</strong>
-  <form method="POST" action="/Suggest/Manager/Add/Suggest">
-    <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
-    <label for="suggest">제시어</label>
-    <input type="text" id="suggest" name="suggest"/>
+
+<div class="panel">
+  <h2>주제 추가</h2>
+  <form method="POST" action="/Suggest/Manager/Add/Subject">
+    <label for="subject">주제</label>
+    <input type="text" id="subject" name="subject"/>
     <button type="submit">추가</button>
   </form>
-  <ul>
-  {{#suggests}}
-  <li>
-    <form method="post" action="/Suggest/Manager/Remove/Suggest">
-      <input type="hidden" name="subject" value="{{../subject}}"/>
-      <input type="hidden" name="suggest" value="{{this}}"/>
-      {{this}} <button type="submit">삭제</button>
+</div>
+
+<div class="panel">
+  <h2>제시어 목록</h2>
+  {{#documents}}
+    <strong>{{subject}}</strong>
+    <form method="POST" action="/Suggest/Manager/Add/Suggest">
+      <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
+      <label for="suggest">제시어</label>
+      <input type="text" id="suggest" name="suggest"/>
+      <button type="submit">추가</button>
     </form>
-  </li>
-  {{/suggests}}
-  </ul>
-{{/documents}}
+    <ul>
+      {{#suggests}}
+        <li>
+          <form method="post" action="/Suggest/Manager/Remove/Suggest">
+            <input type="hidden" name="subject" value="{{../subject}}"/>
+            <input type="hidden" name="suggest" value="{{this}}"/>
+            {{this}} <button type="submit">삭제</button>
+          </form>
+        </li>
+      {{/suggests}}
+    </ul>
+  {{/documents}}
+</div>
+
 </body>
 </html>
