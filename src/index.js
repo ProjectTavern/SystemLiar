@@ -186,7 +186,7 @@ ChatSocketIO.on('connection', socket => {
       let selectedRoom = getSelectedRoom(rooms, roomId);
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
       leaveAllRoom(socket);
-      ChatSocketIO.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
+      ChatSocketIO.to(roomId).emit("user:exit", userNickname);
       if (selectedRoom.members.length === 0) {
         logger.custLog("[leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
         rooms.splice(rooms.indexOf(selectedRoom), 1);
@@ -390,7 +390,7 @@ ChatSocketIO.on('connection', socket => {
     // 개별 유저
     const userinfo = usersession.userinfo;
     userinfo.ready = false;
-  })
+  });
 
   socket.on('disconnect', () => {
     logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
