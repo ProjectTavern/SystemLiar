@@ -8,6 +8,7 @@ const dataScheme = require('./config/dataset');
 const configure = require('./utilities/main.config');
 const { logger, dataLogger } = require('./utilities/logger/winston');
 
+// 앱 설정
 configure(app);
 app.use('/', pages);
 
