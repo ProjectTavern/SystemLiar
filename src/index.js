@@ -148,12 +148,8 @@ ChatSocketIO.on('connection', socket => {
         userinfo.room = data.id;
 
         setNameTag(socket, usersession.userinfo.nickname);
-
-        socket.emit("system:message", { message: "게임에 입장하였습니다." });
-        socket.broadcast.to(data.id).emit('system:message', { message: socket.username + '님이 접속하셨습니다.' });
-
         selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
-
+        socket.broadcast.to(data.id).emit('user:join', usersession.userinfo.nickname);
         socket.emit("join:room", selectedRoom);
 
       }
@@ -223,29 +219,6 @@ ChatSocketIO.on('connection', socket => {
       socket.username = someones[random];
     }
   }
-
-  socket.on('disconnect', () => {
-    logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
-
-    try {
-      /* 유저가 들어간 방 찾기 */
-      const roomId = usersession.userinfo.room;
-      const userNickname = usersession.userinfo.nickname;
-      logger.custLog("유저의 로그 데이터: ", roomId, userNickname);
-      let selectedRoom = getSelectedRoom(rooms, roomId);
-      logger.custLog("[disconnect] 선택된 방의 정보: ", selectedRoom);
-      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      leaveAllRoom(socket);
-      ChatSocketIO.to(roomId).emit("system:message", { message: userNickname + '님이 방에서 나가셨습니다.' });
-      if (selectedRoom.members.length === 0) {
-        logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
-        rooms.splice(rooms.indexOf(selectedRoom), 1);
-      }
-      logger.custLog("[disconnect] 현재 방의 정보들", rooms);
-    } catch (error) {
-      logger.custLog("[ERROR][disconnect] => ", error);
-    }
-  });
 
   /**
    * 게임 시작 관련 : 레디 / 시작 / 종료
@@ -418,6 +391,30 @@ ChatSocketIO.on('connection', socket => {
     const userinfo = usersession.userinfo;
     userinfo.ready = false;
   })
+
+  socket.on('disconnect', () => {
+    logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
+
+    try {
+      /* 유저가 들어간 방 찾기 */
+      const roomId = usersession.userinfo.room;
+      const userNickname = usersession.userinfo.nickname;
+      ChatSocketIO.to(roomId).emit("user:exit", userNickname);
+      logger.custLog('나간 사람: ', usersession.userinfo);
+      logger.custLog("유저의 로그 데이터: ", roomId, userNickname);
+      let selectedRoom = getSelectedRoom(rooms, roomId);
+      logger.custLog("[disconnect] 선택된 방의 정보: ", selectedRoom);
+      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+      leaveAllRoom(socket);
+      if (selectedRoom.members.length === 0) {
+        logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
+        rooms.splice(rooms.indexOf(selectedRoom), 1);
+      }
+      logger.custLog("[disconnect] 현재 방의 정보들", rooms);
+    } catch (error) {
+      logger.custLog("[ERROR][disconnect] => ", error);
+    }
+  });
 });
 
 /* 서버 기동 포트: 30500 */
