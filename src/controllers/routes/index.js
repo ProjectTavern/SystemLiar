@@ -84,6 +84,7 @@ router.post('/Suggest/Manager/Remove/Suggest', (request, response) => {
 });
 
 router.get('/Log/Today', (request, response) => {
+  console.log((new Date).currentDay());
   response.sendFile(path.join(__dirname, `../../utilities/logger/log/${(new Date).currentDay()}.log`));
 });
 

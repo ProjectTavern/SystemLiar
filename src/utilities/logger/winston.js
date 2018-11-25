@@ -7,10 +7,10 @@ String.prototype.capitalizeFirstLetter = function () {
   return this.charAt(0).toUpperCase() + this.slice(1);
 };
 Date.prototype.currentTimeLog = function() {
-  return `${this.getFullYear()}.${this.getMonth() + 1}.${this.getDay()}.${this.getHours()}:${this.getMinutes()}:${this.getSeconds()}`;
+  return `${this.getFullYear()}.${this.getMonth() + 1}.${this.getDate()}.${this.getHours()}:${this.getMinutes()}:${this.getSeconds()}`;
 };
 Date.prototype.currentDay = function() {
-  return `${this.getFullYear()}-${this.getMonth() + 1}-${this.getDay()}`;
+  return `${this.getFullYear()}-${this.getMonth() + 1}-${this.getDate()}`;
 };
 
 const logFormat = printf(info => {
