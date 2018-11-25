@@ -233,14 +233,15 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[ready:user] 유저의 준비되지 않은 유저", usersession);
       userinfo.ready = false;
       selectedRoom.ready--;
+      ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
       ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", false);
     } else {
       logger.custLog("[ready:user] 유저의 준비된 유저", usersession);
       userinfo.ready = true;
       selectedRoom.ready++;
+      ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
       selectedRoom.ready >= 2 && selectedRoom.ready === selectedRoom.members.length && ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", true);
     }
-    ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
   });
 
   socket.on("start:game", () => {
