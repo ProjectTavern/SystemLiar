@@ -297,12 +297,12 @@ ChatSocketIO.on('connection', socket => {
 
       if (data.hasOwnProperty("explain")) {
         if (playersLength > 0) {
-          const serviceData = { nextPlayer: nextOrder, explain : data.explain };
+          const serviceData = { nextPlayer: nextOrder, explain : data.explain, explaingPlayer: data.explaingPlayer };
           logger.custLog("[explain:game] 전달할 데이터", serviceData);
           ChatSocketIO.to(socket.userRooms[0]).emit("explain:game", serviceData);
         } else {
           logger.custLog("[explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
-          ChatSocketIO.to(socket.userRooms[0]).emit("discuss:game", { explain: data.explain });
+          ChatSocketIO.to(socket.userRooms[0]).emit("discuss:game", { explain: data.explain, explaingPlayer: data.explaingPlayer });
         }
       } else {
         logger.custLog("[explain:game] None data exception: 전달할 메세지가 들어오지 않았습니다.", data);
