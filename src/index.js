@@ -178,7 +178,7 @@ ChatSocketIO.on('connection', socket => {
   });
 
   /* 방을 떠납니다. */
-  socket.on("leave:room", data => {
+  socket.on("leave:room", (data) => {
     logger.custLog("[leave:room]", data);
     try {
       const roomId = socket.userRooms[0];
@@ -233,12 +233,12 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[ready:user] 유저의 준비되지 않은 유저", usersession);
       userinfo.ready = false;
       selectedRoom.ready--;
-      socket.emit("all:ready", false);
+      ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", false);
     } else {
       logger.custLog("[ready:user] 유저의 준비된 유저", usersession);
       userinfo.ready = true;
       selectedRoom.ready++;
-      selectedRoom.ready >= 2 && selectedRoom.ready === selectedRoom.members.length && socket.emit("all:ready", true);
+      selectedRoom.ready >= 2 && selectedRoom.ready === selectedRoom.members.length && ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", true);
     }
     ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
   });
