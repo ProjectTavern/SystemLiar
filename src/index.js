@@ -115,6 +115,8 @@ ChatSocketIO.on('connection', socket => {
 
         setNameTag(socket, usersession.userinfo.nickname);
         socket.emit("create:room", true);
+        let selectedRoom = getSelectedRoom(rooms, roomId);
+        socket.emit("create:info", selectedRoom);
       } else {
         logger.custLog(`[create:room] 잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
         socket.emit("create:room", false);
@@ -385,6 +387,7 @@ ChatSocketIO.on('connection', socket => {
       selectedRoom.status = 'wait';
       selectedRoom.ready = 0;
       selectedRoom.ballotBox = [];
+      selectedRoom.discussEnd = false;
     }
 
     // 개별 유저
