@@ -320,6 +320,7 @@ ChatSocketIO.on('connection', socket => {
 
   /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
+    logger.custLog("[end:discuss] 토론 종료", data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     if (!selectedRoom.discussEnd) {
       selectedRoom.discussEnd = true;
