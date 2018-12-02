@@ -359,11 +359,11 @@ ChatSocketIO.on('connection', socket => {
     selectedRoom.ballotBox.push(data.liarID);
     selectedRoom.senderID.push(data.senderID);
 
+    ChatSocketIO.to(socket.userRooms[0]).emit("vote:senderID", data.senderID);
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
       const result = {
         liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
-        result: selectedRoom.ballotBox,
-        senderID: data.senderID
+        result: selectedRoom.ballotBox
       };
       logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
