@@ -201,6 +201,12 @@ ChatSocketIO.on('connection', socket => {
         selectedRoom.ready--;
       }
 
+      selectedRoom.currentUsers.forEach((memberData, index) => {
+        if (memberData.nickname === userNickname) {
+          selectedRoom.currentUsers.splice(index, 1);
+        }
+      });
+
       if (selectedRoom.members.length === 0) {
         logger.custLog("[leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
         rooms.splice(rooms.indexOf(selectedRoom), 1);
@@ -428,10 +434,16 @@ ChatSocketIO.on('connection', socket => {
       selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
       leaveAllRoom(socket);
 
-      if(selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
+      if (selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
         selectedRoom.readiedPlayer.splice(selectedRoom.readiedPlayer.indexOf(userNickname), 1);
         selectedRoom.ready--;
       }
+
+      selectedRoom.currentUsers.forEach((memberData, index) => {
+        if (memberData.nickname === userNickname) {
+          selectedRoom.currentUsers.splice(index, 1);
+        }
+      });
 
       if (selectedRoom.members.length === 0) {
         logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
