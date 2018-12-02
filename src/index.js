@@ -104,7 +104,8 @@ ChatSocketIO.on('connection', socket => {
           readiedPlayer: [],
           host: usersession.userinfo.nickname,
           currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }],
-          ballotBox: []
+          ballotBox: [],
+          senderID: []
         };
         rooms.push(roomData);
         logger.custLog(`[create:room]대화방 생성에 성공하였습니다.`, roomData);
@@ -355,12 +356,14 @@ ChatSocketIO.on('connection', socket => {
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
 
     selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
-    selectedRoom.ballotBox.push(data);
+    selectedRoom.ballotBox.push(data.liarID);
+    selectedRoom.senderID.push(data.senderID);
 
     if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
       const result = {
         liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
-        result: selectedRoom.ballotBox
+        result: selectedRoom.ballotBox,
+        senderID: data.senderID
       };
       logger.custLog('보낼 결과물: ', result);
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
@@ -412,6 +415,7 @@ ChatSocketIO.on('connection', socket => {
       selectedRoom.ballotBox = [];
       selectedRoom.discussEnd = false;
       selectedRoom.readiedPlayer = [];
+      selectedRoom.senderID = [];
     }
 
     // 개별 유저
