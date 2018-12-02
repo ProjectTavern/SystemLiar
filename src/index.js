@@ -400,6 +400,7 @@ ChatSocketIO.on('connection', socket => {
       selectedRoom.ready = 0;
       selectedRoom.ballotBox = [];
       selectedRoom.discussEnd = false;
+      selectedRoom.readiedPlayer = [];
     }
 
     // 개별 유저
