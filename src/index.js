@@ -293,27 +293,27 @@ ChatSocketIO.on('connection', socket => {
     const targetNumber = Math.floor(Math.random() * playersLength);
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
-    /* 메뉴 선택 */
-    logger.custLog(foods);
-    let selectedWords = deepCopy(foods);
-    const targetFood = Math.floor(Math.random() * selectedWords.length);
-    const selectedFood = selectedWords[targetFood];
-    selectedRoom.gameRole = selectedFood;
-    selectedRoom.currentUsers.forEach(memberData => {
-      logger.custLog("[start:game] 판별: ", memberData);
-      if (memberData.nickname === liar) {
-        logger.custLog("[start:game] 거짓말쟁이: ", memberData);
-        memberData.role = 'liar';
-        const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
-        ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
-      } else {
-        logger.custLog("[start:game] 제시어를 받은 사람: ", memberData);
-        memberData.role = 'innocent';
-        const serviceData = { firstPlayer: firstOrder, role: selectedFood };
-        ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
-      }
-    });
+    /* 제시어 선택 */
 
+    redis.smembers(selectedRoom.subject, (error, suggests) => {
+      const targetFood = Math.floor(Math.random() * suggests.length);
+      const selectedFood = suggests[targetFood];
+      selectedRoom.gameRole = selectedFood;
+      selectedRoom.currentUsers.forEach(memberData => {
+        logger.custLog("[start:game] 판별: ", memberData);
+        if (memberData.nickname === liar) {
+          logger.custLog("[start:game] 거짓말쟁이: ", memberData);
+          memberData.role = 'liar';
+          const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
+          ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
+        } else {
+          logger.custLog("[start:game] 제시어를 받은 사람: ", memberData);
+          memberData.role = 'innocent';
+          const serviceData = { firstPlayer: firstOrder, role: selectedFood };
+          ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
+        }
+      });
+    });
   });
 
   socket.on("explain:game", (data) => {
