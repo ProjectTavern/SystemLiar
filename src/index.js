@@ -87,6 +87,13 @@ ChatSocketIO.on('connection', socket => {
     socket.emit("rooms:info", filterRooms(rooms));
   });
 
+  socket.on('get:subject', () => {
+    redis.smembers('subject', (error, subjects) => {
+      logger.custLog('주제', subjects);
+      socket.emit('get:subject', subjects);
+    });
+  });
+
   /* 방 생성을 따로 만듬 */
   socket.on("create:room", (data) => {
     logger.custLog(`[create:room]거짓말쟁이 대화방 생성 요청을 전송받았습니다.`);
