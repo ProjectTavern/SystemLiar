@@ -294,7 +294,6 @@ ChatSocketIO.on('connection', socket => {
     const firstOrder = selectedRoom.playingMembers[targetNumber];
     selectedRoom.playingMembers.splice(targetNumber, 1);
     /* 제시어 선택 */
-
     redis.smembers(selectedRoom.subject, (error, suggests) => {
       const targetFood = Math.floor(Math.random() * suggests.length);
       const selectedFood = suggests[targetFood];
@@ -383,19 +382,22 @@ ChatSocketIO.on('connection', socket => {
     const subject = selectRoom.gameRole;
     logger.custLog('FOODS: ', foods);
 
-    let selectedWords = deepCopy(foods);
-    selectedWords.splice(selectedWords.indexOf(subject), 1);
-    for (let index = 0; index < 25; index++) {
-      const target = Math.floor(Math.random() * selectedWords.length);
-      const temp = selectedWords[target];
-      selectedWords.splice(target, 1);
-      selectedWords.splice(0, 0, temp);
-    }
-    const result = selectedWords.slice(0, 24);
-    const collectTarget = Math.floor(Math.random() * result.length);
-    result.splice(collectTarget, 0, subject);
 
-    ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
+    redis.smembers(selectRoom.subject, (error, suggests) => {
+      suggests.splice(suggests.indexOf(subject), 1);
+      const resultLength = suggests.length >= 25 ? 25 : suggests.length;
+      for (let index = 0; index < resultLength; index++) {
+        const target = Math.floor(Math.random() * suggests.length);
+        const temp = suggests[target];
+        suggests.splice(target, 1);
+        suggests.splice(0, 0, temp);
+      }
+      const result = suggests.slice(0, resultLength - 1);
+      const collectTarget = Math.floor(Math.random() * result.length);
+      result.splice(collectTarget, 0, subject);
+
+      ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
+    });
   });
 
   socket.on('last:answer', (word) => {
