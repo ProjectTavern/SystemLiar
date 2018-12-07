@@ -22,6 +22,10 @@ router.get('/Data/Redis', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
 });
 
+router.get('/Suggest/CSS/common.css', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/CSS/common.css'));
+});
+
 router.get('/Test/Chat', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/sample_chat.html'));
 });
@@ -37,12 +41,13 @@ router.get('/Suggest/Manager', (request, response) => {
   const getSuggests = new Promise((resolve) => {
     getSubjects
       .then((subjects) => {
+        subjects.sort();
         subjects.length ?
         subjects.forEach((subject, index) => {
           redis.smembers(subject, (error, suggests) => {
             const subjectDatas = {
               subject: subject,
-              suggests: suggests
+              suggests: suggests.sort()
             };
             results['documents'].push(subjectDatas);
             if (index === (subjects.length - 1)) {

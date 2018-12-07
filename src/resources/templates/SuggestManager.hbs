@@ -3,43 +3,43 @@
 <head>
   <meta charset="utf-8">
   <title>SystemLiar</title>
+  <link rel="stylesheet" href="CSS/common.css">
 </head>
 <body>
 <h1>제시어 관리</h1>
-
-<div class="panel">
-  <h2>주제 추가</h2>
+<h2>주제 추가</h2>
+<div class="panel subject">
   <form method="POST" action="/Suggest/Manager/Add/Subject">
     <label for="subject">주제</label>
     <input type="text" id="subject" name="subject"/>
     <button type="submit">추가</button>
   </form>
 </div>
-
-<div class="panel">
-  <h2>제시어 목록</h2>
+<h2>제시어 목록</h2>
+<div class="panel suggest">
   {{#documents}}
-    <strong>{{subject}}</strong>
-    <form method="POST" action="/Suggest/Manager/Add/Suggest">
-      <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
-      <label for="suggest">제시어</label>
-      <input type="text" id="suggest" name="suggest"/>
-      <button type="submit">추가</button>
-      <span>{{suggests.length}}개</span>
-    </form>
-    <ul>
-      {{#suggests}}
-        <li>
-          <form method="post" action="/Suggest/Manager/Remove/Suggest">
-            <input type="hidden" name="subject" value="{{../subject}}"/>
-            <input type="hidden" name="suggest" value="{{this}}"/>
-            {{this}} <button type="submit">삭제</button>
-          </form>
-        </li>
-      {{/suggests}}
-    </ul>
+    <div class="single_sugeest">
+      <strong>{{subject}}</strong>
+      <span class="count_suggest">등록된 개수: {{suggests.length}}개</span>
+      <form method="POST" action="/Suggest/Manager/Add/Suggest">
+        <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
+        <label for="suggest">제시어</label>
+        <input type="text" id="suggest" name="suggest"/>
+        <button type="submit">추가</button>
+      </form>
+      <ul class="suggest_list">
+        {{#suggests}}
+          <li>
+            <form method="post" action="/Suggest/Manager/Remove/Suggest" class="suggest_form">
+              <input type="hidden" name="subject" value="{{../subject}}"/>
+              <input type="hidden" name="suggest" value="{{this}}"/>
+              {{this}} <button type="submit" class="btn_delete">삭제</button>
+            </form>
+          </li>
+        {{/suggests}}
+      </ul>
+    </div>
   {{/documents}}
 </div>
-
 </body>
 </html>
