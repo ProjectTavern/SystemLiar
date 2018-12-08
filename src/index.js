@@ -99,9 +99,24 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog(`[create:room]거짓말쟁이 대화방 생성 요청을 전송받았습니다.`);
     try{
       if (data.id === "create") {
+
+        let roomNumbers = [];
+        let lowestRoomNumber = 1;
+        rooms.forEach((room) => {
+          roomNumbers.push(room.number);
+        });
+        roomNumbers.sort();
+        roomNumbers.forEach((number, index) => {
+          if (number !== index + 1) {
+            lowestRoomNumber = index + 1;
+            return false;
+          }
+        });
+
         const roomId = Date.now();
         const roomData = {
           id : roomId,
+          number: lowestRoomNumber,
           name : data.name,
           subject : data.subject,
           members : [usersession.userinfo.nickname],
