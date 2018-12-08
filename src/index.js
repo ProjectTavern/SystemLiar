@@ -381,11 +381,12 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog('[last:chance]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
     const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     const subject = selectRoom.gameRole;
-    logger.custLog('FOODS: ', foods);
-
 
     redis.smembers(selectRoom.subject, (error, suggests) => {
-      suggests.splice(suggests.indexOf(subject), 1);
+      const originalDatasLength = suggests.length;
+      if (originalDatasLength > 25) {
+        suggests.splice(suggests.indexOf(subject), 1);
+      }
       const resultLength = suggests.length >= 25 ? 25 : suggests.length;
       for (let index = 0; index < resultLength; index++) {
         const target = Math.floor(Math.random() * suggests.length);
@@ -393,9 +394,15 @@ ChatSocketIO.on('connection', socket => {
         suggests.splice(target, 1);
         suggests.splice(0, 0, temp);
       }
-      const result = suggests.slice(0, resultLength - 1);
-      const collectTarget = Math.floor(Math.random() * result.length);
-      result.splice(collectTarget, 0, subject);
+
+      let result = [];
+      if (originalDatasLength > 25) {
+        result = suggests.slice(0, resultLength - 1);
+        const collectTarget = Math.floor(Math.random() * result.length);
+        result.splice(collectTarget, 0, subject);
+      } else {
+        result = suggests;
+      }
 
       ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
     });
