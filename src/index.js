@@ -111,7 +111,7 @@ ChatSocketIO.on('connection', socket => {
         let roomNumbers = [];
         let lowestRoomNumber = 1;
         rooms.forEach((room) => {
-          logger.custLog('방정보', room);
+          logger.custLog(room.number);
           roomNumbers.push(room.number);
         });
         roomNumbers.sort();
