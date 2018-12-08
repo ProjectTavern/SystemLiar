@@ -126,6 +126,7 @@ ChatSocketIO.on('connection', socket => {
 
         let roomNumbers = [];
         let lowestRoomNumber = 1;
+        logger.custLog('방데이터 전체 목록: 크리에이트:', rooms);
         rooms.forEach((room) => {
           logger.custLog(room.number);
           roomNumbers.push(room.number);
