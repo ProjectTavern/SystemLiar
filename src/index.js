@@ -59,6 +59,13 @@ ChatSocketIO.on('connection', socket => {
     const userGhashId = data.id;
     logger.custLog('[user:create:nickname]user구글 아이디', data);
 
+    if (userNickname.split(' ').length > 1) {
+      logger.custLog(`[user:create:nickname] 띄어쓰기는 불가능 합니다.`);
+      socket.emit("user:status", false);
+      return false;
+    }
+
+
     redis.smembers(dataScheme.user.nicknames, (error, userNicknameLists) => {
       if(userNicknameLists.includes(userNickname)) {
         logger.custLog(`[user:create:nickname]사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
