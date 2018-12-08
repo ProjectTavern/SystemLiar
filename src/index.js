@@ -125,15 +125,12 @@ ChatSocketIO.on('connection', socket => {
       if (data.id === "create") {
 
         let roomNumbers = [];
-        let lowestRoomNumber = 1;
-        logger.custLog('방데이터 전체 목록: 크리에이트:', rooms);
+        let lowestRoomNumber = rooms.length + 1;
         rooms.forEach((room) => {
-          logger.custLog(room.number);
           roomNumbers.push(room.number);
         });
         roomNumbers.sort();
         roomNumbers.forEach((number, index) => {
-          logger.custLog(typeof number + ":" + index);
           if (number !== index + 1) {
             lowestRoomNumber = index + 1;
             return false;
