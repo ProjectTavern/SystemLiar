@@ -94,7 +94,6 @@ router.post('/Suggest/Manager/Add/Suggest', (request, response) => {
 router.post('/Suggest/Manager/Remove/Suggest', (request, response) => {
   const subject = request.body.subject;
   const suggest = request.body.suggest;
-  console.log(subject,suggest);
   redis.multi()
     .srem(subject, suggest)
     .exec((error, result) => response.redirect('/Suggest/Manager'));
