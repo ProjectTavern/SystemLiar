@@ -91,6 +91,7 @@ ChatSocketIO.on('connection', socket => {
   /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
   socket.on("rooms:refresh", () => {
     logger.custLog(`[rooms:refresh]사용자의 요청으로 방을 새로 고침합니다.`);
+    logger.custLog('방들 전체 리스트 ',rooms);
     socket.emit("rooms:info", filterRooms(rooms));
   });
 
