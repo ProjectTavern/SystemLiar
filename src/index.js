@@ -115,6 +115,7 @@ ChatSocketIO.on('connection', socket => {
         });
         roomNumbers.sort();
         roomNumbers.forEach((number, index) => {
+          logger.custLog('number', number + ":" + index);
           if (number !== index + 1) {
             lowestRoomNumber = index + 1;
             return false;
