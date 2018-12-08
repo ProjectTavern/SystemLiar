@@ -353,6 +353,7 @@ ChatSocketIO.on('connection', socket => {
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
     if (!selectedRoom.discussEnd) {
       selectedRoom.discussEnd = true;
+      logger.custLog('투표자들', selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
       ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
     }
   });
