@@ -368,8 +368,6 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  socket.emit("rooms:info", filterRooms(rooms));
-
   /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
     logger.custLog("[end:discuss] 토론 종료", data);
@@ -503,6 +501,9 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[ERROR][disconnect] => ", error);
     }
   });
+
+
+  socket.emit("rooms:info", filterRooms(rooms));
 });
 
 /* 서버 기동 포트: 30500 */
