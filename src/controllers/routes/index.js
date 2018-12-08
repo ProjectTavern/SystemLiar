@@ -6,6 +6,14 @@ const {logger} = require('../../utilities/logger/winston');
 const HandleBars = require('handlebars');
 const suggestManagerTemplate = require('../../resources/templates/SuggestManager.hbs');
 
+HandleBars.registerHelper("checkList", function(options) {
+  if (options.hash.index % 5 === options.hash.count) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
+});
+
 router.use('/', (request, response, next) => {
   next();
 });
@@ -22,8 +30,12 @@ router.get('/Data/Redis', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
 });
 
-router.get('/Suggest/CSS/common.css', (request, response) => {
-  response.sendFile(path.join(__dirname, '../../resources/CSS/common.css'));
+router.get('/Suggest/CSS/suggestManager.css', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/CSS/suggestManager.css'));
+});
+
+router.get('/Suggest/Javascript/suggestManager.js', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/Javascript/suggestManager.js'));
 });
 
 router.get('/Test/Chat', (request, response) => {

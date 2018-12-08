@@ -2,8 +2,13 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+          integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <title>SystemLiar</title>
-  <link rel="stylesheet" href="CSS/common.css">
+  <link rel="stylesheet" href="CSS/suggestManager.css">
+  <script src="Javascript/suggestManager.js" defer></script>
 </head>
 <body>
 <h1>제시어 관리</h1>
@@ -16,9 +21,12 @@
   </form>
 </div>
 <h2>제시어 목록</h2>
-<div class="panel suggest">
+<div class="panel_subject">
   {{#documents}}
-    <div class="single_sugeest">
+    {{#checkList index=@index count=0}}
+    <div class="panel suggest">
+    {{/checkList}}
+    <div class="single_suggest" draggable="true">
       <strong>{{subject}}</strong>
       <span class="count_suggest">등록된 개수: {{suggests.length}}개</span>
       <form method="POST" action="/Suggest/Manager/Add/Suggest">
@@ -33,12 +41,20 @@
             <form method="post" action="/Suggest/Manager/Remove/Suggest" class="suggest_form">
               <input type="hidden" name="subject" value="{{../subject}}"/>
               <input type="hidden" name="suggest" value="{{this}}"/>
-              {{this}} <button type="submit" class="btn_delete">삭제</button>
+              {{this}}
+              <button type="submit" class="btn_delete">삭제</button>
             </form>
+          </li>
+        {{else}}
+          <li>
+            등록된 제시어가 없습니다.
           </li>
         {{/suggests}}
       </ul>
     </div>
+    {{#checkList index=@index count=4}}
+    </div>
+    {{/checkList}}
   {{/documents}}
 </div>
 </body>
