@@ -5,6 +5,7 @@ const redis = require('../../controllers/database/redis');
 const {logger} = require('../../utilities/logger/winston');
 const HandleBars = require('handlebars');
 const suggestManagerTemplate = require('../../resources/templates/SuggestManager.hbs');
+const noticeManagerTemplate = require('../../resources/templates/NoticeManager.hbs');
 
 HandleBars.registerHelper("checkList", function(options) {
   if (options.hash.index % 5 === options.hash.count) {
@@ -97,6 +98,35 @@ router.post('/Suggest/Manager/Remove/Suggest', (request, response) => {
   redis.multi()
     .srem(subject, suggest)
     .exec((error, result) => response.redirect('/Suggest/Manager'));
+});
+
+router.get('/Notice/Manager', (request, response) => {
+  redis.lrange('noticeList', 0, -1, (error, notices) => {
+    let templateData = {documents: []};
+    try {
+      notices.forEach((notice) => {
+        templateData.documents.push(JSON.parse(notice));
+      })
+    } catch (e) {
+      logger.custLog('공지사항을 가져오다가 오류가 발생했습니다.', e);
+    } finally {
+      console.log(templateData);
+      response.send(noticeManagerTemplate(templateData));
+    }
+  });
+});
+
+router.post('/Notice/Manager/Add/Notice', (request, response) => {
+  const { title, isShow, contents} = request.body;
+  const notice = {
+    id: (new Date).getTime(),
+    title: title,
+    isShow: isShow === 'on',
+    contents: contents
+  };
+  redis.lpush('noticeList', JSON.stringify(notice), (error, statusResult) => {
+    response.redirect('/Notice/Manager');
+  });
 });
 
 router.get('/Log/Today', (request, response) => {

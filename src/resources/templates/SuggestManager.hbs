@@ -16,7 +16,7 @@
 <div class="panel subject">
   <form method="POST" action="/Suggest/Manager/Add/Subject">
     <label for="subject">주제</label>
-    <input type="text" id="subject" name="subject"/>
+    <input type="text" id="subject" name="subject" required/>
     <button type="submit">추가</button>
   </form>
 </div>
@@ -32,7 +32,7 @@
       <form method="POST" action="/Suggest/Manager/Add/Suggest">
         <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
         <label for="suggest">제시어</label>
-        <input type="text" id="suggest" name="suggest"/>
+        <input type="text" id="suggest" name="suggest" required/>
         <button type="submit">추가</button>
       </form>
       <ul class="suggest_list">

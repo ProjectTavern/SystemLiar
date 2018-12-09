@@ -59,6 +59,11 @@ ChatSocketIO.on('connection', socket => {
     });
   });
 
+  socket.on('get:notice', (data) => {
+    const result = '';
+    socket.emit('get:notice', result);
+  });
+
   socket.on("user:create:nickname", data => {
     logger.custLog(`[user:create:nickname]새로운 대화명 생성 요청을 전송받았습니다.`, data);
 
