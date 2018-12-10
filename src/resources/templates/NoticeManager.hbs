@@ -34,14 +34,16 @@
   <ul>
     {{#documents}}
       <li id="{{id}}">
-        <label class="" for="isShow" style="display:none;">노출</label>
-        <input type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>
-        <strong>{{title}}</strong>
-        <div>
-          <span>
-            {{contents}}
-          </span>
-        </div>
+        <form method="POST" action="/Notice/Manager/Put/Notice">
+          <input type="hidden" name="id" value="{{id}}" title="ID"/>
+          <label class="" for="isShow" style="display:none;">노출</label>
+          <input type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>
+          <input type="text" value="{{title}}" name="title" title="제목"/>
+          <div>
+          <textarea title="본문" name="contents">{{contents}}</textarea>
+          </div>
+          <button type="submit">공지사항 수정</button>
+        </form>
       </li>
     {{/documents}}
   </ul>

@@ -72,9 +72,8 @@ router.get('/Suggest/Manager', (request, response) => {
   });
 
   getSuggests.then((suggestDatas) => {
-    response.send(suggestManagerTemplate(suggestDatas, appVersion));
+    response.send(suggestManagerTemplate(suggestDatas));
   });
-
 });
 
 router.post('/Suggest/Manager/Add/Subject', (request, response) => {
@@ -130,16 +129,58 @@ router.get('/app/version/', (request, response) => {
   });
 });
 
+router.get('/app/notices/', (request, response) => {
+  redis.lrange('noticeList', 0, -1, (error, notices) => {
+    let result = [];
+    try {
+      notices.forEach((notice) => {
+        const noticeData = JSON.parse(notice);
+        if (noticeData.isShow) {
+          result.push({ title : noticeData.title, contents: noticeData.contents });
+        }
+      });
+      response.json(result);
+    } catch (e) {
+
+    }
+  });
+});
+
 router.post('/Notice/Manager/Add/Notice', (request, response) => {
   const { title, isShow, contents} = request.body;
   const notice = {
-    id: (new Date).getTime(),
+    id: (new Date).getTime().toString(),
     title: title,
     isShow: isShow === 'on',
     contents: contents
   };
   redis.lpush('noticeList', JSON.stringify(notice), (error, statusResult) => {
     response.redirect('/Notice/Manager');
+  });
+});
+
+router.post('/Notice/Manager/Put/Notice', (request, response) => {
+  const { id, title, isShow, contents} = request.body;
+  const notice = {
+    id: id,
+    title: title,
+    isShow: isShow === 'on',
+    contents: contents
+  };
+  redis.lrange('noticeList', 0, -1, (error, notices) => {
+    try {
+      let currentIndex = 0;
+      notices.forEach((notice, index) => {
+        if (id === JSON.parse(notice).id) {
+          currentIndex = index;
+        }
+      });
+      redis.lset('noticeList', currentIndex, JSON.stringify(notice));
+    } catch (e) {
+      logger.custLog('공지사항을 가져오다가 오류가 발생했습니다.', e);
+    } finally {
+      response.redirect('/Notice/Manager');
+    }
   });
 });
 
