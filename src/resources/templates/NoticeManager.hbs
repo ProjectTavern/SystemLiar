@@ -9,7 +9,16 @@
   <title>SystemLiar</title>
 </head>
 <body>
-  공지사항
+<h2>버전 정보 관리</h2>
+<div>
+  <span>{{appVersion}}</span>
+</div>
+<form method="POST" action="/Application/Input/Version">
+  <label class="" for="applicationVersion">제목</label>
+  <input type="text" id="applicationVersion" name="version" required/>
+  <button type="submit">버전 등록</button>
+</form>
+<h2>공지사항</h2>
 <div class="input_panel_notice">
   <form method="POST" action="/Notice/Manager/Add/Notice">
     <label class="" for="inputNoticeTitle">제목</label>

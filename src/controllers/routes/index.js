@@ -72,7 +72,7 @@ router.get('/Suggest/Manager', (request, response) => {
   });
 
   getSuggests.then((suggestDatas) => {
-    response.send(suggestManagerTemplate(suggestDatas));
+    response.send(suggestManagerTemplate(suggestDatas, appVersion));
   });
 
 });
@@ -81,6 +81,12 @@ router.post('/Suggest/Manager/Add/Subject', (request, response) => {
   const subject = request.body.subject;
   redis.sadd('subject', subject);
   response.redirect('/Suggest/Manager');
+});
+
+router.post('/Application/Input/Version', (request, response) => {
+  const appVersion = request.body.version;
+  redis.set('appVersion', appVersion);
+  response.redirect('/Notice/Manager');
 });
 
 router.post('/Suggest/Manager/Add/Suggest', (request, response) => {
@@ -110,9 +116,17 @@ router.get('/Notice/Manager', (request, response) => {
     } catch (e) {
       logger.custLog('공지사항을 가져오다가 오류가 발생했습니다.', e);
     } finally {
-      console.log(templateData);
-      response.send(noticeManagerTemplate(templateData));
+      redis.get('appVersion', (error, appVersion) => {
+        templateData.appVersion = appVersion;
+        response.send(noticeManagerTemplate(templateData));
+      });
     }
+  });
+});
+
+router.get('/app/version/', (request, response) => {
+  redis.get('appVersion', (error, appVersion) => {
+    response.json({ version: appVersion });
   });
 });
 
