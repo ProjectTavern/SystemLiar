@@ -15,12 +15,9 @@ app.use('/', pages);
 const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
 
+// 방 => 추후 이동
 let rooms = [];
-// const ChatProgram = require('./controllers/socketio/ChatProgramOn/index');
-// ChatSocketIO.on('connection', ChatProgram);
 
-
-const foods = require('./_mockup/Subjects');
 const roomId = Date.now();
 const roomData = {
   id : roomId,
