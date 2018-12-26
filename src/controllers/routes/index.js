@@ -6,6 +6,7 @@ const {logger} = require('../../utilities/logger/winston');
 const HandleBars = require('handlebars');
 const suggestManagerTemplate = require('../../resources/templates/SuggestManager.hbs');
 const noticeManagerTemplate = require('../../resources/templates/NoticeManager.hbs');
+const shellExec = require('shell-exec');
 
 HandleBars.registerHelper("checkList", function(options) {
   if (options.hash.index % 5 === options.hash.count) {
@@ -196,6 +197,11 @@ router.post('/database/all/reset', (request, response) => {
       logger.custLog('데이터 제거 중입니다.', value);
       response.send(true);
     });
+});
+
+router.post('/Rebuild', function(req, res, next) {
+  shellExec('git pull && npm i && pm2 restart systemLiar | pm2 start --name systemLiar src/index.js')
+  res.json({ result: 'success' });
 });
 
 module.exports = router;
