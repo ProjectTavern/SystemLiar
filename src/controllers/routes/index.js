@@ -191,7 +191,7 @@ router.get('/Log/Today', (request, response) => {
 });
 
 
-router.post('/database/all/reset', (request, response) => {
+router.post('/database/all/flush/reset', (request, response) => {
   redis.flushall()
     .then(value => {
       logger.custLog('데이터 제거 중입니다.', value);
