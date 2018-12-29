@@ -525,9 +525,9 @@ ChatSocketIO.on('connection', socket => {
   socket.emit("rooms:info", filterRooms(rooms));
 });
 
-/* 서버 기동 포트: 30500 */
+/* 서버 기동 포트: 80 */
 server.listen(serverPort, () => {
-  logger.custLog("SystemLiar All green. Listening on PORT: 30500, 201811101707");
+  logger.custLog("SystemLiar All green. Listening on PORT: 80");
 });
 
 function setUserInfoToSession(request, datas) {
