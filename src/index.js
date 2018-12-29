@@ -7,6 +7,7 @@ const io = require('socket.io')(server);
 const dataScheme = require('./config/dataset');
 const configure = require('./utilities/main.config');
 const { logger, dataLogger } = require('./utilities/logger/winston');
+const serverPort = 80;
 
 // 앱 설정
 configure(app);
@@ -525,7 +526,7 @@ ChatSocketIO.on('connection', socket => {
 });
 
 /* 서버 기동 포트: 30500 */
-server.listen(30500, () => {
+server.listen(serverPort, () => {
   logger.custLog("SystemLiar All green. Listening on PORT: 30500, 201811101707");
 });
 
