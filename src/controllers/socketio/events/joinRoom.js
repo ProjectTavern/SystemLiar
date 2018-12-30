@@ -1,5 +1,6 @@
 const setNameTag = require('../modules/setNameTag');
 const leaveAllRoom = require('../modules/leaveAllRoom');
+const isJoinPossible = require('../modules/isJoinPossible');
 const getSelectedRoom = require('../modules/getSelectedRoom');
 
 let rooms = require('../rooms');
@@ -29,10 +30,4 @@ module.exports = function joinRoom(responseData) {
 
   }
 
-  function isJoinPossible(selectedRoom, nickname) {
-    const isNotJoined = !((selectedRoom.members.filter(element => element === nickname)).length);
-    return selectedRoom.status === "wait"
-        && selectedRoom.members.length < selectedRoom.limit
-        && isNotJoined;
-  }
 };
