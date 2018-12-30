@@ -17,7 +17,7 @@ const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
 
 // 방 => 추후 이동
-let rooms = [];
+let rooms = require('./controllers/socketio/rooms');
 
 ChatSocketIO.on('connection', socket => {
 
@@ -36,24 +36,6 @@ ChatSocketIO.on('connection', socket => {
       } else {
         logger.custLog(`[user:status]사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
         socket.emit("user:status", false);
-      }
-    });
-  });
-
-  socket.on('get:notice', (data) => {
-    redis.lrange('noticeList', 0, -1, (error, notices) => {
-      let result = [];
-      try {
-        notices.forEach((notice) => {
-          const noticeData = JSON.parse(notice);
-          if (noticeData.isShow) {
-            result.push({ title : noticeData.title, contents: noticeData.contents });
-          }
-          socket.emit('get:notice', result);
-        });
-        response.json(result);
-      } catch (e) {
-
       }
     });
   });
@@ -105,8 +87,6 @@ ChatSocketIO.on('connection', socket => {
 
   /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
   socket.on("rooms:refresh", () => {
-    logger.custLog(`[rooms:refresh]사용자의 요청으로 방을 새로 고침합니다.`);
-    logger.custLog('방들 전체 리스트 ',rooms);
     socket.emit("rooms:info", filterRooms(rooms));
   });
 
