@@ -5,7 +5,7 @@ const socketsession = require('express-socket.io-session');
 const redis = require('./controllers/database/redis');
 const io = require('socket.io')(server);
 const dataScheme = require('./config/dataset');
-const configure = require('./utilities/main.config');
+const configure = require('./config/main.config');
 const { logger, dataLogger } = require('./utilities/logger/winston');
 const serverPort = 80;
 
