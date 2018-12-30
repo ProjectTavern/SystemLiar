@@ -26,51 +26,8 @@ ChatSocketIO.on('connection', socket => {
   logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
   const userStatus = require('./controllers/socketio/events/userStatus');
   socket.on("user:status", userStatus.bind(socket));
-
-  socket.on("user:create:nickname", data => {
-    logger.custLog(`[user:create:nickname]새로운 대화명 생성 요청을 전송받았습니다.`, data);
-
-    let userInform = [];
-    for ( let userInformKey in data) {
-      if (data.hasOwnProperty(userInformKey)) {
-        userInform.push(userInformKey);
-        userInform.push(data[userInformKey]);
-      }
-    }
-
-    /* 유저 정보 */
-    const userNickname = data.nickname;
-    const userGhashId = data.id;
-    logger.custLog('[user:create:nickname]user구글 아이디', data);
-
-    if (userNickname.split(' ').length > 1) {
-      logger.custLog(`[user:create:nickname] 띄어쓰기는 불가능 합니다.`);
-      socket.emit("user:status", false);
-      return false;
-    }
-
-
-    redis.smembers(dataScheme.user.nicknames, (error, userNicknameLists) => {
-      if(userNicknameLists.includes(userNickname)) {
-        logger.custLog(`[user:create:nickname]사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
-        socket.emit("user:status", false);
-      } else {
-        logger.custLog(`[user:create:nickname]${userNickname}은 사용할 수 있는 대화명입니다. 데이터 베이스에 저장을 진행합니다.`);
-        redis.multi()
-          .sadd(dataScheme.user.nicknames, userNickname)
-          .hset(userGhashId, userInform)
-          .exec((error, result) => {
-            if (error) {
-              logger.custLog(`[user:create:nickname]사용자의 정보를 저장하려고 시도했으나 실패했습니다. 실패 보고를 전송합니다. 이유는 다음과 같습니다.`, error);
-              socket.emit("[user:create:nickname]user:status", false);
-            }
-            logger.custLog('[user:create:nickname]사용자의 정보를 성공적으로 저장했습니다. 세션에 유저의 정보를 저장하고 성공 보고를 전송합니다.');
-            usersession.userinfo = { id: userGhashId, nickname: userNickname };
-            socket.emit("user:status", userNickname);
-          });
-      }
-    });
-  });
+  const userCreateNickname = require('./controllers/socketio/events/userCreateNickname');
+  socket.on("user:create:nickname", userCreateNickname.bind(socket));
 
 
   const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
