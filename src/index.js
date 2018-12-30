@@ -32,48 +32,10 @@ ChatSocketIO.on('connection', socket => {
   socket.on("rooms:refresh", roomsRefresh.bind(socket));
   const getSubject = require('./controllers/socketio/events/getSubject');
   socket.on('get:subject', getSubject.bind(socket));
-
   const createRoom = require('./controllers/socketio/events/createRoom');
   socket.on("create:room", createRoom.bind(socket));
-
-  /* 방에 만들 경우 */
-  socket.on('join:room', (data) => {
-    logger.custLog('[join:room] 요청을 전송받았습니다. ', data);
-    try {
-      logger.custLog('[join:room] 데이터를 확인합니다. 유저세션 값입니다.', data, usersession);
-      leaveAllRoom(socket);
-
-      let selectedRoom = getSelectedRoom(rooms, data.id);
-
-      let socketSession = usersession || {};
-      let userinfo = socketSession.userinfo || {};
-
-      if (selectedRoom.hasOwnProperty("id") && isJoinable(selectedRoom, usersession.userinfo.nickname)) {
-        logger.custLog('[join:room] 방 입장이 가능하여 입장되었습니다.');
-        selectedRoom.members.push(usersession.userinfo.nickname);
-
-        socket.join(data.id);
-        socket.userRooms.push(data.id);
-        userinfo.room = data.id;
-
-        setNameTag(socket, usersession.userinfo.nickname);
-        selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
-        socket.broadcast.to(data.id).emit('user:join', usersession.userinfo.nickname);
-        socket.emit("join:room", selectedRoom);
-
-      }
-
-    } catch (error) {
-      logger.custLog("[ERROR] join:room.", error);
-    }
-
-    function isJoinable(selectedRoom, nickname) {
-      const isNotJoined = !((selectedRoom.members.filter(element => {
-        return element === nickname
-      })).length);
-      return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit && isNotJoined;
-    }
-  });
+  const joinRoom = require('./controllers/socketio/events/joinRoom');
+  socket.on('join:room', joinRoom.bind(socket));
 
   /* 대화 전송 */
   socket.on('send:message', (data) => {
