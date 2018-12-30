@@ -511,7 +511,23 @@ ChatSocketIO.on('connection', socket => {
         ChatSocketIO.to(roomId).emit("host:change", selectedRoom.host);
       }
 
-      logger.custLog("[disconnect] 현재 방의 정보들", rooms);
+      /* 방 초기화 */
+      logger.custLog('경기 종료, 초기화를 진행합니다.');
+      if( selectedRoom.ready === 0 ) {
+
+      } else {
+        selectedRoom.status = 'wait';
+        selectedRoom.ready = 0;
+        selectedRoom.ballotBox = [];
+        selectedRoom.discussEnd = false;
+        selectedRoom.readiedPlayer = [];
+        selectedRoom.senderID = [];
+      }
+
+      // 개별 유저
+      const userinfo = usersession.userinfo;
+      userinfo.ready = false;
+
     } catch (error) {
       logger.custLog("[ERROR][disconnect] => ", error);
     }
