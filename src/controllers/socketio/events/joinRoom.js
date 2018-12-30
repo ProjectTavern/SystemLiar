@@ -2,6 +2,7 @@ const setNameTag = require('../modules/setNameTag');
 const leaveAllRoom = require('../modules/leaveAllRoom');
 const getSelectedRoom = require('../modules/getSelectedRoom');
 
+let rooms = require('../rooms');
 module.exports = function joinRoom(responseData) {
   const socket = this;
   const userSession = socket.handshake.session;
@@ -11,7 +12,7 @@ module.exports = function joinRoom(responseData) {
     leaveAllRoom(socket);
     const userId = responseData.id;
     let selectedRoom = getSelectedRoom(rooms, userId);
-    let userInfo = userSession.userinfo || {};
+    let userInfo = userSession.userinfo;
     if (selectedRoom.hasOwnProperty("id") && isJoinPossible(selectedRoom, userSession.userinfo.nickname)) {
       const userNickname = userSession.userinfo.nickname;
       setNameTag(socket, userNickname);
