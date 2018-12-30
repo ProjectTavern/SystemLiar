@@ -86,9 +86,8 @@ ChatSocketIO.on('connection', socket => {
   });
 
   /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
-  socket.on("rooms:refresh", () => {
-    socket.emit("rooms:info", filterRooms(rooms));
-  });
+  const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
+  socket.on("rooms:refresh", roomsRefresh.bind(socket));
 
   socket.on('get:subject', () => {
     redis.smembers('subject', (error, subjects) => {
