@@ -28,8 +28,6 @@ ChatSocketIO.on('connection', socket => {
   socket.on("user:status", userStatus.bind(socket));
   const userCreateNickname = require('./controllers/socketio/events/userCreateNickname');
   socket.on("user:create:nickname", userCreateNickname.bind(socket));
-
-
   const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
   socket.on("rooms:refresh", roomsRefresh.bind(socket));
   const getSubject = require('./controllers/socketio/events/getSubject');
@@ -139,7 +137,7 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog("[send:message] => ",data);
     try {
       data.nickname = usersession.userinfo.nickname;
-      ChatSocketIO.to(socket.userRooms[0]).emit('user:message', data);
+      socket.to(socket.userRooms[0]).emit('user:message', data);
     } catch (error) {
       logger.custLog("[ERROR][send:message] => ", error);
     }
