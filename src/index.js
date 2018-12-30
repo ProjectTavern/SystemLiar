@@ -85,16 +85,11 @@ ChatSocketIO.on('connection', socket => {
     });
   });
 
-  /* 방 요청이 들어온 경우 & 새로고침 누를 경우 방 정보를 재전송 */
+
   const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
   socket.on("rooms:refresh", roomsRefresh.bind(socket));
-
-  socket.on('get:subject', () => {
-    redis.smembers('subject', (error, subjects) => {
-      logger.custLog('주제', subjects);
-      socket.emit('get:subject', subjects);
-    });
-  });
+  const getSubject = require('./controllers/socketio/events/getSubject');
+  socket.on('get:subject', getSubject.bind(socket));
 
   /* 방 생성을 따로 만듬 */
   socket.on("create:room", (data) => {
