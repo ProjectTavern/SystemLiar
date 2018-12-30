@@ -19,23 +19,6 @@ ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
 // 방 => 추후 이동
 let rooms = [];
 
-const roomId = Date.now();
-const roomData = {
-  id : roomId,
-  number: 1,
-  name : 'Test',
-  subject : 'Test',
-  members : ['Tester'],
-  limit : 7,
-  status : "wait",
-  ready: 0,
-  readiedPlayer: [],
-  host: 'Tester',
-  currentUsers: [{ nickname: 'Tester', socketId: 'ok', ready: false }],
-  ballotBox: [],
-  senderID: []
-};
-rooms.push(roomData);
 ChatSocketIO.on('connection', socket => {
 
   socket.userRooms = [];

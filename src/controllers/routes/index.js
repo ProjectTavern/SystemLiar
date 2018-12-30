@@ -200,7 +200,7 @@ router.post('/database/all/flush/reset', (request, response) => {
 });
 
 router.post('/Rebuild', function(req, res, next) {
-  shellExec('git pull && npm i && pm2 restart systemLiar | pm2 start --name systemLiar src/index.js')
+  shellExec('git pull && npm i && pm2 restart systemLiar | pm2 start --name systemLiar src/index.js');
   res.json({ result: 'success' });
 });
 
