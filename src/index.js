@@ -137,7 +137,8 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog("[send:message] => ",data);
     try {
       data.nickname = usersession.userinfo.nickname;
-      socket.to(socket.userRooms[0]).emit('user:message', data);
+      const rest = io.of('/roomspace');
+      rest.to(socket.userRooms[0]).emit('user:message', data);
     } catch (error) {
       logger.custLog("[ERROR][send:message] => ", error);
     }
