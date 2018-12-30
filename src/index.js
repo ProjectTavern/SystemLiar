@@ -33,65 +33,8 @@ ChatSocketIO.on('connection', socket => {
   const getSubject = require('./controllers/socketio/events/getSubject');
   socket.on('get:subject', getSubject.bind(socket));
 
-  /* 방 생성을 따로 만듬 */
-  socket.on("create:room", (data) => {
-    logger.custLog(`[create:room]거짓말쟁이 대화방 생성 요청을 전송받았습니다.`);
-    try{
-      if (data.id === "create") {
-
-        let roomNumbers = [];
-        let lowestRoomNumber = rooms.length + 1;
-        rooms.forEach((room) => {
-          roomNumbers.push(room.number);
-        });
-        roomNumbers.sort();
-        roomNumbers.forEach((number, index) => {
-          if (number !== index + 1) {
-            lowestRoomNumber = index + 1;
-            return false;
-          }
-        });
-
-        const roomId = Date.now();
-        const roomData = {
-          id : roomId,
-          number: lowestRoomNumber,
-          name : data.name,
-          subject : data.subject,
-          members : [usersession.userinfo.nickname],
-          limit : 7,
-          status : "wait",
-          ready: 0,
-          readiedPlayer: [],
-          host: usersession.userinfo.nickname,
-          currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }],
-          ballotBox: [],
-          senderID: []
-        };
-        rooms.push(roomData);
-        logger.custLog(`[create:room]대화방 생성에 성공하였습니다.`, roomData);
-        /* 합쳐야할지 고민 */
-        socket.join(roomId);
-        socket.userRooms.push(roomId);
-        let socketSession = usersession || {};
-        let userinfo = socketSession.userinfo || {};
-        userinfo.room = roomId;
-
-        setNameTag(socket, usersession.userinfo.nickname);
-        socket.emit("create:room", true);
-        let selectedRoom = getSelectedRoom(rooms, roomId);
-        socket.emit("create:info", selectedRoom);
-      } else {
-        logger.custLog(`[create:room] 잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
-        socket.emit("create:room", false);
-      }
-    } catch (e) {
-      logger.error(`[create:room]에러가 발생했습니다. 원인은 다음과 같습니다.`);
-      dataLogger.error(e);
-      socket.emit("create:room", false);
-    }
-
-  });
+  const createRoom = require('./controllers/socketio/events/createRoom');
+  socket.on("create:room", createRoom.bind(socket));
 
   /* 방에 만들 경우 */
   socket.on('join:room', (data) => {
@@ -137,8 +80,7 @@ ChatSocketIO.on('connection', socket => {
     logger.custLog("[send:message] => ",data);
     try {
       data.nickname = usersession.userinfo.nickname;
-      const rest = io.of('/roomspace');
-      rest.to(socket.userRooms[0]).emit('user:message', data);
+      ChatSocketIO.to(socket.userRooms[0]).emit('user:message', data);
     } catch (error) {
       logger.custLog("[ERROR][send:message] => ", error);
     }
