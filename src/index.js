@@ -24,21 +24,8 @@ ChatSocketIO.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
   logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
-
-  socket.on("user:status", data => {
-    const userGhash = data.id;
-    logger.custLog('[user:status] 유저의 구글 아이디를 받았습니다.', data);
-    redis.hget(userGhash, "nickname", (error, value) => {
-      if (value) {
-        logger.custLog('[user:status]사용자 정보가 기존 데이터셋에 존재합니다. 세션에 유저 정보를 저장합니다.');
-        usersession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
-        socket.emit("user:status", value);
-      } else {
-        logger.custLog(`[user:status]사용자의 정보가 기존 데이터베이스에 존재하지 않습니다. 새로운 대화명 생성 및 정보 요청을 전송합니다.`);
-        socket.emit("user:status", false);
-      }
-    });
-  });
+  const userStatus = require('./controllers/socketio/events/userStatus');
+  socket.on("user:status", userStatus.bind(socket));
 
   socket.on("user:create:nickname", data => {
     logger.custLog(`[user:create:nickname]새로운 대화명 생성 요청을 전송받았습니다.`, data);
