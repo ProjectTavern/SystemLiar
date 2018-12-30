@@ -14,7 +14,7 @@ Date.prototype.currentDay = function() {
 };
 
 const logFormat = printf(info => {
-  return `[${info.level.capitalizeFirstLetter()}][${info.label}][${(new Date(info.timestamp)).currentTimeLog()}]: ${info.message}`;
+  return `[${info.level.capitalizeFirstLetter()}][${(new Date(info.timestamp)).currentTimeLog()}]: ${info.message}`;
 });
 
 const logger = createLogger({

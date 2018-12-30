@@ -28,8 +28,11 @@ ChatSocketIO.on('connection', socket => {
   socket.on("user:status", userStatus.bind(socket));
   const userCreateNickname = require('./controllers/socketio/events/userCreateNickname');
   socket.on("user:create:nickname", userCreateNickname.bind(socket));
+
   const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
+  socket.emit("rooms:info", filterRooms(rooms));
   socket.on("rooms:refresh", roomsRefresh.bind(socket));
+
   const getSubject = require('./controllers/socketio/events/getSubject');
   socket.on('get:subject', getSubject.bind(socket));
   const createRoom = require('./controllers/socketio/events/createRoom');
@@ -37,7 +40,6 @@ ChatSocketIO.on('connection', socket => {
   const joinRoom = require('./controllers/socketio/events/joinRoom');
   socket.on('join:room', joinRoom.bind(socket));
 
-  /* 대화 전송 */
   socket.on('send:message', (data) => {
     logger.custLog("[send:message] => ",data);
     try {
@@ -48,7 +50,6 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  /* 방을 떠납니다. */
   socket.on("leave:room", (data) => {
     logger.custLog("[leave:room]", data);
     try {
@@ -190,7 +191,6 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
     logger.custLog("[end:discuss] 토론 종료", data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
@@ -305,14 +305,10 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[ERROR][disconnect] => ", error);
     }
   });
-
-
-  socket.emit("rooms:info", filterRooms(rooms));
 });
 
-/* 서버 기동 포트: 80 */
 server.listen(serverPort, () => {
-  logger.custLog("SystemLiar All green. Listening on PORT: 80");
+  logger.custLog("SystemLiar All green.");
 });
 
 function setUserInfoToSession(request, datas) {
