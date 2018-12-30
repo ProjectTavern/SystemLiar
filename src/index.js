@@ -58,8 +58,21 @@ ChatSocketIO.on('connection', socket => {
   });
 
   socket.on('get:notice', (data) => {
-    const result = '';
-    socket.emit('get:notice', result);
+    redis.lrange('noticeList', 0, -1, (error, notices) => {
+      let result = [];
+      try {
+        notices.forEach((notice) => {
+          const noticeData = JSON.parse(notice);
+          if (noticeData.isShow) {
+            result.push({ title : noticeData.title, contents: noticeData.contents });
+          }
+          socket.emit('get:notice', result);
+        });
+        response.json(result);
+      } catch (e) {
+
+      }
+    });
   });
 
   socket.on("user:create:nickname", data => {
