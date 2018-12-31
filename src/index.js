@@ -24,37 +24,32 @@ ChatSocketIO.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
   logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
+
+  // 로그인
   const userStatus = require('./controllers/socketio/events/userStatus');
-  socket.on("user:status", userStatus.bind(socket));
+  socket.on('user:status', userStatus.bind(socket));
   const userCreateNickname = require('./controllers/socketio/events/userCreateNickname');
-  socket.on("user:create:nickname", userCreateNickname.bind(socket));
+  socket.on('user:create:nickname', userCreateNickname.bind(socket));
 
+  // 게임방
   const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
-  socket.emit("rooms:info", filterRooms(rooms));
-  socket.on("rooms:refresh", roomsRefresh.bind(socket));
+  socket.emit('rooms:info', filterRooms(rooms));
+  socket.on('rooms:refresh', roomsRefresh.bind(socket));
 
-  const getSubject = require('./controllers/socketio/events/getSubject');
-  socket.on('get:subject', getSubject.bind(socket));
   const createRoom = require('./controllers/socketio/events/createRoom');
-  socket.on("create:room", createRoom.bind(socket));
+  socket.on('create:room', createRoom.bind(socket));
   const joinRoom = require('./controllers/socketio/events/joinRoom');
   socket.on('join:room', joinRoom.bind(socket));
+  const getSubject = require('./controllers/socketio/events/getSubject');
+  socket.on('get:subject', getSubject.bind(socket));
+  const leaveRoom = require('./controllers/socketio/events/leaveRoom');
+  socket.on('leave:room', leaveRoom.bind(socket));
 
+  // 인게임
   const sendMessage = require('./controllers/socketio/events/sendMessage');
   socket.on('send:message', sendMessage.bind(socket));
-  const leaveRoom = require('./controllers/socketio/events/leaveRoom');
-  socket.on("leave:room", leaveRoom.bind(socket));
 
-  function leaveAllRoom(socket) {
-    const currentRooms = socket.userRooms;
-    usersession.userinfo.ready = false;
-    currentRooms.forEach((elem) => {
-      socket.leave(elem);
-    });
-    socket.userRooms = [];
-  }
-
-  socket.on("ready:user", () => {
+  socket.on('ready:user', () => {
     logger.custLog("[ready:user] 유저의 준비 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
@@ -78,7 +73,7 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  socket.on("start:game", () => {
+  socket.on('start:game', () => {
     logger.custLog("[start:game] 방장의 시작 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
@@ -117,7 +112,7 @@ ChatSocketIO.on('connection', socket => {
     });
   });
 
-  socket.on("explain:game", (data) => {
+  socket.on('explain:game', (data) => {
     logger.custLog("[explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.", data);
     try {
       const userRoom = socket.userRooms[0];
@@ -261,18 +256,20 @@ ChatSocketIO.on('connection', socket => {
       logger.custLog("[ERROR][disconnect] => ", error);
     }
   });
+
+  function leaveAllRoom(socket) {
+    const currentRooms = socket.userRooms;
+    usersession.userinfo.ready = false;
+    currentRooms.forEach((elem) => {
+      socket.leave(elem);
+    });
+    socket.userRooms = [];
+  }
 });
 
 server.listen(serverPort, () => {
-  logger.custLog("SystemLiar All green.");
+  logger.custLog('SystemLiar All green.');
 });
-
-function setUserInfoToSession(request, datas) {
-  let session = request.session;
-  session.id = datas.id;
-  session.nickname = datas.nickname;
-  return session;
-}
 
 function filterRooms(rooms) {
   return rooms.map(room => {
