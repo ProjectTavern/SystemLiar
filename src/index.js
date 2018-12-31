@@ -217,15 +217,6 @@ ChatSocketIO.on('connection', socket => {
   socket.on('end:game', endGame.bind(socket));
   const disconnect = require('./controllers/socketio/events/userInformation/disconnect');
   socket.on('disconnect', disconnect.bind(socket));
-
-  function leaveAllRoom(socket) {
-    const currentRooms = socket.userRooms;
-    usersession.userinfo.ready = false;
-    currentRooms.forEach((elem) => {
-      socket.leave(elem);
-    });
-    socket.userRooms = [];
-  }
 });
 
 server.listen(serverPort, () => {
