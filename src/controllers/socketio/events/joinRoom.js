@@ -22,8 +22,8 @@ module.exports = function joinRoom(responseData) {
       userInfo.room = roomId;
       socket.join(roomId);
       socket.userRooms.push(roomId);
-      socket.broadcast.to(roomId).emit('user:join', userNickname);
       socket.emit("join:room", selectedRoom);
+      socket.broadcast.to(roomId).emit('user:join', userNickname);
     }
 
   } catch (error) {
