@@ -41,7 +41,7 @@ ChatSocketIO.on('connection', socket => {
   socket.on('join:room', joinRoom.bind(socket));
 
   const sendMessage = require('./controllers/socketio/events/sendMessage');
-  socket.on('send:message', (data) => {});
+  socket.on('send:message', sendMessage.bind(socket));
 
   socket.on("leave:room", (data) => {
     logger.custLog("[leave:room]", data);
