@@ -40,15 +40,8 @@ ChatSocketIO.on('connection', socket => {
   const joinRoom = require('./controllers/socketio/events/joinRoom');
   socket.on('join:room', joinRoom.bind(socket));
 
-  socket.on('send:message', (data) => {
-    logger.custLog("[send:message] => ",data);
-    try {
-      data.nickname = usersession.userinfo.nickname;
-      ChatSocketIO.to(socket.userRooms[0]).emit('user:message', data);
-    } catch (error) {
-      logger.custLog("[ERROR][send:message] => ", error);
-    }
-  });
+  const sendMessage = require('./controllers/socketio/events/sendMessage');
+  socket.on('send:message', (data) => {});
 
   socket.on("leave:room", (data) => {
     logger.custLog("[leave:room]", data);

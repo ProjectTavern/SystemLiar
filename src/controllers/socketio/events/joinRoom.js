@@ -11,18 +11,18 @@ module.exports = function joinRoom(responseData) {
   try {
 
     leaveAllRoom(socket);
-    const userId = responseData.id;
-    let selectedRoom = getSelectedRoom(rooms, userId);
+    const roomId = responseData.id;
+    let selectedRoom = getSelectedRoom(rooms, roomId);
     let userInfo = userSession.userinfo;
     if (selectedRoom.hasOwnProperty("id") && isJoinPossible(selectedRoom, userSession.userinfo.nickname)) {
       const userNickname = userSession.userinfo.nickname;
       setNameTag(socket, userNickname);
       selectedRoom.members.push(userNickname);
       selectedRoom.currentUsers.push({ nickname: userNickname, socketId: socket.id, ready: false });
-      userInfo.room = userId;
-      socket.join(userId);
-      socket.userRooms.push(userId);
-      socket.broadcast.to(userId).emit('user:join', userNickname);
+      userInfo.room = roomId;
+      socket.join(roomId);
+      socket.userRooms.push(roomId);
+      socket.broadcast.to(roomId).emit('user:join', userNickname);
       socket.emit("join:room", selectedRoom);
     }
 
