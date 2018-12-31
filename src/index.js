@@ -215,46 +215,8 @@ ChatSocketIO.on('connection', socket => {
 
   const endGame = require('./controllers/socketio/events/gameProcess/endGame');
   socket.on('end:game', endGame.bind(socket));
-
-  socket.on('disconnect', () => {
-    logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
-
-    try {
-      /* 유저가 들어간 방 찾기 */
-      const roomId = usersession.userinfo.room;
-      const userNickname = usersession.userinfo.nickname;
-      ChatSocketIO.to(roomId).emit("user:exit", userNickname);
-      logger.custLog('나간 사람: ', usersession.userinfo);
-      logger.custLog('유저의 로그 데이터: ', roomId, userNickname);
-      let selectedRoom = getSelectedRoom(rooms, roomId);
-      logger.custLog("[disconnect] 선택된 방의 정보: ", selectedRoom);
-      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      leaveAllRoom(socket);
-
-      if (selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
-        selectedRoom.readiedPlayer.splice(selectedRoom.readiedPlayer.indexOf(userNickname), 1);
-        selectedRoom.ready--;
-      }
-
-      selectedRoom.currentUsers.forEach((memberData, index) => {
-        if (memberData.nickname === userNickname) {
-          selectedRoom.currentUsers.splice(index, 1);
-        }
-      });
-
-      if (selectedRoom.members.length === 0) {
-        logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
-        rooms.splice(rooms.indexOf(selectedRoom), 1);
-      } else if (selectedRoom.host === userNickname) {
-        logger.custLog("[leave:room] 방장이 방을 나가 새로운 방장을 임명합니다.", selectedRoom);
-        selectedRoom.host = selectedRoom.members[0];
-        ChatSocketIO.to(roomId).emit("host:change", selectedRoom.host);
-      }
-
-    } catch (error) {
-      logger.custLog("[ERROR][disconnect] => ", error);
-    }
-  });
+  const disconnect = require('./controllers/socketio/events/userInformation/disconnect');
+  socket.on('disconnect', disconnect.bind(socket));
 
   function leaveAllRoom(socket) {
     const currentRooms = socket.userRooms;
