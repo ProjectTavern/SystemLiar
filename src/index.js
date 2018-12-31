@@ -43,7 +43,7 @@ ChatSocketIO.on('connection', socket => {
   const sendMessage = require('./controllers/socketio/events/sendMessage');
   socket.on('send:message', sendMessage.bind(socket));
   const leaveRoom = require('./controllers/socketio/events/leaveRoom');
-  socket.on("leave:room", (data) => {});
+  socket.on("leave:room", leaveRoom.bind(socket));
 
   function leaveAllRoom(socket) {
     const currentRooms = socket.userRooms;
