@@ -1,4 +1,4 @@
-const redis = require('../../database/redis');
+const redis = require('../../../database/redis');
 
 module.exports = function userCreateNickname(responseData) {
   const socket = this;

@@ -26,27 +26,27 @@ ChatSocketIO.on('connection', socket => {
   logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
 
   // 로그인
-  const userStatus = require('./controllers/socketio/events/userStatus');
+  const userStatus = require('./controllers/socketio/events/userInformation/userStatus');
   socket.on('user:status', userStatus.bind(socket));
-  const userCreateNickname = require('./controllers/socketio/events/userCreateNickname');
+  const userCreateNickname = require('./controllers/socketio/events/userInformation/userCreateNickname');
   socket.on('user:create:nickname', userCreateNickname.bind(socket));
 
   // 게임방
-  const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
+  const roomsRefresh = require('./controllers/socketio/events/roomProcess/refreshRoom');
   socket.emit('rooms:info', filterRooms(rooms));
   socket.on('rooms:refresh', roomsRefresh.bind(socket));
 
-  const createRoom = require('./controllers/socketio/events/createRoom');
+  const createRoom = require('./controllers/socketio/events/roomProcess/createRoom');
   socket.on('create:room', createRoom.bind(socket));
-  const joinRoom = require('./controllers/socketio/events/joinRoom');
+  const joinRoom = require('./controllers/socketio/events/roomProcess/joinRoom');
   socket.on('join:room', joinRoom.bind(socket));
-  const getSubject = require('./controllers/socketio/events/getSubject');
+  const getSubject = require('./controllers/socketio/events/roomProcess/getSubject');
   socket.on('get:subject', getSubject.bind(socket));
-  const leaveRoom = require('./controllers/socketio/events/leaveRoom');
+  const leaveRoom = require('./controllers/socketio/events/roomProcess/leaveRoom');
   socket.on('leave:room', leaveRoom.bind(socket));
 
   // 인게임
-  const sendMessage = require('./controllers/socketio/events/sendMessage');
+  const sendMessage = require('./controllers/socketio/events/gameProcess/sendMessage');
   socket.on('send:message', sendMessage.bind(socket));
 
   socket.on('ready:user', () => {
@@ -214,7 +214,7 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  const endGame = require('./controllers/socketio/events/endGame');
+  const endGame = require('./controllers/socketio/events/gameProcess/endGame');
   socket.on('end:game', endGame.bind(socket));
 
   socket.on('disconnect', () => {

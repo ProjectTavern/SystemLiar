@@ -1,7 +1,7 @@
-const getSelectedRoom = require('../modules/getSelectedRoom');
-const leaveAllRoom = require('../modules/leaveAllRoom');
+const getSelectedRoom = require('../../modules/getSelectedRoom');
+const leaveAllRoom = require('../../modules/leaveAllRoom');
 
-const rooms = require('../rooms');
+const rooms = require('../../rooms');
 
 module.exports = function leaveRoom() {
   const socket = this;

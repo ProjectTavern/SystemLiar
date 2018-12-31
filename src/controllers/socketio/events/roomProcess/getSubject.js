@@ -1,6 +1,6 @@
-const redis = require('../../database/redis');
+const redis = require('../../../database/redis');
 
-let rooms = require('../rooms');
+let rooms = require('../../rooms');
 module.exports = function getSubject() {
   const socket = this;
   redis.smembers('subject', (error, subjects) => {

@@ -1,6 +1,6 @@
-const getSelectedRoom = require('../modules/getSelectedRoom');
+const getSelectedRoom = require('../../modules/getSelectedRoom');
 
-let rooms = require('../rooms');
+let rooms = require('../../rooms');
 module.exports = function endGame() {
   const socket = this;
   const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);

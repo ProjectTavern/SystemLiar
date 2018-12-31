@@ -1,7 +1,7 @@
-const setNameTag = require('../modules/setNameTag');
-const getSelectedRoom = require('../modules/getSelectedRoom');
+const setNameTag = require('../../modules/setNameTag');
+const getSelectedRoom = require('../../modules/getSelectedRoom');
 
-let rooms = require('../rooms');
+let rooms = require('../../rooms');
 
 module.exports = function createRoom(responseData) {
   const socket = this;

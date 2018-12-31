@@ -1,9 +1,9 @@
-const setNameTag = require('../modules/setNameTag');
-const leaveAllRoom = require('../modules/leaveAllRoom');
-const isJoinPossible = require('../modules/isJoinPossible');
-const getSelectedRoom = require('../modules/getSelectedRoom');
+const setNameTag = require('../../modules/setNameTag');
+const leaveAllRoom = require('../../modules/leaveAllRoom');
+const isJoinPossible = require('../../modules/isJoinPossible');
+const getSelectedRoom = require('../../modules/getSelectedRoom');
 
-let rooms = require('../rooms');
+let rooms = require('../../rooms');
 module.exports = function joinRoom(responseData) {
   const socket = this;
   const userSession = socket.handshake.session;
