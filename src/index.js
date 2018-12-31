@@ -32,10 +32,9 @@ ChatSocketIO.on('connection', socket => {
   socket.on('user:create:nickname', userCreateNickname.bind(socket));
 
   // 게임방
-  const roomsRefresh = require('./controllers/socketio/events/roomProcess/refreshRoom');
   socket.emit('rooms:info', filterRooms(rooms));
+  const roomsRefresh = require('./controllers/socketio/events/roomProcess/refreshRoom');
   socket.on('rooms:refresh', roomsRefresh.bind(socket));
-
   const createRoom = require('./controllers/socketio/events/roomProcess/createRoom');
   socket.on('create:room', createRoom.bind(socket));
   const joinRoom = require('./controllers/socketio/events/roomProcess/joinRoom');
