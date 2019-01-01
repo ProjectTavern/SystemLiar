@@ -8,7 +8,6 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
     socket.userRooms = [];
     const usersession = socket.handshake.session;
-
     const SocketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인
