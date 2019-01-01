@@ -47,30 +47,8 @@ ChatSocketIO.on('connection', socket => {
   // 인게임
   const sendMessage = require('./controllers/socketio/events/gameProcess/sendMessage');
   socket.on('send:message', sendMessage.bind(socket));
-
-  socket.on('ready:user', () => {
-    logger.custLog("[ready:user] 유저의 준비 요청.");
-    const userinfo = usersession.userinfo;
-    const userRoom = socket.userRooms[0];
-    let selectedRoom = getSelectedRoom(rooms, userRoom);
-    if (userinfo.ready) {
-      logger.custLog("[ready:user] 유저의 준비되지 않은 유저", usersession);
-      userinfo.ready = false;
-      selectedRoom.ready--;
-      if (selectedRoom.readiedPlayer.indexOf(userinfo.nickname) > -1) {
-        selectedRoom.readiedPlayer.splice(selectedRoom.readiedPlayer.indexOf(userinfo.nickname), 1);
-      }
-      ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
-      ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", false);
-    } else {
-      logger.custLog("[ready:user] 유저의 준비된 유저", usersession);
-      userinfo.ready = true;
-      selectedRoom.readiedPlayer.push(userinfo.nickname);
-      selectedRoom.ready++;
-      ChatSocketIO.to(socket.userRooms[0]).emit('ready:user', userinfo);
-      selectedRoom.ready >= 2 && selectedRoom.ready === selectedRoom.members.length && ChatSocketIO.to(socket.userRooms[0]).emit("all:ready", true);
-    }
-  });
+  const readyUser = require('./controllers/socketio/events/gameProcess/readyUser');
+  socket.on('ready:user', readyUser.bind(socket));
 
   socket.on('start:game', () => {
     logger.custLog("[start:game] 방장의 시작 요청.");
