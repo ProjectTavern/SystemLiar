@@ -9,7 +9,7 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.userRooms = [];
     const usersession = socket.handshake.session;
 
-    SocketIOset = { socket: socket, ChatSocketIO: ChatSocketIO };
+    const SocketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인
     const userStatus = require('./events/userInformation/userStatus');
@@ -32,7 +32,7 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
 
     // 인게임
     const sendMessage = require('./events/gameProcess/sendMessage');
-    socket.on('send:message', sendMessage.bind(socket));
+    socket.on('send:message', sendMessage.bind(SocketSet));
     const readyUser = require('./events/gameProcess/readyUser');
     socket.on('ready:user', readyUser.bind(socket));
 

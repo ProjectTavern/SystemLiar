@@ -1,7 +1,5 @@
-const { ChatSocketIO } = require('../../../../index');
-
 module.exports = function sendMessage(responseData) {
-  const socket = this;
+  const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;
   try {
     responseData.nickname = userSession.userinfo.nickname;
