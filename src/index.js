@@ -97,6 +97,20 @@ ChatSocketIO.on('connection', socket => {
     socket.userRooms = [];
   }
 
+  function setNameTag(socket, name) {
+    if (name) {
+      socket.username = name;
+    } else {
+      const someones = ["A", "B", "C", "D", "E", "F"];
+      const random = Math.floor(Math.random() * 6);
+      socket.username = someones[random];
+    }
+  }
+
+  /**
+   * 게임 시작 관련 : 레디 / 시작 / 종료
+   * */
+
   socket.on("ready:user", () => {
     logger.custLog("[ready:user] 유저의 준비 요청.");
     const userinfo = usersession.userinfo;
@@ -263,8 +277,25 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  const endGame = require('./controllers/socketio/events/endGame');
-  socket.on('end:game', endGame.bind(socket));
+  socket.on('end:game', (data) => {
+    // 참여하고 있는 방
+    logger.custLog('경기 종료, 초기화를 진행합니다.');
+    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+    if( selectedRoom.ready === 0 ) {
+
+    } else {
+      selectedRoom.status = 'wait';
+      selectedRoom.ready = 0;
+      selectedRoom.ballotBox = [];
+      selectedRoom.discussEnd = false;
+      selectedRoom.readiedPlayer = [];
+      selectedRoom.senderID = [];
+    }
+
+    // 개별 유저
+    const userinfo = usersession.userinfo;
+    userinfo.ready = false;
+  });
 
   socket.on('disconnect', () => {
     logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
