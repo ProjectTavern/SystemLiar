@@ -1,9 +1,14 @@
+const getSelectedRooms = require('./modules/getSelectedRoom');
+const filterRooms = require('./modules/filterRooms');
+
+
+const rooms = require('./rooms');
+
 module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
 
     socket.userRooms = [];
     const usersession = socket.handshake.session;
-    logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
 
     // 로그인
     const userStatus = require('./events/userInformation/userStatus');
@@ -31,14 +36,11 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('ready:user', readyUser.bind(socket));
 
     socket.on('start:game', () => {
-      logger.custLog("[start:game] 방장의 시작 요청.");
       const userinfo = usersession.userinfo;
       const userRoom = socket.userRooms[0];
       let selectedRoom = getSelectedRoom(rooms, userRoom);
       selectedRoom.playingMembers = deepCopy(selectedRoom.members);
       selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
-      logger.custLog("[start:game] 시작하려는 방 정보: ", selectedRoom);
-      logger.custLog("[start:game] 시작하려는 방 구성인원: ", selectedRoom.playingMembers);
       selectedRoom.status = "playing";
       /* 거짓말쟁이 추출 */
       const playersLength = selectedRoom.playingMembers.length;
@@ -53,14 +55,11 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
         const selectedFood = suggests[targetFood];
         selectedRoom.gameRole = selectedFood;
         selectedRoom.currentUsers.forEach(memberData => {
-          logger.custLog("[start:game] 판별: ", memberData);
           if (memberData.nickname === liar) {
-            logger.custLog("[start:game] 거짓말쟁이: ", memberData);
             memberData.role = 'liar';
             const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
             ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
           } else {
-            logger.custLog("[start:game] 제시어를 받은 사람: ", memberData);
             memberData.role = 'innocent';
             const serviceData = { firstPlayer: firstOrder, role: selectedFood };
             ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
@@ -70,11 +69,9 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     });
 
     socket.on('explain:game', (data) => {
-      logger.custLog("[explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.", data);
       try {
         const userRoom = socket.userRooms[0];
         let selectedRoom = getSelectedRoom(rooms, userRoom);
-        logger.custLog("[explain:game] 현재 남은 설명할 사람: ", selectedRoom.playingMembers);
         const playersLength = selectedRoom.playingMembers.length;
         const targetNumber = Math.floor(Math.random() * playersLength);
         const nextOrder = selectedRoom.playingMembers[targetNumber];
@@ -83,34 +80,27 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
         if (data.hasOwnProperty("explain")) {
           if (playersLength > 0) {
             const serviceData = { nextPlayer: nextOrder, explain : data.explain, explaingPlayer: data.explaingPlayer };
-            logger.custLog("[explain:game] 전달할 데이터", serviceData);
             ChatSocketIO.to(socket.userRooms[0]).emit("explain:game", serviceData);
           } else {
-            logger.custLog("[explain:game] 설명할 사람이 남지 않았습니다. 난상토론으로 넘어갑니다.");
             ChatSocketIO.to(socket.userRooms[0]).emit("discuss:game", { explain: data.explain, explaingPlayer: data.explaingPlayer });
           }
         } else {
-          logger.custLog("[explain:game] None data exception: 전달할 메세지가 들어오지 않았습니다.", data);
         }
 
 
       } catch (e) {
-        logger.custLog(`[explain:game]${e}`);
       }
     });
 
     socket.on('end:discuss', (data) => {
-      logger.custLog("[end:discuss] 토론 종료", data);
       const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
       if (!selectedRoom.discussEnd) {
         selectedRoom.discussEnd = true;
-        logger.custLog('투표자들', selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
         ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
       }
     });
 
     socket.on('vote:game', (data) => {
-      logger.custLog('[vote:gmae] 투표한 사람에 대한 데이터: ', data);
       const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
 
       selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
@@ -123,13 +113,11 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
           liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
           result: selectedRoom.ballotBox
         };
-        logger.custLog('보낼 결과물: ', result);
         ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
       }
     });
 
     socket.on('last:chance', () => {
-      logger.custLog('[last:chance]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
       const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
       const subject = selectRoom.gameRole;
 
@@ -160,13 +148,10 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     });
 
     socket.on('last:answer', (word) => {
-      logger.custLog('[last:answer]거짓말쟁이가 검거되었습니다. 최후의 제시어 확인 발표를 진행합니다.');
       const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
       if (selectRoom.gameRole === word) {
-        logger.custLog('거짓말쟁이가 제시어를 맞췄습니다!');
         ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", true);
       } else {
-        logger.custLog('거짓말쟁이가 제시어를 틀렸습니다!');
         ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", false);
       }
     });
@@ -177,3 +162,7 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('disconnect', disconnect.bind(socket));
   });
 };
+
+function deepCopy(data) {
+  return JSON.parse(JSON.stringify(data));
+}
