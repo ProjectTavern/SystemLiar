@@ -1,3 +1,4 @@
+const { ChatSocketIO } = require('../../../../index');
 
 module.exports = function sendMessage(responseData) {
   const socket = this;
@@ -5,8 +6,10 @@ module.exports = function sendMessage(responseData) {
   try {
     responseData.nickname = userSession.userinfo.nickname;
     const roomId = userSession.userinfo.room;
-    socket.emit('user:message', responseData);
-    socket.broadcast.to(roomId).emit('user:message', responseData);
+    ChatSocketIO.to(roomId).emit("user:message", responseData);
+
+    // socket.emit('user:message', responseData);
+    // socket.broadcast.to(roomId).emit('user:message', responseData);
   } catch (error) {
 
   }
