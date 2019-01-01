@@ -15,8 +15,8 @@ app.use('/', pages);
 
 const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketsession(app.session, { autoSave: true }));
+exports.ChatSocketIO = ChatSocketIO;
 
-// 방 => 추후 이동
 const ChatSocketIOEvent = require('./controllers/socketio/index');
 ChatSocketIOEvent(ChatSocketIO);
 
