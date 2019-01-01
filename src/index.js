@@ -24,234 +24,31 @@ ChatSocketIO.on('connection', socket => {
   socket.userRooms = [];
   const usersession = socket.handshake.session;
   logger.custLog(`사용자가 접속하였습니다. 해당 사용자의 아이디는 ${socket.id} 입니다. 소켓 접속에 사용자의 세션 정보를 불러옵니다.`, usersession);
-  const userStatus = require('./controllers/socketio/events/userStatus');
-  socket.on("user:status", userStatus.bind(socket));
 
-  socket.on("user:create:nickname", data => {
-    logger.custLog(`[user:create:nickname]새로운 대화명 생성 요청을 전송받았습니다.`, data);
+  // 로그인
+  const userStatus = require('./controllers/socketio/events/userInformation/userStatus');
+  socket.on('user:status', userStatus.bind(socket));
+  const userCreateNickname = require('./controllers/socketio/events/userInformation/userCreateNickname');
+  socket.on('user:create:nickname', userCreateNickname.bind(socket));
 
-    let userInform = [];
-    for ( let userInformKey in data) {
-      if (data.hasOwnProperty(userInformKey)) {
-        userInform.push(userInformKey);
-        userInform.push(data[userInformKey]);
-      }
-    }
-
-    /* 유저 정보 */
-    const userNickname = data.nickname;
-    const userGhashId = data.id;
-    logger.custLog('[user:create:nickname]user구글 아이디', data);
-
-    if (userNickname.split(' ').length > 1) {
-      logger.custLog(`[user:create:nickname] 띄어쓰기는 불가능 합니다.`);
-      socket.emit("user:status", false);
-      return false;
-    }
-
-
-    redis.smembers(dataScheme.user.nicknames, (error, userNicknameLists) => {
-      if(userNicknameLists.includes(userNickname)) {
-        logger.custLog(`[user:create:nickname]사용하시려는 대화명 ${userNickname}이 이미 존재합니다. 다른 대화명 사용을 요청합니다.`);
-        socket.emit("user:status", false);
-      } else {
-        logger.custLog(`[user:create:nickname]${userNickname}은 사용할 수 있는 대화명입니다. 데이터 베이스에 저장을 진행합니다.`);
-        redis.multi()
-          .sadd(dataScheme.user.nicknames, userNickname)
-          .hset(userGhashId, userInform)
-          .exec((error, result) => {
-            if (error) {
-              logger.custLog(`[user:create:nickname]사용자의 정보를 저장하려고 시도했으나 실패했습니다. 실패 보고를 전송합니다. 이유는 다음과 같습니다.`, error);
-              socket.emit("[user:create:nickname]user:status", false);
-            }
-            logger.custLog('[user:create:nickname]사용자의 정보를 성공적으로 저장했습니다. 세션에 유저의 정보를 저장하고 성공 보고를 전송합니다.');
-            usersession.userinfo = { id: userGhashId, nickname: userNickname };
-            socket.emit("user:status", userNickname);
-          });
-      }
-    });
-  });
-
-
-  const roomsRefresh = require('./controllers/socketio/events/refreshRoom');
-  socket.on("rooms:refresh", roomsRefresh.bind(socket));
-  const getSubject = require('./controllers/socketio/events/getSubject');
+  // 게임방
+  socket.emit('rooms:info', filterRooms(rooms));
+  const roomsRefresh = require('./controllers/socketio/events/roomProcess/refreshRoom');
+  socket.on('rooms:refresh', roomsRefresh.bind(socket));
+  const createRoom = require('./controllers/socketio/events/roomProcess/createRoom');
+  socket.on('create:room', createRoom.bind(socket));
+  const joinRoom = require('./controllers/socketio/events/roomProcess/joinRoom');
+  socket.on('join:room', joinRoom.bind(socket));
+  const getSubject = require('./controllers/socketio/events/roomProcess/getSubject');
   socket.on('get:subject', getSubject.bind(socket));
+  const leaveRoom = require('./controllers/socketio/events/roomProcess/leaveRoom');
+  socket.on('leave:room', leaveRoom.bind(socket));
 
-  /* 방 생성을 따로 만듬 */
-  socket.on("create:room", (data) => {
-    logger.custLog(`[create:room]거짓말쟁이 대화방 생성 요청을 전송받았습니다.`);
-    try{
-      if (data.id === "create") {
+  // 인게임
+  const sendMessage = require('./controllers/socketio/events/gameProcess/sendMessage');
+  socket.on('send:message', sendMessage.bind(socket));
 
-        let roomNumbers = [];
-        let lowestRoomNumber = rooms.length + 1;
-        rooms.forEach((room) => {
-          roomNumbers.push(room.number);
-        });
-        roomNumbers.sort();
-        roomNumbers.forEach((number, index) => {
-          if (number !== index + 1) {
-            lowestRoomNumber = index + 1;
-            return false;
-          }
-        });
-
-        const roomId = Date.now();
-        const roomData = {
-          id : roomId,
-          number: lowestRoomNumber,
-          name : data.name,
-          subject : data.subject,
-          members : [usersession.userinfo.nickname],
-          limit : 7,
-          status : "wait",
-          ready: 0,
-          readiedPlayer: [],
-          host: usersession.userinfo.nickname,
-          currentUsers: [{ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false }],
-          ballotBox: [],
-          senderID: []
-        };
-        rooms.push(roomData);
-        logger.custLog(`[create:room]대화방 생성에 성공하였습니다.`, roomData);
-        /* 합쳐야할지 고민 */
-        socket.join(roomId);
-        socket.userRooms.push(roomId);
-        let socketSession = usersession || {};
-        let userinfo = socketSession.userinfo || {};
-        userinfo.room = roomId;
-
-        setNameTag(socket, usersession.userinfo.nickname);
-        socket.emit("create:room", true);
-        let selectedRoom = getSelectedRoom(rooms, roomId);
-        socket.emit("create:info", selectedRoom);
-      } else {
-        logger.custLog(`[create:room] 잘못된 요청입니다. 생성 아이디의 값이 "create"가 아닙니다.`);
-        socket.emit("create:room", false);
-      }
-    } catch (e) {
-      logger.error(`[create:room]에러가 발생했습니다. 원인은 다음과 같습니다.`);
-      dataLogger.error(e);
-      socket.emit("create:room", false);
-    }
-
-  });
-
-  /* 방에 만들 경우 */
-  socket.on('join:room', (data) => {
-    logger.custLog('[join:room] 요청을 전송받았습니다. ', data);
-    try {
-      logger.custLog('[join:room] 데이터를 확인합니다. 유저세션 값입니다.', data, usersession);
-      leaveAllRoom(socket);
-
-      let selectedRoom = getSelectedRoom(rooms, data.id);
-
-      let socketSession = usersession || {};
-      let userinfo = socketSession.userinfo || {};
-
-      if (selectedRoom.hasOwnProperty("id") && isJoinable(selectedRoom, usersession.userinfo.nickname)) {
-        logger.custLog('[join:room] 방 입장이 가능하여 입장되었습니다.');
-        selectedRoom.members.push(usersession.userinfo.nickname);
-
-        socket.join(data.id);
-        socket.userRooms.push(data.id);
-        userinfo.room = data.id;
-
-        setNameTag(socket, usersession.userinfo.nickname);
-        selectedRoom.currentUsers.push({ nickname: usersession.userinfo.nickname, socketId: socket.id, ready: false });
-        socket.broadcast.to(data.id).emit('user:join', usersession.userinfo.nickname);
-        socket.emit("join:room", selectedRoom);
-
-      }
-
-    } catch (error) {
-      logger.custLog("[ERROR] join:room.", error);
-    }
-
-    function isJoinable(selectedRoom, nickname) {
-      const isNotJoined = !((selectedRoom.members.filter(element => {
-        return element === nickname
-      })).length);
-      return selectedRoom.status === "wait" && selectedRoom.members.length < selectedRoom.limit && isNotJoined;
-    }
-  });
-
-  /* 대화 전송 */
-  socket.on('send:message', (data) => {
-    logger.custLog("[send:message] => ",data);
-    try {
-      data.nickname = usersession.userinfo.nickname;
-      ChatSocketIO.to(socket.userRooms[0]).emit('user:message', data);
-    } catch (error) {
-      logger.custLog("[ERROR][send:message] => ", error);
-    }
-  });
-
-  /* 방을 떠납니다. */
-  socket.on("leave:room", (data) => {
-    logger.custLog("[leave:room]", data);
-    try {
-      const roomId = socket.userRooms[0];
-      const userNickname = usersession.userinfo.nickname;
-      let selectedRoom = getSelectedRoom(rooms, roomId);
-      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      leaveAllRoom(socket);
-      ChatSocketIO.to(roomId).emit("user:exit", userNickname);
-
-      /* 추후 삭제 */
-      logger.custLog("[leave:room] 현재 방의 정보들", rooms);
-      socket.emit("leave:room", true);
-
-      if(selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
-        selectedRoom.readiedPlayer.splice(selectedRoom.readiedPlayer.indexOf(userNickname), 1);
-        selectedRoom.ready--;
-      }
-
-      selectedRoom.currentUsers.forEach((memberData, index) => {
-        if (memberData.nickname === userNickname) {
-          selectedRoom.currentUsers.splice(index, 1);
-        }
-      });
-
-      if (selectedRoom.members.length === 0) {
-        logger.custLog("[leave:room] 방에 아무도 없어 방을 삭제합니다.", rooms[data.number]);
-        rooms.splice(rooms.indexOf(selectedRoom), 1);
-      } else if (selectedRoom.host === userNickname) {
-        logger.custLog("[leave:room] 방장이 방을 나가 새로운 방장을 임명합니다.", selectedRoom);
-        selectedRoom.host = selectedRoom.members[0];
-        ChatSocketIO.to(roomId).emit("host:change", selectedRoom.host);
-      }
-    } catch (error) {
-      logger.custLog("[ERROR][leave:room] => ", error);
-      socket.emit("leave:room", false);
-    }
-  });
-
-  function leaveAllRoom(socket) {
-    const currentRooms = socket.userRooms;
-    usersession.userinfo.ready = false;
-    currentRooms.forEach((elem) => {
-      socket.leave(elem);
-    });
-    socket.userRooms = [];
-  }
-
-  function setNameTag(socket, name) {
-    if (name) {
-      socket.username = name;
-    } else {
-      const someones = ["A", "B", "C", "D", "E", "F"];
-      const random = Math.floor(Math.random() * 6);
-      socket.username = someones[random];
-    }
-  }
-
-  /**
-   * 게임 시작 관련 : 레디 / 시작 / 종료
-   * */
-
-  socket.on("ready:user", () => {
+  socket.on('ready:user', () => {
     logger.custLog("[ready:user] 유저의 준비 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
@@ -275,7 +72,7 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  socket.on("start:game", () => {
+  socket.on('start:game', () => {
     logger.custLog("[start:game] 방장의 시작 요청.");
     const userinfo = usersession.userinfo;
     const userRoom = socket.userRooms[0];
@@ -314,7 +111,7 @@ ChatSocketIO.on('connection', socket => {
     });
   });
 
-  socket.on("explain:game", (data) => {
+  socket.on('explain:game', (data) => {
     logger.custLog("[explain:game] 게임 설명을 마치고 다음 사람에게 설명 차례라는 내용을 전달해주어야 합니다.", data);
     try {
       const userRoom = socket.userRooms[0];
@@ -344,7 +141,6 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  /* 토론의 종료 */
   socket.on('end:discuss', (data) => {
     logger.custLog("[end:discuss] 토론 종료", data);
     const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
@@ -417,81 +213,15 @@ ChatSocketIO.on('connection', socket => {
     }
   });
 
-  socket.on('end:game', (data) => {
-    // 참여하고 있는 방
-    logger.custLog('경기 종료, 초기화를 진행합니다.');
-    const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-    if( selectedRoom.ready === 0 ) {
-
-    } else {
-      selectedRoom.status = 'wait';
-      selectedRoom.ready = 0;
-      selectedRoom.ballotBox = [];
-      selectedRoom.discussEnd = false;
-      selectedRoom.readiedPlayer = [];
-      selectedRoom.senderID = [];
-    }
-
-    // 개별 유저
-    const userinfo = usersession.userinfo;
-    userinfo.ready = false;
-  });
-
-  socket.on('disconnect', () => {
-    logger.custLog("[disconnect] 유저의 연결이 끊어졌습니다.");
-
-    try {
-      /* 유저가 들어간 방 찾기 */
-      const roomId = usersession.userinfo.room;
-      const userNickname = usersession.userinfo.nickname;
-      ChatSocketIO.to(roomId).emit("user:exit", userNickname);
-      logger.custLog('나간 사람: ', usersession.userinfo);
-      logger.custLog('유저의 로그 데이터: ', roomId, userNickname);
-      let selectedRoom = getSelectedRoom(rooms, roomId);
-      logger.custLog("[disconnect] 선택된 방의 정보: ", selectedRoom);
-      selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
-      leaveAllRoom(socket);
-
-      if (selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
-        selectedRoom.readiedPlayer.splice(selectedRoom.readiedPlayer.indexOf(userNickname), 1);
-        selectedRoom.ready--;
-      }
-
-      selectedRoom.currentUsers.forEach((memberData, index) => {
-        if (memberData.nickname === userNickname) {
-          selectedRoom.currentUsers.splice(index, 1);
-        }
-      });
-
-      if (selectedRoom.members.length === 0) {
-        logger.custLog("[disconnect] 방에 아무도 없어 방을 삭제합니다.", selectedRoom);
-        rooms.splice(rooms.indexOf(selectedRoom), 1);
-      } else if (selectedRoom.host === userNickname) {
-        logger.custLog("[leave:room] 방장이 방을 나가 새로운 방장을 임명합니다.", selectedRoom);
-        selectedRoom.host = selectedRoom.members[0];
-        ChatSocketIO.to(roomId).emit("host:change", selectedRoom.host);
-      }
-
-    } catch (error) {
-      logger.custLog("[ERROR][disconnect] => ", error);
-    }
-  });
-
-
-  socket.emit("rooms:info", filterRooms(rooms));
+  const endGame = require('./controllers/socketio/events/gameProcess/endGame');
+  socket.on('end:game', endGame.bind(socket));
+  const disconnect = require('./controllers/socketio/events/userInformation/disconnect');
+  socket.on('disconnect', disconnect.bind(socket));
 });
 
-/* 서버 기동 포트: 80 */
 server.listen(serverPort, () => {
-  logger.custLog("SystemLiar All green. Listening on PORT: 80");
+  logger.custLog('SystemLiar All green.');
 });
-
-function setUserInfoToSession(request, datas) {
-  let session = request.session;
-  session.id = datas.id;
-  session.nickname = datas.nickname;
-  return session;
-}
 
 function filterRooms(rooms) {
   return rooms.map(room => {

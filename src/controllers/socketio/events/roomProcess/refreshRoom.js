@@ -1,6 +1,6 @@
-const filterRooms = require('../modules/filterRooms');
+const filterRooms = require('../../modules/filterRooms');
 
-let rooms = require('../rooms');
+let rooms = require('../../rooms');
 
 module.exports = function refreshRoom() {
   const socket = this;
