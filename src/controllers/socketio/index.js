@@ -1,4 +1,4 @@
-const getSelectedRooms = require('./modules/getSelectedRoom');
+const getSelectedRoom = require('./modules/getSelectedRoom');
 const filterRooms = require('./modules/filterRooms');
 
 
