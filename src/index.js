@@ -12,7 +12,6 @@ app.use('/', pages);
 
 const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketSession(app.session, { autoSave: true }));
-exports.ChatSocketIO = ChatSocketIO;
 ChatSocketIOEvent(ChatSocketIO);
 
 server.listen(serverPort);
