@@ -1,7 +1,7 @@
 const redis = require('../../../database/redis');
 
 module.exports = function userCreateNickname(responseData) {
-  const socket = this;
+  const { socket } = this;
   const usersession = socket.handshake.session;
   const userNickname = responseData.nickname;
   const userGhashId = responseData.id;

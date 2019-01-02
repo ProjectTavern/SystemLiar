@@ -8,20 +8,20 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
     socket.userRooms = [];
     const usersession = socket.handshake.session;
-    const SocketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
+    const socketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인
     const userStatus = require('./events/userInformation/userStatus');
-    socket.on('user:status', userStatus.bind(socket));
+    socket.on('user:status', userStatus.bind(socketSet));
     const userCreateNickname = require('./events/userInformation/userCreateNickname');
-    socket.on('user:create:nickname', userCreateNickname.bind(socket));
+    socket.on('user:create:nickname', userCreateNickname.bind(socketSet));
 
     // 게임방
     socket.emit('rooms:info', filterRooms(rooms));
     const roomsRefresh = require('./events/roomProcess/refreshRoom');
-    socket.on('rooms:refresh', roomsRefresh.bind(socket));
+    socket.on('rooms:refresh', roomsRefresh.bind(socketSet));
     const createRoom = require('./events/roomProcess/createRoom');
-    socket.on('create:room', createRoom.bind(socket));
+    socket.on('create:room', createRoom.bind(socketSet));
     const joinRoom = require('./events/roomProcess/joinRoom');
     socket.on('join:room', joinRoom.bind(socket));
     const getSubject = require('./events/roomProcess/getSubject');
@@ -31,7 +31,7 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
 
     // 인게임
     const sendMessage = require('./events/gameProcess/sendMessage');
-    socket.on('send:message', sendMessage.bind(SocketSet));
+    socket.on('send:message', sendMessage.bind(socketSet));
     const readyUser = require('./events/gameProcess/readyUser');
     socket.on('ready:user', readyUser.bind(socket));
 

@@ -4,7 +4,7 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 let rooms = require('../../rooms');
 
 module.exports = function createRoom(responseData) {
-  const socket = this;
+  const { socket } = this;
   const userSession = socket.handshake.session;
 
   try{
