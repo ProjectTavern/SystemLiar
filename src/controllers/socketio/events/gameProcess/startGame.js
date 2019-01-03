@@ -1,6 +1,6 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
 const deepCopy = require('../../modules/deepCopy');
-
+const redis = require('../../../database/redis');
 const rooms = require('../../rooms');
 
 module.exports = function() {
