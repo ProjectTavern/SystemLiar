@@ -23,50 +23,19 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     const createRoom = require('./events/roomProcess/createRoom');
     socket.on('create:room', createRoom.bind(socketSet));
     const joinRoom = require('./events/roomProcess/joinRoom');
-    socket.on('join:room', joinRoom.bind(socket));
+    socket.on('join:room', joinRoom.bind(socketSet));
     const getSubject = require('./events/roomProcess/getSubject');
-    socket.on('get:subject', getSubject.bind(socket));
+    socket.on('get:subject', getSubject.bind(socketSet));
     const leaveRoom = require('./events/roomProcess/leaveRoom');
-    socket.on('leave:room', leaveRoom.bind(socket));
+    socket.on('leave:room', leaveRoom.bind(socketSet));
 
     // 인게임
     const sendMessage = require('./events/gameProcess/sendMessage');
     socket.on('send:message', sendMessage.bind(socketSet));
     const readyUser = require('./events/gameProcess/readyUser');
-    socket.on('ready:user', readyUser.bind(socket));
-
-    socket.on('start:game', () => {
-      const userinfo = usersession.userinfo;
-      const userRoom = socket.userRooms[0];
-      let selectedRoom = getSelectedRoom(rooms, userRoom);
-      selectedRoom.playingMembers = deepCopy(selectedRoom.members);
-      selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
-      selectedRoom.status = "playing";
-      /* 거짓말쟁이 추출 */
-      const playersLength = selectedRoom.playingMembers.length;
-      const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];
-      /* 첫 시작 플레이어 추출 */
-      const targetNumber = Math.floor(Math.random() * playersLength);
-      const firstOrder = selectedRoom.playingMembers[targetNumber];
-      selectedRoom.playingMembers.splice(targetNumber, 1);
-      /* 제시어 선택 */
-      redis.smembers(selectedRoom.subject, (error, suggests) => {
-        const targetFood = Math.floor(Math.random() * suggests.length);
-        const selectedFood = suggests[targetFood];
-        selectedRoom.gameRole = selectedFood;
-        selectedRoom.currentUsers.forEach(memberData => {
-          if (memberData.nickname === liar) {
-            memberData.role = 'liar';
-            const serviceData = { firstPlayer: firstOrder, role: "거짓말쟁이" };
-            ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
-          } else {
-            memberData.role = 'innocent';
-            const serviceData = { firstPlayer: firstOrder, role: selectedFood };
-            ChatSocketIO.to(memberData.socketId).emit("role:game", serviceData);
-          }
-        });
-      });
-    });
+    socket.on('ready:user', readyUser.bind(socketSet));
+    const startGame = require('./events/gameProcess/startGame');
+    socket.on('start:game', startGame.bind(socketSet));
 
     socket.on('explain:game', (data) => {
       try {
@@ -162,7 +131,3 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('disconnect', disconnect.bind(socket));
   });
 };
-
-function deepCopy(data) {
-  return JSON.parse(JSON.stringify(data));
-}

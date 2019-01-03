@@ -4,7 +4,7 @@ const leaveAllRoom = require('../../modules/leaveAllRoom');
 const rooms = require('../../rooms');
 
 module.exports = function leaveRoom() {
-  const socket = this;
+  const { socket } = this;
   const userSession = socket.handshake.session;
   try {
     const userInfo = userSession.userinfo;
