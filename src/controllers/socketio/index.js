@@ -36,30 +36,8 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('ready:user', readyUser.bind(socketSet));
     const startGame = require('./events/gameProcess/startGame');
     socket.on('start:game', startGame.bind(socketSet));
-
-    socket.on('explain:game', (data) => {
-      try {
-        const userRoom = socket.userRooms[0];
-        let selectedRoom = getSelectedRoom(rooms, userRoom);
-        const playersLength = selectedRoom.playingMembers.length;
-        const targetNumber = Math.floor(Math.random() * playersLength);
-        const nextOrder = selectedRoom.playingMembers[targetNumber];
-        selectedRoom.playingMembers.splice(targetNumber, 1);
-
-        if (data.hasOwnProperty("explain")) {
-          if (playersLength > 0) {
-            const serviceData = { nextPlayer: nextOrder, explain : data.explain, explaingPlayer: data.explaingPlayer };
-            ChatSocketIO.to(socket.userRooms[0]).emit("explain:game", serviceData);
-          } else {
-            ChatSocketIO.to(socket.userRooms[0]).emit("discuss:game", { explain: data.explain, explaingPlayer: data.explaingPlayer });
-          }
-        } else {
-        }
-
-
-      } catch (e) {
-      }
-    });
+    const explainGame = require('./events/gameProcess/explainGame');
+    socket.on('explain:game', explainGame.bind(socketSet));
 
     socket.on('end:discuss', (data) => {
       const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
