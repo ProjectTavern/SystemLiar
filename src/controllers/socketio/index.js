@@ -88,15 +88,8 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
       });
     });
 
-    socket.on('last:answer', (word) => {
-      const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-      if (selectRoom.gameRole === word) {
-        ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", true);
-      } else {
-        ChatSocketIO.to(socket.userRooms[0]).emit("last:answer", false);
-      }
-    });
-
+    const lastAnswer = require('./events/gameProcess/lastAnswer');
+    socket.on('last:answer', lastAnswer.bind(socketSet));
     const endGame = require('./events/gameProcess/endGame');
     socket.on('end:game', endGame.bind(socket));
     const disconnect = require('./events/userInformation/disconnect');
