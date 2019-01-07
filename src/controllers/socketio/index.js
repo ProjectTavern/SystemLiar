@@ -7,7 +7,6 @@ const rooms = require('./rooms');
 module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
     socket.userRooms = [];
-    const usersession = socket.handshake.session;
     const socketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인
@@ -42,37 +41,8 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('end:discuss', endDiscuss.bind(socketSet));
     const voteGame = require('./events/gameProcess/voteGame');
     socket.on('vote:game', voteGame.bind(socketSet));
-
-    socket.on('last:chance', () => {
-      const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-      const subject = selectRoom.gameRole;
-
-      redis.smembers(selectRoom.subject, (error, suggests) => {
-        const originalDatasLength = suggests.length;
-        if (originalDatasLength > 25) {
-          suggests.splice(suggests.indexOf(subject), 1);
-        }
-        const resultLength = suggests.length >= 25 ? 25 : suggests.length;
-        for (let index = 0; index < resultLength; index++) {
-          const target = Math.floor(Math.random() * suggests.length);
-          const temp = suggests[target];
-          suggests.splice(target, 1);
-          suggests.splice(0, 0, temp);
-        }
-
-        let result = [];
-        if (originalDatasLength > 25) {
-          result = suggests.slice(0, resultLength - 1);
-          const collectTarget = Math.floor(Math.random() * result.length);
-          result.splice(collectTarget, 0, subject);
-        } else {
-          result = suggests;
-        }
-
-        ChatSocketIO.to(socket.userRooms[0]).emit("last:chance", result);
-      });
-    });
-
+    const lastChance = require('./events/gameProcess/lastChance');
+    socket.on('last:chance', lastChance.bind(socketSet));
     const lastAnswer = require('./events/gameProcess/lastAnswer');
     socket.on('last:answer', lastAnswer.bind(socketSet));
     const endGame = require('./events/gameProcess/endGame');
