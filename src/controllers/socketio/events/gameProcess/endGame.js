@@ -2,8 +2,12 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 
 let rooms = require('../../rooms');
 module.exports = function endGame() {
-  const socket = this;
-  const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
+  const { socket } = this;
+  const userSession = socket.handshake.session;
+  const userInfo = userSession.userinfo;
+  const roomId = userInfo.room;
+
+  const selectedRoom = getSelectedRoom(rooms, roomId);
   if( selectedRoom.ready === 0 ) {
 
   } else {
@@ -15,7 +19,5 @@ module.exports = function endGame() {
     selectedRoom.senderID = [];
   }
 
-  // 개별 유저
-  const userinfo = usersession.userinfo;
-  userinfo.ready = false;
+  userInfo.ready = false;
 };
