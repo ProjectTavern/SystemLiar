@@ -38,14 +38,8 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('start:game', startGame.bind(socketSet));
     const explainGame = require('./events/gameProcess/explainGame');
     socket.on('explain:game', explainGame.bind(socketSet));
-
-    socket.on('end:discuss', (data) => {
-      const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-      if (!selectedRoom.discussEnd) {
-        selectedRoom.discussEnd = true;
-        ChatSocketIO.to(socket.userRooms[0]).emit("vote:list", selectedRoom.currentUsers.map(userinfo => userinfo.nickname));
-      }
-    });
+    const endDiscuss = require('./events/gameProcess/endDiscuss');
+    socket.on('end:discuss', endDiscuss.bind(socketSet));
 
     socket.on('vote:game', (data) => {
       const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
