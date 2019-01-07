@@ -15,10 +15,10 @@ module.exports = function (responseData) {
 
     if (responseData.hasOwnProperty("explain")) {
       if (playersLength > 0) {
-        const serviceData = { nextPlayer: nextOrder, explain : responseData.explain, explaingPlayer: responseData.explaingPlayer };
+        const serviceData = { nextPlayer: nextOrder, explain : responseData.explain, explainingPlayer: responseData.explaingPlayer };
         ChatSocketIO.to(roomId).emit("explain:game", serviceData);
       } else {
-        ChatSocketIO.to(roomId).emit("discuss:game", { explain: responseData.explain, explaingPlayer: responseData.explaingPlayer });
+        ChatSocketIO.to(roomId).emit("discuss:game", { explain: responseData.explain, explainingPlayer: responseData.explaingPlayer });
       }
     }
   } catch (e) {

@@ -2,7 +2,7 @@ const redis = require('../../../database/redis');
 
 module.exports = function userCreateNickname(responseData) {
   const { socket } = this;
-  const usersession = socket.handshake.session;
+  const userSession = socket.handshake.session;
   const userNickname = responseData.nickname;
   const userGhashId = responseData.id;
 
@@ -30,7 +30,7 @@ module.exports = function userCreateNickname(responseData) {
           if (error) {
             socket.emit('user:status', false);
           }
-          usersession.userinfo = { id: userGhashId, nickname: userNickname, socketId: socket.id };
+          userSession.userinfo = { id: userGhashId, nickname: userNickname, socketId: socket.id };
           socket.emit('user:status', userNickname);
         });
     }
