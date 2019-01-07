@@ -3,7 +3,7 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 
 const rooms = require('../../rooms');
 module.exports = function disconnect() {
-  const socket = this;
+  const { socket } = this;
   const userSession = socket.handshake.session;
   try {
     const userInfo = userSession.userinfo;

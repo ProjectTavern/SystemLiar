@@ -47,6 +47,6 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     const endGame = require('./events/gameProcess/endGame');
     socket.on('end:game', endGame.bind(socketSet));
     const disconnect = require('./events/userInformation/disconnect');
-    socket.on('disconnect', disconnect.bind(socket));
+    socket.on('disconnect', disconnect.bind(socketSet));
   });
 };
