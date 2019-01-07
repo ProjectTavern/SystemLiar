@@ -2,6 +2,7 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 
 module.exports = function (responseData) {
   const { socket, ChatSocketIO } = this;
+  const userSession = socket.handshake.session;
   const userInfo = userSession.userinfo;
   const roomId = userInfo.room;
 
