@@ -41,8 +41,7 @@ module.exports = function createRoom(responseData) {
       rooms.push(roomData);
       /* 합쳐야할지 고민 */
       socket.join(roomId);
-      socket.userRooms.push(roomId);
-      let userInfo = userSession.userinfo || {};
+      let userInfo = userSession.userinfo;
       userInfo.room = roomId;
 
       setNameTag(socket, userNickname);

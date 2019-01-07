@@ -6,7 +6,6 @@ const rooms = require('./rooms');
 
 module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
-    socket.userRooms = [];
     const socketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인

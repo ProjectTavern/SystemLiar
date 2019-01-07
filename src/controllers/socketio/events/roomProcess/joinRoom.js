@@ -9,7 +9,6 @@ module.exports = function joinRoom(responseData) {
   const userSession = socket.handshake.session;
 
   try {
-
     leaveAllRoom(socket);
     const roomId = responseData.id;
     let selectedRoom = getSelectedRoom(rooms, roomId);
@@ -21,7 +20,6 @@ module.exports = function joinRoom(responseData) {
       selectedRoom.currentUsers.push({ nickname: userNickname, socketId: socket.id, ready: false });
       userInfo.room = roomId;
       socket.join(roomId);
-      socket.userRooms.push(roomId);
       socket.emit("join:room", selectedRoom);
       socket.broadcast.to(roomId).emit('user:join', userNickname);
     }
