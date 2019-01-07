@@ -40,23 +40,8 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('explain:game', explainGame.bind(socketSet));
     const endDiscuss = require('./events/gameProcess/endDiscuss');
     socket.on('end:discuss', endDiscuss.bind(socketSet));
-
-    socket.on('vote:game', (data) => {
-      const selectedRoom = getSelectedRoom(rooms, socket.userRooms[0]);
-
-      selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
-      selectedRoom.ballotBox.push(data.liarID);
-      selectedRoom.senderID.push(data.senderID);
-
-      ChatSocketIO.to(socket.userRooms[0]).emit("vote:senderID", data.senderID);
-      if (selectedRoom.ballotBox.length === selectedRoom.currentUsers.length) {
-        const result = {
-          liar: selectedRoom.currentUsers.filter((member) => member.role === 'liar')[0].nickname,
-          result: selectedRoom.ballotBox
-        };
-        ChatSocketIO.to(socket.userRooms[0]).emit("vote:game", result);
-      }
-    });
+    const voteGame = require('./events/gameProcess/voteGame');
+    socket.on('vote:game', voteGame.bind(socketSet));
 
     socket.on('last:chance', () => {
       const selectRoom = getSelectedRoom(rooms, socket.userRooms[0]);
