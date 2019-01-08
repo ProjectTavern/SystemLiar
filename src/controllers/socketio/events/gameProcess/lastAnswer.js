@@ -1,21 +1,18 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
-
-
 const rooms = require('../../rooms');
+
 /**
+ * 거짓말쟁이 최후의 기회 = 제시어를 맞추면 성공
+ * @params requestData string
  * @return undefined
- * @params responseData string
  * */
-module.exports = function lastAnswer(responseData) {
+module.exports = function lastAnswer(requestData) {
   const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;
   const userInfo = userSession.userinfo;
   const roomId = userInfo.room;
 
   const selectRoom = getSelectedRoom(rooms, roomId);
-  if (selectRoom.gameRole === responseData) {
-    ChatSocketIO.to(roomId).emit("last:answer", true);
-  } else {
-    ChatSocketIO.to(roomId).emit("last:answer", false);
-  }
+  let response = selectRoom.gameRole === requestData;
+  ChatSocketIO.to(roomId).emit("last:answer", result);
 };
