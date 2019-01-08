@@ -1,10 +1,12 @@
 const redis = require('../../../database/redis');
+const crypto = require('crypto');
 
-// TODO: 구글 유저 아이디값 암호화해서 저장하기
 module.exports = function userStatus(requestData) {
   const { socket } = this;
   const userSession = socket.handshake.session;
   const userGhash = requestData.id;
+
+  // crypto.createHash('sha512').update(userGhash).digest('base64');
   redis.hget(userGhash, "nickname", (error, value) => {
     if (value) {
       userSession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
