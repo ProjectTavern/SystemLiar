@@ -29,6 +29,7 @@ module.exports = function userCreateNickname(responseData) {
         .exec((error, result) => {
           if (error) {
             socket.emit('user:status', false);
+            return false;
           }
           userSession.userinfo = { id: userGhashId, nickname: userNickname, socketId: socket.id };
           socket.emit('user:status', userNickname);
