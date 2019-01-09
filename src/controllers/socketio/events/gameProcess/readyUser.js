@@ -1,7 +1,13 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
-
 const rooms = require('../../rooms');
 
+/**
+ * 유저의 준비 상태를 저장하고, 클라이언트에 전달한다.
+ * 신호가 오면 on / off 의 형태처럼 수정한다.
+ * @function
+ * @return {boolean}
+ * @return {Object} userInfo
+ * */
 module.exports = function() {
   const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;

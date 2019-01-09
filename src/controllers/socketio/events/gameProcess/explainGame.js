@@ -1,8 +1,13 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
-// const {logger} = require('../../../../utilities/logger/winston');
-
 const rooms = require('../../rooms');
-module.exports = function (responseData) {
+
+/**
+ * 플레이어의 제시어 설명을 전달한다.
+ * @function
+ * @param {Object} responseData
+ * @return {Object} serviceData
+ * */
+module.exports = function explainGame(responseData) {
   const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;
   const userInfo = userSession.userinfo;

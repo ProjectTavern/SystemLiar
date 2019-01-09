@@ -2,6 +2,11 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 const redis = require('../../../database/redis');
 const rooms = require('../../rooms');
 
+/**
+ * 거짓말쟁이에게 마지막 기회로 제시어를 맞출 수 있게 해준다.
+ * @function
+ * @return {Array} result
+ * */
 module.exports = function lastChance() {
   const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;

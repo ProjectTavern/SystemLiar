@@ -1,6 +1,13 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
 
 let rooms = require('../../rooms');
+
+/**
+ * 게임을 종료한다.
+ * 게임을 초기화한다.
+ * @function
+ * @return {undefined}
+ * */
 module.exports = function endGame() {
   const { socket } = this;
   const userSession = socket.handshake.session;
