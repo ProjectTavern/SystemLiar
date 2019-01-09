@@ -1,12 +1,10 @@
 const getSelectedRoom = require('../../modules/getSelectedRoom');
-const {logger} = require('../../../../utilities/logger/winston');
 
 module.exports = function (responseData) {
   const { socket, ChatSocketIO } = this;
   const userSession = socket.handshake.session;
   const userInfo = userSession.userinfo;
   const roomId = userInfo.room;
-  logger.custLog(responseData);
   try {
     let selectedRoom = getSelectedRoom(rooms, roomId);
     const playersLength = selectedRoom.playingMembers.length;
@@ -23,6 +21,5 @@ module.exports = function (responseData) {
       }
     }
   } catch (e) {
-    logger.custLog("ERROR", e);
   }
 };
