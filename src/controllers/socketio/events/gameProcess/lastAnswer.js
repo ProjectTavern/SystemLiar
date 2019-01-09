@@ -2,8 +2,10 @@ const getSelectedRoom = require('../../modules/getSelectedRoom');
 const rooms = require('../../rooms');
 
 /**
- * 거짓말쟁이 최후의 기회 = 제시어를 맞추면 성공
- * @params requestData string
+ * 거짓말쟁이 최후의 기회를 준다.
+ * 제시어를 맞추면 성공이다.
+ * @function
+ * @param requestData string
  * @return undefined
  * */
 module.exports = function lastAnswer(requestData) {
@@ -13,6 +15,6 @@ module.exports = function lastAnswer(requestData) {
   const roomId = userInfo.room;
 
   const selectRoom = getSelectedRoom(rooms, roomId);
-  let response = selectRoom.gameRole === requestData;
-  ChatSocketIO.to(roomId).emit("last:answer", result);
+  let responseAnswer = selectRoom.gameRole === requestData;
+  ChatSocketIO.to(roomId).emit("last:answer", responseAnswer);
 };
