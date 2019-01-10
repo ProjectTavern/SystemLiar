@@ -1,10 +1,14 @@
 const redis = require('../../../database/redis');
+const crypto = require('crypto');
 
-module.exports = function userCreateNickname(responseData) {
+module.exports = function userCreateNickname(requestData) {
   const { socket } = this;
   const userSession = socket.handshake.session;
-  const userNickname = responseData.nickname;
-  const userGhashId = responseData.id;
+  const userNickname = requestData.nickname;
+  const prefix = '라이어';
+  const surfix = '시스템';
+  const userID = `${prefix}${requestData.id}${surfix}`;
+  const userGhash = crypto.createHash('sha512').update(userID).digest('base64');
 
   if (userNickname.split(' ').length > 1) {
     socket.emit("user:status", false);
@@ -12,10 +16,10 @@ module.exports = function userCreateNickname(responseData) {
   }
 
   let userInformForRedisData = [];
-  for (let userInformKey in responseData) {
-    if (responseData.hasOwnProperty(userInformKey)) {
+  for (let userInformKey in requestData) {
+    if (requestData.hasOwnProperty(userInformKey)) {
       userInformForRedisData.push(userInformKey);
-      userInformForRedisData.push(responseData[userInformKey]);
+      userInformForRedisData.push(requestData[userInformKey]);
     }
   }
 
@@ -25,13 +29,13 @@ module.exports = function userCreateNickname(responseData) {
     } else {
       redis.multi()
         .sadd('user:nickname', userNickname)
-        .hset(userGhashId, userInformForRedisData)
+        .hset(userGhash, userInformForRedisData)
         .exec((error, result) => {
           if (error) {
             socket.emit('user:status', false);
             return false;
           }
-          userSession.userinfo = { id: userGhashId, nickname: userNickname, socketId: socket.id };
+          userSession.userinfo = { id: userGhash, nickname: userNickname, socketId: socket.id };
           socket.emit('user:status', userNickname);
         });
     }
