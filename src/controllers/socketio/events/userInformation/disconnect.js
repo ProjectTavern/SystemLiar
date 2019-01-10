@@ -1,3 +1,4 @@
+const users = require('../../../database/Users');
 const leaveAllRoom = require('../../modules/leaveAllRoom');
 const getSelectedRoom = require('../../modules/getSelectedRoom');
 
@@ -34,5 +35,8 @@ module.exports = function disconnect() {
     }
 
   } catch (error) {
+
+  } finally {
+    users.disconnected();
   }
 };

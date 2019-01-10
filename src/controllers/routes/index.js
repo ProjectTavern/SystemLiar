@@ -24,6 +24,11 @@ router.get('/', (request, response) => {
   response.redirect('/Main');
 });
 
+router.get('/usersLength', (request, response) => {
+  const users = require('../database/Users');
+  response.json({usersLength: users.getLength()});
+});
+
 router.get('/Main', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/index.html'));
 });
