@@ -1,5 +1,4 @@
 const redis = require('../../../database/redis');
-const users = require('../../../database/Users');
 const crypto = require('crypto');
 
 module.exports = function userStatus(requestData) {
@@ -13,7 +12,6 @@ module.exports = function userStatus(requestData) {
   redis.hget(userGhash, "nickname", (error, value) => {
     if (value) {
       userSession.userinfo = { id: userGhash, nickname: value, socketId: socket.id };
-      users.connected();
       socket.emit("user:status", value);
     } else {
       socket.emit("user:status", false);

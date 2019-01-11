@@ -1,5 +1,4 @@
 const redis = require('../../../database/redis');
-const users = require('../../../database/Users');
 const crypto = require('crypto');
 
 
@@ -38,7 +37,6 @@ module.exports = function userCreateNickname(requestData) {
             return false;
           }
           userSession.userinfo = { id: userGhash, nickname: userNickname, socketId: socket.id };
-          users.connected();
           socket.emit('user:status', userNickname);
         });
     }

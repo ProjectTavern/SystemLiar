@@ -1,11 +1,11 @@
-const getSelectedRoom = require('./modules/getSelectedRoom');
 const filterRooms = require('./modules/filterRooms');
-
+const users = require('../../../database/Users');
 
 const rooms = require('./rooms');
 
 module.exports = function bindEventChatSocket(ChatSocketIO) {
   ChatSocketIO.on('connection', socket => {
+    users.connected();
     const socketSet = { socket: socket, ChatSocketIO: ChatSocketIO };
 
     // 로그인
