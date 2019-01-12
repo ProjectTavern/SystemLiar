@@ -11,7 +11,7 @@ module.exports = function leaveRoom() {
     const roomId = userInfo.room;
     const userNickname = userInfo.nickname;
     let selectedRoom = getSelectedRoom(rooms, roomId);
-    selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+    selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1, null);
     leaveAllRoom(socket);
 
     socket.emit('user:exit', userNickname);
