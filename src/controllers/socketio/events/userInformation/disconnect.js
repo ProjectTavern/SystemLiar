@@ -30,7 +30,7 @@ module.exports = function disconnect() {
     if (selectedRoom.members.length === 0) {
       rooms.splice(rooms.indexOf(selectedRoom), 1);
     } else if (selectedRoom.host === userNickname) {
-      selectedRoom.host = selectedRoom.members[0];
+      selectedRoom.host = selectedRoom.members.findNextHost();
       socket.broadcast.to(roomId).emit('host:change', selectedRoom.host);
     }
 

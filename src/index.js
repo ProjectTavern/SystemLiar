@@ -18,6 +18,14 @@ Array.prototype.findEmptyPositions = function(nickname) {
   });
   return _this;
 };
+Array.prototype.findNextHost = function() {
+  const _this = this;
+  let nextHost = '';
+  _this.some((elem, index) => {
+    if (elem) return nextHost = elem;
+  });
+  return nextHost;
+};
 
 const ChatSocketIO = io.of('/roomspace');
 ChatSocketIO.use(socketSession(app.session, { autoSave: true }));
