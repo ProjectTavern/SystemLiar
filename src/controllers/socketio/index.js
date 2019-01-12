@@ -1,6 +1,6 @@
 const filterRooms = require('./modules/filterRooms');
 const users = require('../database/Users');
-
+// 개별룸 객체화 필요
 const rooms = require('./rooms');
 
 // 로그인
