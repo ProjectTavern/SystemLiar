@@ -1,5 +1,5 @@
 const filterRooms = require('./modules/filterRooms');
-const users = require('../../../database/Users');
+const users = require('../database/Users');
 
 const rooms = require('./rooms');
 
