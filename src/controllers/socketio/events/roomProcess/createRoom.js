@@ -30,7 +30,7 @@ module.exports = function createRoom(responseData) {
         subject : responseData.subject,
         members : [userNickname],
         limit : 7,
-        status : "wait",
+        status : "대기중",
         ready: 0,
         readiedPlayer: [],
         host: userNickname,

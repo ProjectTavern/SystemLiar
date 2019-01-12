@@ -11,7 +11,7 @@ module.exports = function() {
   let selectedRoom = getSelectedRoom(rooms, roomId);
   selectedRoom.playingMembers = deepCopy(selectedRoom.members);
   selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
-  selectedRoom.status = 'playing';
+  selectedRoom.status = '게임중';
   /* 거짓말쟁이 추출 */
   const playersLength = selectedRoom.playingMembers.length;
   const liar = selectedRoom.playingMembers[Math.floor(Math.random() * playersLength)];

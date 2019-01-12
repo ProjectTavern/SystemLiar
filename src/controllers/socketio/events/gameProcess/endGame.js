@@ -18,7 +18,7 @@ module.exports = function endGame() {
   if( selectedRoom.ready === 0 ) {
 
   } else {
-    selectedRoom.status = 'wait';
+    selectedRoom.status = '대기중';
     selectedRoom.ready = 0;
     selectedRoom.ballotBox = [];
     selectedRoom.discussEnd = false;
