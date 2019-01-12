@@ -23,12 +23,16 @@ module.exports = function createRoom(responseData) {
 
       const roomId = Date.now();
       const userNickname = userSession.userinfo.nickname;
+      const roomMembers = (new Array(8)).fill(null);
+      roomMembers.some((elem, index) => {
+        if (!elem) return roomMembers[index] = userNickname;
+      });
       const roomData = {
         id : roomId,
         number: possibleLowestRoomNumber,
         name : responseData.name,
         subject : responseData.subject,
-        members : [userNickname],
+        members : roomMembers,
         limit : 7,
         status : "대기중",
         ready: 0,
