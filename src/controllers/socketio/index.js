@@ -35,7 +35,6 @@ module.exports = function bindEventChatSocket(ChatSocketIO) {
     socket.on('user:create:nickname', userCreateNickname.bind(socketSet));
 
     // 게임방
-    socket.emit('rooms:info', filterRooms(rooms));
     socket.on('rooms:refresh', roomsRefresh.bind(socketSet));
     socket.on('create:room', createRoom.bind(socketSet));
     socket.on('join:room', joinRoom.bind(socketSet));
