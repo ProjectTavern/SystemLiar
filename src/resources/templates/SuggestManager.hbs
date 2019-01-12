@@ -14,7 +14,7 @@
 <h1>제시어 관리</h1>
 <h2>주제 추가</h2>
 <div class="panel subject">
-  <form method="POST" action="/Suggest/Manager/Add/Subject">
+  <form method="POST" action="/Manager/Suggest/Manager/Add/Subject">
     <label for="subject">주제</label>
     <input type="text" id="subject" name="subject" required/>
     <button type="submit">추가</button>
@@ -29,7 +29,7 @@
     <div class="single_suggest" draggable="true">
       <strong>{{subject}}</strong>
       <span class="count_suggest">등록된 개수: {{suggests.length}}개</span>
-      <form method="POST" action="/Suggest/Manager/Add/Suggest">
+      <form method="POST" action="/Manager/Suggest/Manager/Add/Suggest">
         <input type="hidden" id="subject" name="subject" value="{{subject}}"/>
         <label for="suggest">제시어</label>
         <input type="text" id="suggest" name="suggest" required/>
@@ -38,7 +38,7 @@
       <ul class="suggest_list">
         {{#suggests}}
           <li>
-            <form method="post" action="/Suggest/Manager/Remove/Suggest" class="suggest_form">
+            <form method="post" action="/Manager/Suggest/Manager/Remove/Suggest" class="suggest_form">
               <input type="hidden" name="subject" value="{{../subject}}"/>
               <input type="hidden" name="suggest" value="{{this}}"/>
               {{this}}

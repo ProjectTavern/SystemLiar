@@ -13,14 +13,14 @@
 <div>
   <span>{{appVersion}}</span>
 </div>
-<form method="POST" action="/Application/Input/Version">
+<form method="POST" action="/Manager/Application/Input/Version">
   <label class="" for="applicationVersion">제목</label>
   <input type="text" id="applicationVersion" name="version" required/>
   <button type="submit">버전 등록</button>
 </form>
 <h2>공지사항</h2>
 <div class="input_panel_notice">
-  <form method="POST" action="/Notice/Manager/Add/Notice">
+  <form method="POST" action="/Manager/Notice/Manager/Add/Notice">
     <label class="" for="inputNoticeTitle">제목</label>
     <input type="text" id="inputNoticeTitle" name="title" required/>
     <label class="" for="isShow">노출</label>
@@ -34,7 +34,7 @@
   <ul>
     {{#documents}}
       <li id="{{id}}">
-        <form method="POST" action="/Notice/Manager/Put/Notice">
+        <form method="POST" action="/Manager/Notice/Manager/Put/Notice">
           <input type="hidden" name="id" value="{{id}}" title="ID"/>
           <label class="" for="isShow" style="display:none;">노출</label>
           <input type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>
