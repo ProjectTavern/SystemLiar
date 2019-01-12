@@ -3,7 +3,7 @@ module.exports = function getSelectedRoom(rooms, id) {
     return element.id + '' === id + '';
   });
   let selectedRoom = {};
-  if (checkRoom.length) {
+  if (checkRoom.length > 0) {
     selectedRoom = checkRoom[0];
   }
   return selectedRoom;
