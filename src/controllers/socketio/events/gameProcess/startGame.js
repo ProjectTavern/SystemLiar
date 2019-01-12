@@ -9,7 +9,7 @@ module.exports = function() {
   const userInfo = userSession.userinfo;
   const roomId = userInfo.room;
   let selectedRoom = getSelectedRoom(rooms, roomId);
-  selectedRoom.playingMembers = deepCopy(selectedRoom.members);
+  selectedRoom.playingMembers = deepCopy(selectedRoom.members.filter((member) => (member)));
   selectedRoom.ballotBox = selectedRoom.ballotBox.filter((member) => (member));
   selectedRoom.status = '게임중';
   /* 거짓말쟁이 추출 */
