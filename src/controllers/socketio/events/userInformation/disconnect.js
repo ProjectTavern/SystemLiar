@@ -27,7 +27,8 @@ module.exports = function disconnect() {
       memberData.nickname === userNickname && selectedRoom.currentUsers.splice(index, 1);
     });
 
-    if (selectedRoom.members.length === 0) {
+    const checkRoomPeople = selectedRoom.members.filter(elem => elem).length;
+    if (checkRoomPeople === 0) {
       rooms.splice(rooms.indexOf(selectedRoom), 1);
     } else if (selectedRoom.host === userNickname) {
       selectedRoom.host = selectedRoom.members.findNextHost();
