@@ -15,7 +15,7 @@ module.exports = function disconnect() {
     socket.broadcast.to(roomId).emit('user:exit', userNickname);
 
     let selectedRoom = getSelectedRoom(rooms, roomId);
-    selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1);
+    selectedRoom.members.splice(selectedRoom.members.indexOf(userNickname), 1, null);
     leaveAllRoom(socket);
 
     if (selectedRoom.readiedPlayer.indexOf(userNickname) > -1) {
