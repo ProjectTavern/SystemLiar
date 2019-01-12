@@ -11,10 +11,12 @@ configure(app);
 app.use('/', pages);
 
 // 임시 프로토타입 세팅
-Array.prototype.findEmptyPositions = function(room, nickname) {
-  this.some((elem, index) => {
-    if (!elem) return room[index] = nickname;
+Array.prototype.findEmptyPositions = function(nickname) {
+  const _this = this;
+  _this.some((elem, index) => {
+    if (!elem) return _this[index] = nickname;
   });
+  return _this;
 };
 
 const ChatSocketIO = io.of('/roomspace');

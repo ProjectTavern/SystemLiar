@@ -23,10 +23,7 @@ module.exports = function createRoom(responseData) {
 
       const roomId = Date.now();
       const userNickname = userSession.userinfo.nickname;
-      const roomMembers = (new Array(8)).fill(null);
-      roomMembers.some((elem, index) => {
-        if (!elem) return roomMembers[index] = userNickname;
-      });
+      const roomMembers = (new Array(8)).fill(null).findEmptyPositions(userNickname);
       const roomData = {
         id : roomId,
         number: possibleLowestRoomNumber,
