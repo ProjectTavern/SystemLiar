@@ -16,7 +16,7 @@ module.exports = function joinRoom(responseData) {
     if (selectedRoom.hasOwnProperty("id") && isJoinPossible(selectedRoom, userSession.userinfo.nickname)) {
       const userNickname = userSession.userinfo.nickname;
       setNameTag(socket, userNickname);
-      selectedRoom.members.push(userNickname);
+      selectedRoom.members.findEmptyPositions(userNickname);
       selectedRoom.currentUsers.push({ nickname: userNickname, socketId: socket.id, ready: false });
       userInfo.room = roomId;
       socket.join(roomId);
