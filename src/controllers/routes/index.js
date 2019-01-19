@@ -22,7 +22,7 @@ router.use('/', (request, response, next) => {
 
 
 router.get('/', (request, response) => {
-  response.redirect('/Manager');
+  response.redirect('/Manager/LogCheck');
 });
 
 router.get('/usersLength', (request, response) => {
@@ -34,16 +34,26 @@ router.get('/Test/Chat', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/sample_chat.html'));
 });
 
-router.get('/Manager', (request, response) => {
-  response.sendFile(path.join(__dirname, '../../resources/templates/index.html'));
+router.use('/Manager', (request, response, next) => {
+  const isAdminProcess = request.session.isAdmin || request.url === '/LogIn';
+  isAdminProcess ? next() : response.sendFile(path.join(__dirname, '../../resources/templates/index.html'));
+});
+
+router.get('/Manager/LogCheck', (request, response, next) => {
+  response.sendFile(path.join(__dirname, '../../resources/templates/menu.html'));
+});
+
+router.post('/Manager/LogIn', (request, response) => {
+  const { id, password } = request.body;
+  if (id === 'dnrkckzk' && password === 'addnrkminckzk') {
+    request.session.isAdmin = true;
+    console.log('TestCheck');
+  }
+  response.redirect('/Manager/LogCheck');
 });
 
 router.get('/Data/Redis', (request, response) => {
   response.sendFile(path.join(__dirname, '../../resources/templates/sample_redis.html'));
-});
-
-router.use('/Manager', (request, response, next) => {
-  next();
 });
 
 router.get('/Manager/Suggest/CSS/suggestManager.css', (request, response) => {
