@@ -26,7 +26,7 @@ module.exports = function() {
     userInfo.ready = true;
     selectedRoom.readiedPlayer.push(userInfo.nickname);
     selectedRoom.ready++;
-    if (selectedRoom.ready >= 1 && selectedRoom.ready === selectedRoom.members.filter(member => member).length) {
+    if (selectedRoom.ready >= 3 && selectedRoom.ready === selectedRoom.members.filter(member => member).length) {
       ChatSocketIO.to(roomId).emit('all:ready', true);
     }
   }
