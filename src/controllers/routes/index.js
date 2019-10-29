@@ -99,6 +99,7 @@ router.get('/Manager/Suggest/Manager', (request, response) => {
   });
 });
 
+
 router.get('/Suggest/Get/Local', (request, response) => {
 
   let results = { documents: [] };
