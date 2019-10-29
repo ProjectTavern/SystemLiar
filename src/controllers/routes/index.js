@@ -99,6 +99,40 @@ router.get('/Manager/Suggest/Manager', (request, response) => {
   });
 });
 
+router.get('/Suggest/Get/Local', (request, response) => {
+
+  let results = { documents: [] };
+  const getSubjects = new Promise((resolve) => {
+    redis.smembers('subject', (error, subjects) => {
+      resolve(subjects);
+    })
+  });
+  const getSuggests = new Promise((resolve) => {
+    getSubjects
+      .then((subjects) => {
+        subjects.sort();
+        subjects.length ?
+        subjects.forEach((subject, index) => {
+          redis.smembers(subject, (error, suggests) => {
+            const subjectDatas = {
+              subject: subject,
+              suggests: suggests.sort()
+            };
+            results['documents'].push(subjectDatas);
+            if (index === (subjects.length - 1)) {
+              resolve(results);
+            }
+          });
+        }) : resolve();
+      });
+  });
+
+  getSuggests.then((suggestDatas) => {
+    response.json(suggestDatas);
+  });
+});
+
+
 router.post('/Manager/Suggest/Manager/Add/Subject', (request, response) => {
   const subject = request.body.subject;
   redis.sadd('subject', subject);
