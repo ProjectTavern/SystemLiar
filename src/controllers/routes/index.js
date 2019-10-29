@@ -134,6 +134,11 @@ router.get('/Suggest/Get/Local', (request, response) => {
 });
 
 
+router.get('/Suggest/Get/L2', (request, response) => {
+  response.json({ test: 'code' });
+});
+
+
 router.post('/Manager/Suggest/Manager/Add/Subject', (request, response) => {
   const subject = request.body.subject;
   redis.sadd('subject', subject);
