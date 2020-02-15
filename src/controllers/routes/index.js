@@ -25,6 +25,10 @@ router.get('/', (request, response) => {
   response.redirect('/Manager/LogCheck');
 });
 
+router.get('/app-ads.txt', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../resources/GoogleCertification/app-ads.txt'));
+});
+
 router.get('/usersLength', (request, response) => {
   const users = require('../database/Users');
   response.json({usersLength: users.getLength()});
