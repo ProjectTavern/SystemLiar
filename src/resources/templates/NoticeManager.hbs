@@ -7,42 +7,91 @@
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"
           integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <title>SystemLiar</title>
+  <style>
+    button {border: 0}
+    h2 { text-align: center; border: 1px solid black; padding: 10px; }
+    ul { padding: 0; }
+    li { padding: 20px; list-style: none; }
+
+    .input_panel_notice {padding: 20px; border: 1px solid black}
+    #inputNoticeContents {width: 100%}
+
+    .notice_form {display: flex;}
+    .notice_main {flex-grow: 1;}
+    .notice_order {margin: 18px 0px 12px 15px}
+    .notice_contents textarea { width: 100%; }
+    .notice_submit { width: 100%; height: 40px; }
+
+    .notice_title label {}
+    .notice_title .title_input { width: 100%; height: 30px; }
+
+    .notice_submit_container { text-align: center;}
+    .notice_contents_modify { width: 100%; height: 40px; }
+    .notice_contents_remove { width: 100%; height: 40px; color: white; background-color: tomato; }
+
+    .notice_order .notice_order_input { height: 100%;}
+  </style>
 </head>
 <body>
 <h2>버전 정보 관리</h2>
 <div>
+  <span>현재 버전:</span>
   <span>{{appVersion}}</span>
 </div>
 <form method="POST" action="/Manager/Application/Input/Version">
-  <label class="" for="applicationVersion">제목</label>
+  <label for="applicationVersion">제목</label>
   <input type="text" id="applicationVersion" name="version" required/>
   <button type="submit">버전 등록</button>
 </form>
-<h2>공지사항</h2>
+<h2>공지사항 신규 작성</h2>
 <div class="input_panel_notice">
   <form method="POST" action="/Manager/Notice/Manager/Add/Notice">
-    <label class="" for="inputNoticeTitle">제목</label>
-    <input type="text" id="inputNoticeTitle" name="title" required/>
-    <label class="" for="isShow">노출</label>
+    <div class="notice_title">
+      <label for="inputNoticeTitle">제목</label>
+      <input class="title_input" type="text" id="inputNoticeTitle" name="title" required/>
+    </div>
+    <label for="isShow">노출</label>
     <input type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>
-    <label class="" for="inputNoticeContents">내용</label>
-    <textarea id="inputNoticeContents" name="contents" required></textarea>
-    <button type="submit">공지사항 등록</button>
+    <label style="width:100%" for="inputNoticeContents">내용</label>
+    <textarea id="inputNoticeContents" rows="7" name="contents" required></textarea>
+    <label style="width:100%">정렬점수</label>
+    <input class="notice_order_input" style="width:100%;height:30px;" name="orders" type="number" />
+    <button class="notice_submit" type="submit">공지사항 등록</button>
   </form>
 </div>
+<h2>작성된 공지사항 수정</h2>
 <div class="history_notice">
   <ul>
     {{#documents}}
       <li id="{{id}}">
-        <form method="POST" action="/Manager/Notice/Manager/Put/Notice">
-          <input type="hidden" name="id" value="{{id}}" title="ID"/>
-          <label class="" for="isShow" style="display:none;">노출</label>
-          <input type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>
-          <input type="text" value="{{title}}" name="title" title="제목"/>
-          <div>
-          <textarea title="본문" name="contents">{{contents}}</textarea>
+        <form class="user_notice" method="POST" action="/Manager/Notice/Manager/Put/Notice">
+          <div class="notice_form">
+            <div class="notice_main">
+              <input type="hidden" name="id" value="{{id}}" title="ID"/>
+              <label for="isShow">노출</label>
+              <input class="title_checkbox" type="checkbox" id="isShow" name="isShow" {{#if isShow}}checked{{/if}}/>              
+              <div class="notice_title">
+                <input class="title_input" type="text" value="{{title}}" name="title" title="제목"/>
+              </div>
+              <div class="notice_contents">
+                <textarea title="본문" rows="7" name="contents">{{contents}}</textarea>
+              </div>
+            </div>
+            <div class="notice_order">
+              <input class="notice_order_input" name="orders" type="number" value="{{orders}}" />
+            </div>
           </div>
-          <button type="submit">공지사항 수정</button>
+          <div class="notice_submit_container">
+            <button class="notice_contents_modify" type="submit">공지사항 수정</button>
+          </div>
+        </form>
+        <form method="POST" action="/Manager/Notice/Manager/Remove/Notice">
+          <input type="hidden" name="id" value="{{id}}" title="ID"/>
+          <input type="hidden" name="isShow" {{#if isShow}}checked{{/if}}/>
+          <input type="hidden" value="{{title}}" name="title" title="제목"/>
+          <textarea title="본문" rows="7" name="contents" style="display:none">{{contents}}</textarea>
+          <input class="notice_order_input" name="orders" type="number" value="{{orders}}" style="display:none"/>
+          <button class="notice_contents_remove" type="submit">공지사항 삭제</button>
         </form>
       </li>
     {{/documents}}

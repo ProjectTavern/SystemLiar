@@ -51,7 +51,6 @@ router.post('/Manager/LogIn', (request, response) => {
   const { id, password } = request.body;
   if (id === 'dnrkckzk' && password === 'addnrkminckzk') {
     request.session.isAdmin = true;
-    console.log('TestCheck');
   }
   response.redirect('/Manager/LogCheck');
 });
@@ -176,6 +175,9 @@ router.get('/Manager/Notice/Manager', (request, response) => {
   redis.lrange('noticeList', 0, -1, (error, notices) => {
     let templateData = {documents: []};
     try {
+      notices = notices.filter((notice) => !JSON.parse(notice).remove).sort((a, b) => {
+        return JSON.parse(b).orders - JSON.parse(a).orders;
+      });
       notices.forEach((notice) => {
         templateData.documents.push(JSON.parse(notice));
       })
@@ -191,25 +193,56 @@ router.get('/Manager/Notice/Manager', (request, response) => {
 });
 
 router.post('/Manager/Notice/Manager/Add/Notice', (request, response) => {
-  const { title, isShow, contents} = request.body;
+  const { title, isShow, contents, orders = 0} = request.body;
   const notice = {
     id: (new Date).getTime().toString(),
     title: title,
     isShow: isShow === 'on',
-    contents: contents
+    contents: contents,
+    orders,
+    remove: false
   };
   redis.lpush('noticeList', JSON.stringify(notice), (error, statusResult) => {
     response.redirect('/Manager/Notice/Manager');
   });
 });
 
-router.post('/Manager/Notice/Manager/Put/Notice', (request, response) => {
-  const { id, title, isShow, contents} = request.body;
+router.post('/Manager/Notice/Manager/Remove/Notice', (request, response) => {
+  const { id, title, isShow, contents, orders = 0} = request.body;
   const notice = {
     id: id,
     title: title,
     isShow: isShow === 'on',
-    contents: contents
+    contents: contents,
+    orders,
+    remove: true
+  };
+  redis.lrange('noticeList', 0, -1, (error, notices) => {
+    try {
+      let currentIndex = 0;
+      notices.forEach((notice, index) => {
+        if (id === JSON.parse(notice).id) {
+          currentIndex = index;
+        }
+      });
+      redis.lset('noticeList', currentIndex, JSON.stringify(notice));
+    } catch (e) {
+      logger.custLog('공지사항을 가져오다가 오류가 발생했습니다.', e);
+    } finally {
+      response.redirect('/Manager/Notice/Manager');
+    }
+  });
+});
+
+router.post('/Manager/Notice/Manager/Put/Notice', (request, response) => {
+  const { id, title, isShow, contents, orders = 0} = request.body;
+  const notice = {
+    id: id,
+    title: title,
+    isShow: isShow === 'on',
+    contents: contents,
+    orders,
+    remove: false
   };
   redis.lrange('noticeList', 0, -1, (error, notices) => {
     try {
@@ -259,6 +292,9 @@ router.get('/app/notices/', (request, response) => {
   redis.lrange('noticeList', 0, -1, (error, notices) => {
     let result = [];
     try {
+      notices = notices.filter((notice) => !JSON.parse(notice).remove).sort((a, b) => {
+        return JSON.parse(b).orders - JSON.parse(a).orders;
+      });
       notices.forEach((notice) => {
         const noticeData = JSON.parse(notice);
         if (noticeData.isShow) {
