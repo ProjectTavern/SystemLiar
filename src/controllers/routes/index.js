@@ -103,7 +103,7 @@ router.get('/Manager/Suggest/Manager', (request, response) => {
   });
 });
 
-router.get('/Suggest/Get/LocalTest', async (request, response) => {
+router.get('/Suggest/Get/liarwordlist', async (request, response) => {
   const requestURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIZMny52zLykWqswYlOuFtWuPOivgdp9SHXATwietk6jmPcI7sdw3px6bSKwWW8npK9QcJLFaKwUs1/pub?output=csv';
   const { data = '' } = await axios.get(requestURL);
   const rows = data.split('\r\n');
