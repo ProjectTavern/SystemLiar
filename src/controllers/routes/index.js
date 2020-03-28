@@ -134,7 +134,7 @@ router.get('/Suggest/Get/LocalTest', async (request, response) => {
 
   });
   
-  console.log(responseData);
+
   response.send(responseData);
 });
 
