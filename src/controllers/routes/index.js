@@ -118,6 +118,9 @@ router.get('/Suggest/Get/liarwordlist', async (request, response) => {
     
     if (rowIndex === 0) {
       columns.forEach(columnSubject => {
+        if(!columnSubject) {
+          return;
+        }
         const columsData = {};
         columsData.subject = columnSubject
         columsData.suggests = [];
