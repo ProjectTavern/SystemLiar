@@ -7,6 +7,7 @@ const HandleBars = require('handlebars');
 const suggestManagerTemplate = require('../../resources/templates/SuggestManager.hbs');
 const noticeManagerTemplate = require('../../resources/templates/NoticeManager.hbs');
 const shellExec = require('shell-exec');
+const axios = require('axios');
 
 HandleBars.registerHelper("checkList", function(options) {
   if (options.hash.index % 5 === options.hash.count) {
@@ -102,6 +103,40 @@ router.get('/Manager/Suggest/Manager', (request, response) => {
   });
 });
 
+router.get('/Suggest/Get/LocalTest', async (request, response) => {
+  const requestURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIZMny52zLykWqswYlOuFtWuPOivgdp9SHXATwietk6jmPcI7sdw3px6bSKwWW8npK9QcJLFaKwUs1/pub?output=csv';
+  const { data = '' } = await axios.get(requestURL);
+  const rows = data.split('\r\n');
+  const responseData = { documents: [] };
+  rows.forEach((row, rowIndex) => {
+    
+    if (rowIndex === 1) {
+      return false
+    }
+    
+    const columns = row.split(',');
+    
+    if (rowIndex === 0) {
+      columns.forEach(columnSubject => {
+        const columsData = {};
+        columsData.subject = columnSubject
+        columsData.suggests = [];
+        responseData.documents.push(columsData);
+      });
+      return;
+    }
+
+    columns.forEach((columnSuggest, columnIndex) => {
+      if (responseData.documents[columnIndex]) {
+        responseData.documents[columnIndex].suggests.push(columnSuggest);
+      }
+    })
+
+  });
+  
+  console.log(responseData);
+  response.send(responseData);
+});
 
 router.get('/Suggest/Get/Local', (request, response) => {
 
