@@ -127,11 +127,15 @@ router.get('/Suggest/Get/LocalTest', async (request, response) => {
     }
 
     columns.forEach((columnSuggest, columnIndex) => {
+      columnSuggest = columnSuggest.trim();
+      if (!columnSuggest) {
+        return;
+      }
+
       if (responseData.documents[columnIndex]) {
         responseData.documents[columnIndex].suggests.push(columnSuggest);
       }
     })
-
   });
   
 
