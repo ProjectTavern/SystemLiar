@@ -325,9 +325,7 @@ router.post('/Rebuild', function(req, res, next) {
 // OUTPUT data
 
 router.get('/app/version/', (request, response) => {
-  redis.get('appVersion', (error, appVersion) => {
-    response.json({ version: appVersion });
-  });
+  response.json({ version: "4.6" });
 });
 
 router.get('/app/notices/', (request, response) => {
