@@ -325,7 +325,7 @@ router.post('/Rebuild', function(req, res, next) {
 // OUTPUT data
 
 router.get('/app/version/', (request, response) => {
-  response.json({ version: "4.6" });
+  response.json({ version: "4.7" });
 });
 
 router.get('/app/notices/', (request, response) => {
