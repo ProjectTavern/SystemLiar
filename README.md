@@ -5,7 +5,6 @@
 ### 서버 시작 경로
 
 ./src/index.js 에서 실행
-<iframe src="https://m.daum.net/"></iframe>
 
 ### todo list
 
