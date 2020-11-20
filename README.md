@@ -6,18 +6,6 @@
 
 ./src/index.js 에서 실행
 
-### todo list
-
-|done|as-is|to-be|
-|-----|-----|-----|
-|[o]|index.js 실행 | npm start 형태로 변경|
-|[o]|옵션 인라인 삽입|configure.json 에서 설정 핸들링|
-|[o]|채팅 기능 테스트|현재 전체 채팅 => 방 기능 추가|
-|[?]| |로그 만들기|
-|[x]| |테스트 코드 만들기|
-
-- 배열 받는 것이 어려워 c#측에서 } 를 구분점으로 찢음
-
 ## References
 - [Node-Redis 사용하기](https://askofcloud.wordpress.com/2016/04/05/node-%EC%97%90%EC%84%9C-redis-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/)  
 - [Node-WebSocket 서버 구축하기](https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61)  
